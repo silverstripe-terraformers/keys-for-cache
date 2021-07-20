@@ -4,7 +4,7 @@
     "type": "silverstripe-vendormodule",
     "keywords": [
         "silverstripe",
-        "cache,
+        "cache",
         "keys"
     ],
     "license": "BSD-3-Clause",
