@@ -2,8 +2,10 @@
 
 namespace Terraformers;
 
+use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
 use Symfony\Contracts\EventDispatcher\Event;
+use Terraformers\KeysForCache\CacheDependent;
 use Terraformers\KeysForCache\Models\CacheKey;
 
 /**
@@ -57,14 +59,15 @@ class CacheEvent extends Event
 
     public static function handleEvent(CacheEvent $event): void
     {
-        $shouldUpdateSelf = Config::get($item)->get('i_care_cache');
+        $shouldUpdateSelf = Config::get($event->getClassName())->get('care_cache');
 
         if ($shouldUpdateSelf) {
             CacheKey::updateOrCreateKey($event->getClassName(), $event->getId());
         }
 
-        $worries = GeneralWorries::getForClass($item);
-        foreach ($worries as $worry) {
+        $cacheDependents = CacheDependent::getForClass($event->getClassName());
+
+        foreach ($cacheDependents as $dependent) {
             // Update things that worry about this
         }
 
