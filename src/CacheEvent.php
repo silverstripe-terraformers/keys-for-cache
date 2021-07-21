@@ -1,11 +1,10 @@
 <?php
 
-namespace Terraformers;
+namespace Terraformers\KeysForCache;
 
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
 use Symfony\Contracts\EventDispatcher\Event;
-use Terraformers\KeysForCache\CacheDependent;
 use Terraformers\KeysForCache\Models\CacheKey;
 
 /**
@@ -14,7 +13,7 @@ use Terraformers\KeysForCache\Models\CacheKey;
  */
 class CacheEvent extends Event
 {
-    private const EVENT_NAME = 'event.send.%s';
+    public const EVENT_FORMAT = 'event.send.%s';
 
     protected string $className;
     protected int $id;
@@ -65,15 +64,15 @@ class CacheEvent extends Event
             CacheKey::updateOrCreateKey($event->getClassName(), $event->getId());
         }
 
-        $cacheDependents = CacheDependent::getForClass($event->getClassName());
+        $cacheDependents = ConfigHelper::getConfigDependents($event->getClassName(), 'cache_dependencies');
 
         foreach ($cacheDependents as $dependent) {
             // Update things that worry about this
         }
 
         $dispatcher = static::singleton()->getDispatcher();
-        /** @var array $thingsThatOwnThis */
-        $thingsThatOwnThis = GetThem();
+
+        $onwers = ConfigHelper::getConfigDependents($event->getClassName(), 'owns');;
 
         foreach ($thingsThatOwnThis as $ownThi) {
             $items = DataObject::get($ownThi)
