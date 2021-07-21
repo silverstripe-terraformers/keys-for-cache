@@ -16,7 +16,7 @@ class ConfigHelper
     {
         $dependents = [];
 
-        $configs = self::getAllConfigs($configName);
+        $configs = self::getConfigForName($configName);
 
         foreach ($configs as $dependent => $dependency) {
             if (in_array($className,  $dependency)) {
@@ -32,7 +32,7 @@ class ConfigHelper
      *
      * @return array [Page:class => [File:class, Image:class]]
      */
-    public static function getAllConfigs(string $configName): array
+    public static function getConfigForName(string $configName): array
     {
         // all configs
         $configs = Config::inst()->getAll();

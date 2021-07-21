@@ -13,7 +13,7 @@ use Terraformers\KeysForCache\Models\CacheKey;
  */
 class CacheEvent extends Event
 {
-    public const EVENT_FORMAT = 'event.send.%s';
+    public const EVENT_NAME = 'event.send.cache';
 
     protected string $className;
     protected int $id;
@@ -83,7 +83,7 @@ class CacheEvent extends Event
             foreach ($items as $className => $id) {
                 $dispatcher->dispatch(
                     new CacheEvent($className, $id),
-                    sprintf(CacheEvent::EVENT_FORMAT, $className)
+                    sprintf(CacheEvent::EVENT_NAME, $className)
                 );
             }
         }
