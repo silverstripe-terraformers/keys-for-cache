@@ -29,6 +29,18 @@ class CacheKeyExtension extends DataExtension
         'CacheKeys' => CacheKey::class . '.Record',
     ];
 
+    private static $owns = [
+        'CacheKeys',
+    ];
+
+    private static $cascade_deletes = [
+        'CacheKeys',
+    ];
+
+    private static $cascade_duplicates = [
+        'CacheKeys',
+    ];
+
     public function getCacheKey(): string
     {
         return implode(
