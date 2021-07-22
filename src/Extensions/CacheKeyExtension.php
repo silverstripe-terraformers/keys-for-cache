@@ -2,7 +2,6 @@
 
 namespace Terraformers\KeysForCache\Extensions;
 
-use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
@@ -66,7 +65,7 @@ class CacheKeyExtension extends DataExtension
             }
         }
 
-        EventManager::handleEvent($this->owner);
+        EventManager::singleton()->handleCacheEvent($this->owner->ClassName, $this->owner->ID);
     }
 
 }

@@ -2,7 +2,9 @@
 
 namespace Terraformers\KeysForCache;
 
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\ORM\DataObject;
 
 class ConfigHelper
 {
@@ -12,15 +14,15 @@ class ConfigHelper
      * @param string $className
      * @return array
      */
-    public static function getConfigDependents(string $className, string $configName): array
+    public static function getGlobalCacheDependencies(string $className, string $configName): array
     {
         $dependents = [];
 
-        $configs = self::getConfigForName($configName);
+        $allConfigs = self::getAllConfigsForName($configName);
 
-        foreach ($configs as $dependent => $dependency) {
+        foreach ($allConfigs as $owner => $dependency) {
             if (in_array($className,  $dependency)) {
-                $dependents[] = $dependent;
+                $dependents[] = $owner;
             }
         }
 
@@ -32,17 +34,18 @@ class ConfigHelper
      *
      * @return array [Page:class => [File:class, Image:class]]
      */
-    public static function getConfigForName(string $configName): array
+    public static function getAllConfigsForName(string $configName): array
     {
-        // all configs
-        $configs = Config::inst()->getAll();
-
         $specificConfigs = [];
 
-        foreach ($configs as $className => $config) {
-            if (array_key_exists($configName, $config)) {
-                $specificConfigs[$className] = $config[$configName];
+        foreach (ClassInfo::subclassesFor(DataObject::class) as $className) {
+            $config = Config::inst()->get($className, $configName, 1);
+
+            if (!$config) {
+                continue;
             }
+
+            $specificConfigs[$className] = $config;
         }
 
         return $specificConfigs;

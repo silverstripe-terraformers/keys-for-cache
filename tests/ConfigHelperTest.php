@@ -5,6 +5,7 @@ namespace Terraformers\KeysForCache\Tests;
 use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\ConfigHelper;
+use Terraformers\KeysForCache\Tests\Models\MenuItem;
 
 class ConfigHelperTest extends SapphireTest
 {
@@ -13,7 +14,14 @@ class ConfigHelperTest extends SapphireTest
 
     public function testGetConfigForName(): void
     {
-        $configs = ConfigHelper::getConfigForName('db');
+        $configs = ConfigHelper::getAllConfigsForName('cache_dependencies');
+
+        Debug::dump($configs);
+    }
+
+    public function testGetConfigDependents(): void
+    {
+        $configs = ConfigHelper::getGlobalCacheDependencies(MenuItem::class, 'cache_dependencies');
 
         Debug::dump($configs);
     }

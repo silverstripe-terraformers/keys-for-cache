@@ -1,0 +1,9 @@
+---
+Name: keysforcache
+---
+Page:
+  has_cache_key: true
+
+SilverStripe\ORM\DataObject:
+  extensions:
+    - Terraformers\KeysForCache\Extensions\CacheKeyExtension
