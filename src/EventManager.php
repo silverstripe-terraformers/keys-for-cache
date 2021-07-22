@@ -104,6 +104,8 @@ class EventManager
                     continue;
                 }
 
+                EventManager::singleton()->handleCacheEvent($dependency['RelationshipClassName'], $result);
+
                 Debug::dump($result);
             }
 

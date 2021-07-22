@@ -82,6 +82,55 @@ class ConfigHelper
         return $tableQueries;
     }
 
+    public static function getOwnedByHasMany(string $className): array
+    {
+        $relationships = [];
+        $tableQueries = [];
+
+        foreach (ClassInfo::ancestry($className) as $ancestorClassName) {
+            $ownedByRelationships = Config::inst()->get($ancestorClassName, 'owned_by', 1);
+            $hasManyRelationships = Config::inst()->get($ancestorClassName, 'has_many', 1);
+
+            if (!$ownedByRelationships) {
+                continue;
+            }
+
+            if (!$hasManyRelationships) {
+                continue;
+            }
+
+            $ownedByHasManyRelationships = [];
+
+            foreach ($hasManyRelationships as $relationship => $relationshipClassName) {
+                if(in_array($relationship, $ownedByRelationships)) {
+                    $ownedByHasManyRelationships[$relationship] = $relationshipClassName;
+                }
+            }
+
+            $table = Config::inst()->get($ancestorClassName, 'table_name');
+
+            foreach ($ownedByHasManyRelationships as $relationship => $relationshipClassName) {
+                // Strip out any field relationship and just keep the classname
+                $relationshipClassName = strtok($relationshipClassName, '.');
+                $fieldName = $relationship . 'ID';
+
+                if (in_array($fieldName, $relationships)) {
+                    continue;
+                }
+
+                if (!array_key_exists($table, $tableQueries)) {
+                    $tableQueries[$table] = [];
+                }
+
+                $tableQueries[$table] = [
+                    'FieldName' => $fieldName,
+                    'RelationshipClassName' => $relationshipClassName,
+                ];
+            }
+
+        }
+    }
+
     /**
      * Get specific configs for all classes
      *
