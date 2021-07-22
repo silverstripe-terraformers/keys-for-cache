@@ -39,7 +39,6 @@ class ConfigHelper
         foreach (ClassInfo::ancestry($className) as $ancestorClassName) {
             $ownedByRelationships = Config::inst()->get($ancestorClassName, 'owned_by', 1);
             $hasOneRelationships = Config::inst()->get($ancestorClassName, 'has_one', 1);
-            $table = Config::inst()->get($ancestorClassName, 'table_name');
 
             if (!$ownedByRelationships) {
                 continue;
@@ -49,7 +48,18 @@ class ConfigHelper
                 continue;
             }
 
+            $ownedByHasOneRelationships = [];
+
+            // This is just for filtering the has_one relationships which exist in the owned_by relationships
             foreach ($hasOneRelationships as $relationship => $relationshipClassName) {
+                if(in_array($relationship, $ownedByRelationships)) {
+                    $ownedByHasOneRelationships[$relationship] = $relationshipClassName;
+                }
+            }
+
+            $table = Config::inst()->get($ancestorClassName, 'table_name');
+
+            foreach ($ownedByHasOneRelationships as $relationship => $relationshipClassName) {
                 // Strip out any field relationship and just keep the classname
                 $relationshipClassName = strtok($relationshipClassName, '.');
                 $fieldName = $relationship . 'ID';
