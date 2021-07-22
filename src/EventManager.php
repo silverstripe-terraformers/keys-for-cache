@@ -2,10 +2,12 @@
 
 namespace Terraformers\KeysForCache;
 
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\Queries\SQLSelect;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Terraformers\KeysForCache\Events\CacheEvent;
 use Terraformers\KeysForCache\Events\DependencyEvent;
@@ -88,7 +90,22 @@ class EventManager
                 EventManager::singleton()->handleDependencyEvent($dependent);
             }
 
-            $ownedByDependencies = [];
+            $hasOneDependencies = ConfigHelper::getOwnedByHasOnes($event->getClassName());
+
+            foreach ($hasOneDependencies as $table => $dependency) {
+                Debug::dump($table);
+                Debug::dump($dependency);
+
+                $sql = SQLSelect::create($dependency['FieldName'], $table, ['ID' => $event->getId()]);
+                Debug::dump($sql->sql());
+                $result = $sql->execute()->column($dependency['FieldName']);
+
+                if (!$result) {
+                    continue;
+                }
+
+                Debug::dump($result);
+            }
 
 //            $dispatcher = static::singleton()->getDispatcher();
 //

@@ -33,24 +33,43 @@ class ConfigHelper
 
     public static function getOwnedByHasOnes(string $className): array
     {
-        $ownedByRelationships = Config::inst()->get($className, 'owned_by', 1);
-        $hasOneRelationships = Config::inst()->get($className, 'has_one', 1);
         $relationships = [];
+        $tableQueries = [];
 
-        foreach ($hasOneRelationships as $relationship => $relationshipClassName) {
-            // Strip out any field relationship and just keep the classname
-            $relationshipClassName = strtok($relationshipClassName, '.');
+        foreach (ClassInfo::ancestry($className) as $ancestorClassName) {
+            $ownedByRelationships = Config::inst()->get($ancestorClassName, 'owned_by', 1);
+            $hasOneRelationships = Config::inst()->get($ancestorClassName, 'has_one', 1);
+            $table = Config::inst()->get($ancestorClassName, 'table_name');
+
+            if (!$ownedByRelationships) {
+                continue;
+            }
+
+            if (!$hasOneRelationships) {
+                continue;
+            }
+
+            foreach ($hasOneRelationships as $relationship => $relationshipClassName) {
+                // Strip out any field relationship and just keep the classname
+                $relationshipClassName = strtok($relationshipClassName, '.');
+                $fieldName = $relationship . 'ID';
+
+                if (in_array($fieldName, $relationships)) {
+                    continue;
+                }
+
+                if (!array_key_exists($table, $tableQueries)) {
+                    $tableQueries[$table] = [];
+                }
+
+                $tableQueries[$table] = [
+                    'FieldName' => $fieldName,
+                    'RelationshipClassName' => $relationshipClassName,
+                ];
+            }
         }
 
-        $hasManyRelationships = Config::inst()->get($className, 'has_many', 1);
-
-        // TODO Add support for many_many
-
-        Debug::dump($ownedByRelationships);
-        Debug::dump($hasOneRelationships);
-        Debug::dump($hasManyRelationships);
-
-        return [];
+        return $tableQueries;
     }
 
     /**

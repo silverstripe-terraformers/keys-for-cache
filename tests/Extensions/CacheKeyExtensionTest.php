@@ -61,11 +61,6 @@ class CacheKeyExtensionTest extends SapphireTest
 
         /** @var DataList|CacheKey[] $cacheKeys */
         $cacheKeys = CacheKey::get();
-        Debug::dump($cacheKeys->count());
-
-        foreach ($cacheKeys as $cacheKey) {
-            Debug::dump($cacheKey->RecordClass . ' ' . $cacheKey->RecordID);
-        }
     }
 
 }
