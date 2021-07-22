@@ -2,7 +2,6 @@
 
 namespace Terraformers\KeysForCache;
 
-use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Dev\Debug;
@@ -94,35 +93,38 @@ class EventManager
             $hasOneDependencies = ConfigHelper::getOwnedByHasOnes($event->getClassName());
 
             foreach ($hasOneDependencies as $table => $dependency) {
-                Debug::dump($table);
-                Debug::dump($dependency);
-
                 $sql = SQLSelect::create($dependency['FieldName'], $table, ['ID' => $event->getId()]);
-                Debug::dump($sql->sql());
-                $result = $sql->execute()->column($dependency['FieldName']);
+                $result = $sql->execute()->first();
 
-                if (!$result) {
+                $parentId = $result[$dependency['FieldName']];
+
+                if (!$parentId) {
                     continue;
                 }
 
-                EventManager::singleton()->handleCacheEvent($dependency['RelationshipClassName'], $result);
-
-                Debug::dump($result);
+                EventManager::singleton()->handleCacheEvent($dependency['RelationshipClassName'], $parentId);
             }
 
             // deal with the has_many relationship
             $hasManyDependencies = ConfigHelper::getOwnedByHasMany($event->getClassName());
 
-            foreach ($hasManyDependencies as $table => $dependency) {
-                $sql = SQLSelect::create($dependency['FieldName'], $table, ['ID' => $event->getId()]);
-                $results = $sql->execute()->column($dependency['FieldName']);
+            foreach ($hasManyDependencies as $table => $owner) {
+                $ownerClassName = $owner['ClassName'];
+                $fieldNames = $owner['FieldNames'];
 
-                if (!$results) {
-                    continue;
+                foreach ($fieldNames as $fieldName) {
+                    $filters[$fieldName] = $event->getId();
                 }
 
+                $sql = SQLSelect::create(
+                    'ID',
+                    $table
+                )->addWhereAny($filters);
+
+                $results = $sql->execute();
+
                 foreach ($results as $result) {
-                    EventManager::singleton()->handleCacheEvent($dependency['RelationshipClassName'], $result);
+                    EventManager::singleton()->handleCacheEvent($ownerClassName, $result['ID']);
                 }
             }
 

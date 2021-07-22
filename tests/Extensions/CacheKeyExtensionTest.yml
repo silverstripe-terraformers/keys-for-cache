@@ -1,23 +1,23 @@
-Page:
-  page1:
-    Title: Page 1
-
-App\Models\MenuGroup:
-  group1:
-    Title: Group 1
-  group2:
-    Title: Group 2
-
-App\Models\MenuItem:
-  item1:
-    Title: Item 1
-    MenuGroup: =>App\Models\MenuGroup.group1
-  item2:
-    Title: Item 2
-    MenuGroup: =>App\Models\MenuGroup.group1
-  item3:
-    Title: Item 1
-    MenuGroup: =>App\Models\MenuGroup.group2
-  item4:
-    Title: Item 2
-    MenuGroup: =>App\Models\MenuGroup.group2
+#Page:
+#  page1:
+#    Title: Page 1
+#
+#App\Models\MenuGroup:
+#  group1:
+#    Title: Group 1
+#  group2:
+#    Title: Group 2
+#
+#App\Models\MenuItem:
+#  item1:
+#    Title: Item 1
+#    MenuGroup: =>App\Models\MenuGroup.group1
+#  item2:
+#    Title: Item 2
+#    MenuGroup: =>App\Models\MenuGroup.group1
+#  item3:
+#    Title: Item 1
+#    MenuGroup: =>App\Models\MenuGroup.group2
+#  item4:
+#    Title: Item 2
+#    MenuGroup: =>App\Models\MenuGroup.group2

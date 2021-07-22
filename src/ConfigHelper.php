@@ -2,11 +2,11 @@
 
 namespace Terraformers\KeysForCache;
 
-use App\Models\MenuGroup;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DataObjectSchema;
 
 class ConfigHelper
 {
@@ -48,26 +48,16 @@ class ConfigHelper
                 continue;
             }
 
-            $ownedByHasOneRelationships = [];
-
-            // This is just for filtering the has_one relationships which exist in the owned_by relationships
-            foreach ($hasOneRelationships as $relationship => $relationshipClassName) {
-                if(in_array($relationship, $ownedByRelationships)) {
-                    $ownedByHasOneRelationships[$relationship] = $relationshipClassName;
-                }
-            }
-
             $table = Config::inst()->get($ancestorClassName, 'table_name');
 
-            foreach ($ownedByHasOneRelationships as $relationship => $relationshipClassName) {
-                // Strip out any field relationship and just keep the classname
-                $relationshipClassName = strtok($relationshipClassName, '.');
-                $fieldName = $relationship . 'ID';
-
-                // TODO: what is $relationships
-                if (in_array($fieldName, $relationships)) {
+            foreach ($hasOneRelationships as $relationshipName => $relationshipClassName) {
+                if (!in_array($relationshipName, $ownedByRelationships)) {
                     continue;
                 }
+
+                // Strip out any field relationship and just keep the classname
+                $relationshipClassName = strtok($relationshipClassName, '.');
+                $fieldName = $relationshipName . 'ID';
 
                 if (!array_key_exists($table, $tableQueries)) {
                     $tableQueries[$table] = [];
@@ -88,49 +78,67 @@ class ConfigHelper
         $relationships = [];
         $tableQueries = [];
 
-        foreach (ClassInfo::ancestry($className) as $ancestorClassName) {
-            $ownedByRelationships = Config::inst()->get($ancestorClassName, 'owned_by', 1);
-            $hasManyRelationships = Config::inst()->get($ancestorClassName, 'has_many', 1);
+        $ownedByRelationships = Config::inst()->get($className, 'owned_by', 1);
+        $hasManyRelationships = Config::inst()->get($className, 'has_many', 1);
 
-            if (!$ownedByRelationships) {
+        if (!$ownedByRelationships) {
+            return [];
+        }
+
+        if (!$hasManyRelationships) {
+            return [];
+        }
+
+        foreach ($hasManyRelationships as $relationship => $relationshipClassName) {
+            if (!in_array($relationship, $ownedByRelationships)) {
                 continue;
             }
 
-            if (!$hasManyRelationships) {
-                continue;
+            // Strip out any field relationship and just keep the classname
+            $relationshipArray = explode('.', $relationshipClassName);
+            $relationshipClassName = array_shift($relationshipArray);
+            $relationshipFieldName = array_shift($relationshipArray);
+
+            $ownerTableName = DataObject::singleton($relationshipClassName)->config()->uninherited('table_name');
+
+            if (!$ownerTableName) {
+                $separator = DataObjectSchema::config()->uninherited('table_namespace_separator');
+                $ownerTableName = str_replace('\\', $separator, trim($relationshipClassName, '\\'));
             }
 
-            $ownedByHasManyRelationships = [];
+            if ($relationshipFieldName === null) {
+                $ownerHasOnes = Config::inst()->get($relationshipClassName, 'has_one');
 
-            foreach ($hasManyRelationships as $relationship => $relationshipClassName) {
-                if(in_array($relationship, $ownedByRelationships)) {
-                    $ownedByHasManyRelationships[$relationship] = $relationshipClassName;
-                }
-            }
-
-            $table = Config::inst()->get($ancestorClassName, 'table_name');
-
-            foreach ($ownedByHasManyRelationships as $relationship => $relationshipClassName) {
-                // Strip out any field relationship and just keep the classname
-                $relationshipClassName = strtok($relationshipClassName, '.');
-                $fieldName = $relationship . 'ID';
-
-                // TODO: what is $relationships
-                if (in_array($fieldName, $relationships)) {
+                if (!$ownerHasOnes) {
                     continue;
                 }
 
-                if (!array_key_exists($table, $tableQueries)) {
-                    $tableQueries[$table] = [];
-                }
+                foreach ($ownerHasOnes as $fieldName => $childClassName) {
+                    $childClassName = strtok($childClassName, '.');
 
-                $tableQueries[$table] = [
-                    'FieldName' => $fieldName,
-                    'RelationshipClassName' => $relationshipClassName,
+                    if ($className === $childClassName) {
+                        $relationshipFieldName = $fieldName . 'ID';
+
+                        break;
+                    }
+                }
+            }
+
+            if (!$relationshipFieldName) {
+                continue;
+            }
+
+            if (!array_key_exists($ownerTableName, $tableQueries)) {
+                $tableQueries[$ownerTableName] = [
+                    'ClassName' => $relationshipClassName,
+                    'FieldNames' => [],
                 ];
             }
 
+            $tableQueries[$ownerTableName]['FieldNames'][] = $relationshipFieldName;
         }
+
+        return $tableQueries;
     }
 
     /**
