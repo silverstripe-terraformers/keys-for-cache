@@ -2,10 +2,10 @@
 
 namespace Terraformers\KeysForCache\Tests;
 
+use App\Models\MenuItem;
 use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\ConfigHelper;
-use Terraformers\KeysForCache\Tests\Models\MenuItem;
 
 class ConfigHelperTest extends SapphireTest
 {
@@ -24,6 +24,11 @@ class ConfigHelperTest extends SapphireTest
         $configs = ConfigHelper::getGlobalCacheDependencies(MenuItem::class, 'cache_dependencies');
 
         Debug::dump($configs);
+    }
+
+    public function testGetOwnedByDependencies(): void
+    {
+        Debug::dump(ConfigHelper::getOwnedByHasOnes(MenuItem::class));
     }
 
 }

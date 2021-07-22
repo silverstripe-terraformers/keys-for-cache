@@ -2,8 +2,10 @@
 
 namespace Terraformers\KeysForCache;
 
+use App\Models\MenuGroup;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataObject;
 
 class ConfigHelper
@@ -27,6 +29,28 @@ class ConfigHelper
         }
 
         return $dependents;
+    }
+
+    public static function getOwnedByHasOnes(string $className): array
+    {
+        $ownedByRelationships = Config::inst()->get($className, 'owned_by', 1);
+        $hasOneRelationships = Config::inst()->get($className, 'has_one', 1);
+        $relationships = [];
+
+        foreach ($hasOneRelationships as $relationship => $relationshipClassName) {
+            // Strip out any field relationship and just keep the classname
+            $relationshipClassName = strtok($relationshipClassName, '.');
+        }
+
+        $hasManyRelationships = Config::inst()->get($className, 'has_many', 1);
+
+        // TODO Add support for many_many
+
+        Debug::dump($ownedByRelationships);
+        Debug::dump($hasOneRelationships);
+        Debug::dump($hasManyRelationships);
+
+        return [];
     }
 
     /**
