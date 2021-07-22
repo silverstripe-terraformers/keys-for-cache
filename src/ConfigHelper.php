@@ -64,6 +64,7 @@ class ConfigHelper
                 $relationshipClassName = strtok($relationshipClassName, '.');
                 $fieldName = $relationship . 'ID';
 
+                // TODO: what is $relationships
                 if (in_array($fieldName, $relationships)) {
                     continue;
                 }
@@ -114,6 +115,7 @@ class ConfigHelper
                 $relationshipClassName = strtok($relationshipClassName, '.');
                 $fieldName = $relationship . 'ID';
 
+                // TODO: what is $relationships
                 if (in_array($fieldName, $relationships)) {
                     continue;
                 }

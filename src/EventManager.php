@@ -90,6 +90,7 @@ class EventManager
                 EventManager::singleton()->handleDependencyEvent($dependent);
             }
 
+            // deal with the has_one relationship
             $hasOneDependencies = ConfigHelper::getOwnedByHasOnes($event->getClassName());
 
             foreach ($hasOneDependencies as $table => $dependency) {
@@ -108,6 +109,24 @@ class EventManager
 
                 Debug::dump($result);
             }
+
+            // deal with the has_many relationship
+            $hasManyDependencies = ConfigHelper::getOwnedByHasMany($event->getClassName());
+
+            foreach ($hasManyDependencies as $table => $dependency) {
+                $sql = SQLSelect::create($dependency['FieldName'], $table, ['ID' => $event->getId()]);
+                $results = $sql->execute()->column($dependency['FieldName']);
+
+                if (!$results) {
+                    continue;
+                }
+
+                foreach ($results as $result) {
+                    EventManager::singleton()->handleCacheEvent($dependency['RelationshipClassName'], $result);
+                }
+            }
+
+            // deal with the many_many relationship
 
 //            $dispatcher = static::singleton()->getDispatcher();
 //
