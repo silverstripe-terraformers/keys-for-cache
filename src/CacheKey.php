@@ -1,15 +1,15 @@
 <?php
 
-namespace Terraformers\KeysForCache\Models;
+namespace Terraformers\KeysForCache;
 
 use SilverStripe\ORM\DataObject;
 
 /**
  * Maintain and manage cache keys for records
  *
- * @property string $RecordClass
- * @property int $RecordID
- * @property string $KeyHash
+ * @property string RecordClass
+ * @property int RecordID
+ * @property string KeyHash
  */
 class CacheKey extends DataObject
 {
@@ -20,18 +20,15 @@ class CacheKey extends DataObject
         'KeyHash' => 'Varchar',
     ];
 
-    private static array $has_one = [
+    private static array $belongs_to = [
         'Record' => DataObject::class,
     ];
 
     /**
-     * Update the CacheKey if it is invalivated,
+     * Update the CacheKey if it is invalidated,
      * Create a CacheKey if it is empty
-     *
-     * @param string $recordClass
-     * @param int $recordId
      */
-    public static function updateOrCreateKey(string $recordClass, int $recordId): void
+    public static function updateOrCreateKey(string $recordClass, int $recordId): CacheKey
     {
         $cacheKey = static::get()->filter([
             'RecordClass' => $recordClass,
@@ -46,6 +43,12 @@ class CacheKey extends DataObject
 
         $cacheKey->KeyHash = md5(implode('-', [$recordClass, $recordId, microtime()]));
         $cacheKey->write();
+
+        return $cacheKey;
     }
 
+    public function __toString(): string
+    {
+        return $this->KeyHash ?? 'no-hash';
+    }
 }
