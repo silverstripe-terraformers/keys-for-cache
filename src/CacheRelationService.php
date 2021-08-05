@@ -2,14 +2,12 @@
 
 namespace Terraformers\KeysForCache;
 
-use App\Taxonomy\Relations\RelatedContentBlockTaxonomyTerm;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\Queries\SQLDelete;
-use SilverStripe\ORM\Queries\SQLUpdate;
 
 class CacheRelationService
 {

@@ -1,14 +1,110 @@
+# Cache Keys
+This module helps you create singular cache keys which can be used in your templates. The idea is that you will configure the links between dependencies and then we'll manage updating the keys when those dependencies change
 
-Assumptions:
- The direction of relations is hard to follow, therefore we need to accept we will invalidate both direction.
+## API warning:
+This module is still in the early days of its life and therefore could have its API changed/updated
 
-E.g. a page title is updated and a block has a heading, therefore it should update
+## Installation
+```
+composer require silverstripe-terraformers/keys-for-cache
+```
 
-a block has a list of pages and the page title updates, therefore the block updates, therefore it's page updates etc
+## Config
+You'll need to specify where you're using the cache key, for example we usually use a key on all pages:
+```yaml
+Page:
+  has_cache_key: true
+```
 
+You will then need to configure you're `touches`, that is, when this thing is updated it should "touch" the other thing. For example if you had a `Carousel` with `CarouselItems` then you might configure it like so:
+```yaml
+App\Carousel\CarouselItem:
+  touches:
+    Parent: App\Carousel\Carousel
+```
 
+This would mean that any time the carousel item is updated it would also update the parent carousel (and if that parent had a cache key then it would also update it's cachekey)
 
+We could then imagine one of our items having an `Image` we would configure it with the `cares` config:
+```yaml
+App\Carousel\CarouselItem:
+  cares:
+    Image: SilverStripe\Assets\Image
+```
 
+Now whenever the linked image is updated, it will also update the carousel item. The carousel item will then update the linked carousel.
+
+### Global cares
+You might run into places where the thing you care about is dynamic but only updates through content author action. For example we could have a latest updates block that lists out pages that have been recently updated. For this we would want to make it so any time a page was updated it would also cause all the cache keys to update for the blocks that exist (since every block would now be come invalid)
+```yaml
+App\RecentUpdates\Block:
+  global_cares:
+    SiteTree: SilverStripe\CMS\Model\SiteTree
+```
+
+It's good to mention here that these global updates won't use the touches/cares when they occur so for example if `RecentUpdates\Block` had a `touches` of `Link:  SilverStripe\CMS\Model\SiteTree`, The site tree wouldn't be updated. This is a mechanism of global updates to ensure we don't run into performance issues
+
+### Example config with Elemental
+```yaml
+# All of our pages should have a cache key
+Page:
+  has_cache_key: true
+
+SilverStripe\SiteConfig\SiteConfig:
+  has_cache_key: true
+  cares:
+    PrimaryButton: gorriecoe\Link\Models\Link
+    SecondaryButton: gorriecoe\Link\Models\Link
+    HeaderLinks: gorriecoe\Link\Models\Link
+    SearchPage: SilverStripe\CMS\Model\SiteTree
+
+# If the block page is updated then it should update the elemental area
+App\Elemental\BlockPage:
+  cares:
+    ElementalArea: DNADesign\Elemental\Models\ElementalArea
+  touches:
+    ElementalArea: DNADesign\Elemental\Models\ElementalArea
+
+# If an elemental area is updated, then it should update the base elements
+DNADesign\Elemental\Models\ElementalArea:
+    touches:
+        Elements: DNADesign\Elemental\Models\BaseElement
+
+# If an element is updated, then it should update the area
+DNADesign\Elemental\Models\BaseElement:
+    has_cache_key: true
+    touches:
+        Parent: DNADesign\Elemental\Models\ElementalArea
+
+# If an internal page updates then the link should too
+gorriecoe\Link\Models\Link:
+    cares:
+        SiteTree: SilverStripe\CMS\Model\SiteTree
+
+App\DecisionTree\DecisionTreeBlock:
+    cares:
+        Answers: App\DecisionTree\DecisionTreeAnswer
+App\DecisionTree\DecisionTreeQuestion:
+    cares:
+        Answers: App\DecisionTree\DecisionTreeAnswer.Parent
+        OtherAnswers: App\DecisionTree\DecisionTreeAnswer.OtherParentQuestion
+
+App\Elemental\Blocks\HeroBlock:
+    cares:
+        PrimaryLink: gorriecoe\Link\Models\Link
+        SecondaryLink: gorriecoe\Link\Models\Link
+
+# HeroImageBlock extends HeroBlock, therefore we just need to add Image
+App\Elemental\Blocks\HeroImageBlock:
+    cares:
+        Image: SilverStripe\Assets\Image
+```
+
+## Performance impact/considerations
+This will increase the queries to the database when records are added (if they have applicable config (e.. Member might not have any performance impacts))
+
+### Queued jobs
+If you want to prevent content authors from getting slightly slower responses when editing in the CMS you can queue a job to generate the cache updates by injecting over `CacheKeyExtension` and updating `triggerEvent` to create a job then call `CacheRelationService::singleton()->processChange($this->DataObject)` in the job
 
 # SilverStripe supported module skeleton
 
@@ -25,94 +121,12 @@ other places where you need to customise it
 Below is a template of the sections of your readme.md you should ideally include to met the Module Standard
 and help others make use of your modules.
 
-### Steps to prepare this module for your own use:
-
-- Clone this repository into a folder
-- Add your name/organisation to `LICENSE.md`
-- Update this readme with information about your module. Ensure sections that aren't relevant are deleted and
-placeholders are edited where relevant
-- Review the README files in the various provided directories. You should replace these with `.gitkeep` or delete the
-directories
-- Update the module's `composer.json` with your requirements and package name
-- Update (or remove) `package.json` with your requirements and package name. Run `yarn` (or remove `yarn.lock`) to
-ensure dependencies resolve correctly
-- Clear the git history by running `rm -rf .git && git init`
-- Add and push to a VCS repository
-- Either [publish](https://getcomposer.org/doc/02-libraries.md#publishing-to-packagist) the module on packagist.org, or add a [custom repository](https://getcomposer.org/doc/02-libraries.md#publishing-to-a-vcs) to your main `composer.json`
-- Require the module in your main `composer.json`
-- Start developing your module!
-
-## Requirements
-
-* SilverStripe ^4.0
-* [Yarn](https://yarnpkg.com/lang/en/), [NodeJS](https://nodejs.org/en/) (6.x) and [npm](https://npmjs.com) (for building
-  frontend assets)
-* Other module
-* Other server requirement
-* Etc
-
-## Installation
-Add some installation instructions here, having a 1 line composer copy and paste is useful.
-Here is a composer command to create a new module project. Ensure you read the
-['publishing a module'](https://docs.silverstripe.org/en/developer_guides/extending/how_tos/publish_a_module/) guide
-and update your module's composer.json to designate your code as a SilverStripe module.
-
-```
-composer require silverstripe-module/skeleton 4.x-dev
-```
-
-**Note:** When you have completed your module, submit it to Packagist or add it as a VCS repository to your
-project's composer.json, pointing to the private repository URL.
-
 ## License
 See [License](license.md)
 
-We have included a 3-clause BSD license you can use as a default. We advocate for the BSD license as
-it is one of the most permissive and open licenses.
-
-Feel free to alter the [license.md](license.md) to suit if you wan to use an alternative license.
-You can use [choosealicense.com](http://choosealicense.com) to help pick a suitable license for your project.
-
-## Documentation
- * [Documentation readme](docs/en/readme.md)
-
-Add links into your docs/<language> folder here unless your module only requires minimal documentation
-in that case, add here and remove the docs folder. You might use this as a quick table of content if you
-mhave multiple documentation pages.
-
-## Example configuration (optional)
-If your module makes use of the config API in SilverStripe it's a good idea to provide an example config
- here that will get the module working out of the box and expose the user to the possible configuration options.
-
-Provide a yaml code example where possible.
-
-```yaml
-
-Page:
-  config_option: true
-  another_config:
-    - item1
-    - item2
-
-```
-
 ## Maintainers
- * Person here <person@emailaddress.com>
- * Another maintainer <maintain@emailaddress.com>
-
-## Bugtracker
-Bugs are tracked in the issues section of this repository. Before submitting an issue please read over
-existing issues to ensure yours is unique.
-
-If the issue does look like a new bug:
-
- - Create a new issue
- - Describe the steps required to reproduce your issue, and the expected outcome. Unit tests, screenshots
- and screencasts can help here.
- - Describe your environment as detailed as possible: SilverStripe version, Browser, PHP version,
- Operating System, any installed SilverStripe modules.
-
-Please report security issues to the module maintainers directly. Please don't file security issues in the bugtracker.
+ * Adrian Humphreys <adrhumphreys@gmail.com>
+ * Chris Penny <cpenny@silverstripe.com>
 
 ## Development and contribution
 If you would like to make contributions to the module please ensure you raise a pull request and discuss with the module maintainers.
