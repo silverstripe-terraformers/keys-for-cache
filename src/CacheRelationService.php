@@ -8,6 +8,8 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\Queries\SQLDelete;
+use SilverStripe\ORM\Queries\SQLUpdate;
 
 class CacheRelationService
 {
@@ -17,9 +19,12 @@ class CacheRelationService
 
     private array $processedUpdates;
 
+    private array $globalCares;
+
     public function __construct()
     {
         $this->graph = Graph::build();
+        $this->globalCares = $this->createGlobalCares();
         $this->processedUpdates = [];
     }
 
@@ -56,7 +61,7 @@ class CacheRelationService
             $edgesUpdated[] = $from;
         }
 
-        // TODO: Handle global cares
+        $this->updateGlobalCares($className);
     }
 
     private function updateEdge(EdgeUpdateDTO $dto): array
@@ -152,6 +157,66 @@ class CacheRelationService
         }
 
         return false;
+    }
+
+    public function updateGlobalCares(string $className): void
+    {
+        $cares = $this->getGlobalCares();
+        $possibleClassNames = ClassInfo::ancestry($className);
+        $cares = array_map(
+            fn($c) => $cares[$c] ?? null,
+            $possibleClassNames,
+        );
+        $cares = array_filter($cares, fn($c) => !is_null($c));
+        $cares = array_merge(...array_values($cares));
+        $cares = array_unique($cares);
+
+        $cacheKeyTable = CacheKey::config()->get('table_name');
+
+        foreach ($cares as $care) {
+            SQLDelete::create(
+                $cacheKeyTable,
+                ['RecordClass' => $care]
+            )->execute();
+        }
+    }
+
+    public function getGlobalCares(): array
+    {
+        return $this->globalCares;
+    }
+
+    private function createGlobalCares(): array
+    {
+        $classes = ClassInfo::getValidSubClasses(DataObject::class);
+
+        $classes = array_map(
+            fn($c) => ['className' => $c, 'cares' => Config::forClass($c)->get('global_cares')],
+            $classes
+        );
+
+        $classes = array_filter(
+            $classes,
+            fn($c) => is_array($c['cares']) && count($c['cares']) > 0
+        );
+
+        $classes = array_reduce(
+            $classes,
+            function($carry, $item) {
+                foreach ($item['cares'] as $care) {
+                    if (!array_key_exists($care, $carry)) {
+                        $carry[$care] = [];
+                    }
+
+                    $carry[$care][] = $item['className'];
+                }
+
+                return $carry;
+            },
+            []
+        );
+
+        return $classes;
     }
 
     private function getClassesWithCacheKey(): array

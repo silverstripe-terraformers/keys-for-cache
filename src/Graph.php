@@ -63,18 +63,31 @@ class Graph
             $node = $graph->findOrCreateNode($className);
 
             foreach ($touches as $relation => $touchClassName) {
+                [$touchClassName, $tRelation] = self::getClassAndRelation($touchClassName);
                 $touchNode = $graph->findOrCreateNode($touchClassName);
-                $edge = new Edge($node, $touchNode, $relation);
+                $edge = $tRelation
+                    ? new Edge($touchNode, $node, $tRelation)
+                    : new Edge($node, $touchNode, $relation);
                 $graph->addEdge($edge);
             }
 
             foreach ($cares as $relation => $careClassName) {
+                [$careClassName, $cRelation] = self::getClassAndRelation($careClassName);
                 $careNode = $graph->findOrCreateNode($careClassName);
-                $edge = new Edge($careNode, $node, $relation);
+                $edge = $cRelation
+                    ? new Edge($node, $careNode, $cRelation)
+                    : new Edge($careNode, $node, $relation);
                 $graph->addEdge($edge);
             }
         }
 
         return $graph;
+    }
+
+    private static function getClassAndRelation(string $input): array
+    {
+        $res = explode('.', $input);
+
+        return [$res[0], $res[1] ?? null];
     }
 }
