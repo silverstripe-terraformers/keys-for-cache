@@ -2,9 +2,11 @@
 
 namespace Terraformers\KeysForCache;
 
+use App\Taxonomy\Relations\RelatedContentBlockTaxonomyTerm;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
+use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 
 class CacheRelationService
@@ -53,6 +55,8 @@ class CacheRelationService
 
             $edgesUpdated[] = $from;
         }
+
+        // TODO: Handle global cares
     }
 
     private function updateEdge(EdgeUpdateDTO $dto): array
@@ -76,45 +80,39 @@ class CacheRelationService
         }
 
         if ($relation === 'has_many') {
-            $relatedInstances = $instance->{$edge->getRelation()}();
+            return $this->updateInstances($instance->{$edge->getRelation()}(), $dto);
+        }
 
-            $results = [];
-
-            foreach ($relatedInstances as $relatedInstance) {
-                if ($this->alreadyProcessed($relatedInstance->ID,  $edge->getToClassName())) {
-                    continue;
-                }
-
-                $results = array_merge(
-                    $results,
-                    $this->updateInstance($relatedInstance)
-                );
-            }
-
-            return $results;
+        if ($relation === 'many_many') {
+            // TODO: Handle this?
         }
 
         if (!$relation) {
             $relatedInstances = DataObject::get($edge->getToClassName())
                 ->filter($edge->getRelation().'ID', $instance->ID);
 
-            $results = [];
-
-            foreach ($relatedInstances as $relatedInstance) {
-                if ($this->alreadyProcessed($relatedInstance->ID,  $edge->getToClassName())) {
-                    continue;
-                }
-
-                $results = array_merge(
-                    $results,
-                    $this->updateInstance($relatedInstance)
-                );
-            }
-
-            return $results;
+            return $this->updateInstances($relatedInstances, $dto);
         }
 
         return [];
+    }
+
+    private function updateInstances(DataList $instances, EdgeUpdateDTO $dto): array
+    {
+        $results = [];
+
+        foreach ($instances as $relatedInstance) {
+            if ($this->alreadyProcessed($relatedInstance->ID,  $dto->getEdge()->getToClassName())) {
+                continue;
+            }
+
+            $results = array_merge(
+                $results,
+                $this->updateInstance($relatedInstance)
+            );
+        }
+
+        return $results;
     }
 
     private function updateInstance(DataObject $instance): array
