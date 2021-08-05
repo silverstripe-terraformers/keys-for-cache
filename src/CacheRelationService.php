@@ -4,7 +4,6 @@ namespace Terraformers\KeysForCache;
 
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Config\Config_ForClass;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DataObject;
 
@@ -12,143 +11,158 @@ class CacheRelationService
 {
     use Injectable;
 
-    public function getTree(): array
+    private Graph $graph;
+
+    private array $processedUpdates;
+
+    public function __construct()
     {
-        $classes = $this->getClassesWithCacheKey();
-
-        return $classes;
-
-        $relations = new RelationDTO();
-
-        foreach ($classes as $className) {
-            $relations->setRelation($className, $this->getRelationsForClass($className));
-        }
-
-        return $this->fillRelations($relations);
+        $this->graph = Graph::build();
+        $this->processedUpdates = [];
     }
 
-    /*
-     * Recursively create a relation mapping config
-     */
-    public function fillRelations(RelationDTO $relations): RelationDTO
+    public function getGraph(): Graph
     {
-        $foundANewRelation = false;
-
-        foreach ($relations->getRelations() as $className => $classRelations) {
-            // We now need to know if any of these class relations have
-            // relations that are not already added to the relation for $className
-
-            // therefore for each relation, we need to get all of it's relations
-            foreach ($classRelations as $classRelation) {
-                $foundANewRelation = $this->combineRelations($relations, $className, $this->getRelationsForClass($classRelation)) || $foundANewRelation;
-            }
-        }
-
-        return $foundANewRelation
-            ? $this->fillRelations($relations)
-            : $relations;
+        return $this->graph;
     }
 
-    public function combineRelations(RelationDTO $relations, $className, $relatedClasses): bool
+    public function processChange(DataObject $instance): void
     {
-        $newClasses = [];
-        foreach ($relatedClasses as $relatedClass) {
-            if ($relations->hasRelationForClass($className, $relatedClass)) {
+        $className = $instance->getClassName();
+        $id = $instance->ID;
+        CacheKey::updateOrCreateKey($className, $id);
+        $this->processedUpdates[] = new ProcessedUpdateDTO($className, $id);
+        $edgesToUpdate = $this->createEdges($instance);
+
+        // Prevent edges from being used more than once
+        $edgesUpdated = [];
+
+        while (count($edgesToUpdate) > 0) {
+            /** @var EdgeUpdateDTO $current */
+            $current = array_pop($edgesToUpdate);
+            $from = $current->getEdge()->getFromClassName();
+
+            if (in_array($from, $edgesUpdated)) {
                 continue;
             }
 
-            $newClasses[] = $relatedClass;
+            $edgesToUpdate = array_merge(
+                $edgesToUpdate,
+                $this->updateEdge($current)
+            );
+
+            $edgesUpdated[] = $from;
         }
-
-        if (count($newClasses) === 0) {
-            return false;
-        }
-
-        $relations->setRelation($className, array_merge(
-            $relations->getRelationsForClass($className),
-            $newClasses,
-        ));
-
-        return true;
     }
 
-    public function getRelationsForClass(string $className): array
+    private function updateEdge(EdgeUpdateDTO $dto): array
     {
-        $config = Config::forClass($className);
-        $types = ['has_one', 'has_many', 'many_many', 'belongs_many_many', 'belongs_to'];
-        $relations = [];
+        $edge = $dto->getEdge();
+        $instance = $dto->getInstance();
+        $relation = $instance->getRelationType($edge->getRelation());
 
-        foreach ($types as $type) {
-            $relations = array_merge($relations, $this->getFromConfig($config, $type));
-        }
-
-        return $relations;
-    }
-
-    public function getFromConfig(Config_ForClass $config, string $relation): array
-    {
-        $relations = (array)$config->get($relation);
-
-        // Handle many many through relations
-        if ($relation === 'many_many') {
-            $relations = array_map(function ($item): string {
-                return is_array($item) ? $item['through'] : $item;
-            }, $relations);
-        }
-
-        // Strip out the `.Relation` part of classnames is they exist
-        $relations = $relations && count($relations) > 0
-            ? preg_replace('/(.+)?\..+/', '$1', $relations)
-            : [];
-
-        $relations = IgnoredClasses::singleton()->filter($relations);
-
-        return $relations;
-    }
-
-    public function getRelationConfig(): Graph
-    {
-        $graph = new Graph();
-
-        $this->buildGraph($graph);
-
-        return $graph;
-    }
-
-    public function buildGraph(Graph $graph): void
-    {
-        // Relations only exist from data objects
-        $classes = ClassInfo::getValidSubClasses(DataObject::class);
-
-        foreach ($classes as $className) {
-            $config = Config::forClass($className);
-            $touches = $config->get('touches') ?? [];
-            $cares = $config->get('cares') ?? [];
-            $node = $graph->findOrCreateNode($className);
-
-            foreach ($touches as $relation => $touchClassName) {
-                $touchNode = $graph->findOrCreateNode($touchClassName);
-                $edge = new Edge($node, $touchNode, $relation);
-                $graph->addEdge($edge);
+        if ($relation === 'has_one') {
+            if ($this->alreadyProcessed($instance->getField($edge->getRelation().'ID'),  $edge->getToClassName())) {
+                return [];
             }
 
-            foreach ($cares as $relation => $careClassName) {
-                $careNode = $graph->findOrCreateNode($careClassName);
-                $edge = new Edge($careNode, $node, $relation);
-                $graph->addEdge($edge);
+            $relatedInstance = $instance->getField($edge->getRelation());
+
+            if (!$relatedInstance) {
+                return [];
+            }
+
+            return $this->updateInstance($relatedInstance);
+        }
+
+        if ($relation === 'has_many') {
+            $relatedInstances = $instance->{$edge->getRelation()}();
+
+            $results = [];
+
+            foreach ($relatedInstances as $relatedInstance) {
+                if ($this->alreadyProcessed($relatedInstance->ID,  $edge->getToClassName())) {
+                    continue;
+                }
+
+                $results = array_merge(
+                    $results,
+                    $this->updateInstance($relatedInstance)
+                );
+            }
+
+            return $results;
+        }
+
+        if (!$relation) {
+            $relatedInstances = DataObject::get($edge->getToClassName())
+                ->filter($edge->getRelation().'ID', $instance->ID);
+
+            $results = [];
+
+            foreach ($relatedInstances as $relatedInstance) {
+                if ($this->alreadyProcessed($relatedInstance->ID,  $edge->getToClassName())) {
+                    continue;
+                }
+
+                $results = array_merge(
+                    $results,
+                    $this->updateInstance($relatedInstance)
+                );
+            }
+
+            return $results;
+        }
+
+        return [];
+    }
+
+    private function updateInstance(DataObject $instance): array
+    {
+        $className = $instance->getClassName();
+        $id = $instance->ID;
+        CacheKey::updateOrCreateKey($className, $id);
+        $this->processedUpdates[] = new ProcessedUpdateDTO($className, $id);
+
+        return $this->createEdges($instance);
+    }
+
+    private function createEdges(DataObject $instance): array
+    {
+        $applicableEdges = $this->getGraph()->getEdges($instance->getClassName());
+
+        if (count($applicableEdges) === 0) {
+            return [];
+        }
+
+        return array_map(
+            fn($e) => new EdgeUpdateDTO($e, $instance),
+            $applicableEdges
+        );
+    }
+
+    private function alreadyProcessed(int $id, string $getToClassName): bool
+    {
+        /** @var ProcessedUpdateDTO $processedUpdate */
+        foreach ($this->processedUpdates as $processedUpdate) {
+            $classNameMatches = $processedUpdate->getClassName() === $getToClassName;
+            $idMatches = $processedUpdate->getId() === $id;
+
+            if ($idMatches && $classNameMatches) {
+                return true;
             }
         }
+
+        return false;
     }
 
     private function getClassesWithCacheKey(): array
     {
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
 
-        // Only add classes we care about generating keys for
-        $classes = array_filter($classes, function (string $className): bool {
-            return Config::forClass($className)->get('has_cache_key') === true;
-        });
-
-        return $classes;
+        return array_filter(
+            $classes,
+            fn($c) => Config::forClass($c)->get('has_cache_key') === true
+        );
     }
 }

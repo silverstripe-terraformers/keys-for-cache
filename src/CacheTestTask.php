@@ -4,6 +4,7 @@ namespace Terraformers\KeysForCache;
 
 use App\Elemental\Blocks\HeroImageBlock;
 use DNADesign\Elemental\Models\BaseElement;
+use Page;
 use SilverStripe\Assets\Image;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
@@ -17,32 +18,22 @@ class CacheTestTask extends BuildTask
      */
     public function run($request): void
     {
-        $config = CacheRelationService::singleton()->getRelationConfig();
-//        $result = $config->getEdges(HeroImageBlock::class);
-//        echo '<pre>'; print_r($result); exit;
-
-        $classThatWasEdited = HeroImageBlock::class;
-        $this->simulateClassUpdate($classThatWasEdited);
-
-
-//        $result = $config;
-//        $result = $config->getEdges(Image::class);
-//
-//        echo '<pre>';
-//        print_r($result);
-//        echo '</pre>';
+//        $b = HeroImageBlock::get()->find('ID', 111);
+        $b = Image::get()->find('ID', 2);
+        $b->Title = time();
+        $b->write();
+//        $classThatWasEdited = HeroImageBlock::class;
+//        $this->simulateClassUpdate($classThatWasEdited);
     }
 
     public function simulateClassUpdate(string $className): void
     {
-        $config = CacheRelationService::singleton()->getRelationConfig();
+        $config = CacheRelationService::singleton()->getGraph();
         $classesToUpdate = [$className];
         $edgesUpdated = [];
 
-        $passes = 0;
 
-        while (count($classesToUpdate) > 0 && $passes <= 50) {
-            $passes += 1;
+        while (count($classesToUpdate) > 0) {
             $current = array_pop($classesToUpdate);
 
             if (!$current) {

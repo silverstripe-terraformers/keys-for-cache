@@ -2,7 +2,6 @@
 
 namespace Terraformers\KeysForCache;
 
-use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 
@@ -31,7 +30,9 @@ class CacheKeyExtension extends DataExtension
             $key = CacheKey::updateOrCreateKey($className, $id);
         }
 
-        return $key->KeyHash;
+        return $key
+            ? $key->KeyHash
+            : md5(microtime(false));
     }
 
     public function getCacheKey(): string
@@ -45,19 +46,7 @@ class CacheKeyExtension extends DataExtension
 
     protected function triggerEvent(): void
     {
-        // Update the items cache key if required
-        if (Config::forClass(get_class($this->owner))->get('has_cache_key')) {
-            CacheKey::updateOrCreateKey($this->owner->getClassName(), $this->owner->ID);
-        }
-
-        return;
-        foreach ($this->owner->config()->get('trigger_blacklist') as $blacklistClassName) {
-            if (is_a($this->owner, $blacklistClassName)) {
-                return;
-            }
-        }
-
-        EventManager::singleton()->handleCacheEvent($this->owner->ClassName, $this->owner->ID);
+        CacheRelationService::singleton()->processChange($this->owner);
     }
 
     /**
@@ -81,7 +70,7 @@ class CacheKeyExtension extends DataExtension
 
     public function onAfterDelete(): void
     {
-        // TODO: REMOVE CACHE KEY
         $this->triggerEvent();
+        CacheKey::remove($this->owner->getClassName(), $this->owner->ID);
     }
 }
