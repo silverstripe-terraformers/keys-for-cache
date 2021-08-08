@@ -20,6 +20,13 @@ The overall aim of this module is twofold:
     * [Touches](#touches)
     * [Cares](#cares)
     * [Global cares](#global-cares)
+    * [Headers, Footers, and other "global" content areas](#headers-footers-and-other-global-content-areas)
+    * [Example config and usage](#example-config-and-usage)
+* [Performance impact/considerations](#performance-impactconsiderations)
+    * [Queued jobs](#queued-jobs)
+* [License](#license)
+* [Maintainers](#maintainers)
+* [Development and contribution](#development-and-contribution)
 
 ## API warning:
 
@@ -215,7 +222,68 @@ App\Blocks\RecentUpdates:
 if `Blocks\RecentUpdates` had a `touches` of `Link:  SilverStripe\CMS\Model\SiteTree`, The site tree wouldn't be
 updated. This is a mechanism of global updates to ensure we don't run into performance issues
 
-### Example config with Elemental
+### Headers, Footers, and other "global" content areas
+
+We quite often have global footers on our sites - that being, the same footer for every page. For areas like this,
+rather than having a `global_cares` for each of your pages, it might make more sense to keep a separate cache key.
+
+You might decide to just provide that cache key in (probably) the same way that you already do. EG:
+
+```php
+class PageController extends ContentController
+{
+    public function getFooterCacheKey(): string
+    {
+        return implode(
+            '-',
+            'Footer',
+            SiteTree::get()->count(),
+            SiteTree::get()->max('LastEdited')
+        );
+    }
+}
+```
+
+Or, you could add a `global_cares` to your `SiteConfig`:
+
+```yaml
+SilverStripe\SiteConfig\SiteConfig:
+    has_cache_key: true
+    cares:
+        SiteTree: SilverStripe\CMS\Model\SiteTree
+```
+
+And then your cache key for the footer might be:
+
+```silverstripe
+<% cached 'Footer', $SiteConfig.CacheKey %>
+    ...
+<% end_cached %>
+```
+
+Similarly, it's quite common for our Primary Navigation to need to care about global changes to `SiteTree`, but also to
+be aware of the "active page", so we might use this same cache key from our `SiteConfig`, and supplement it with the
+cache key from the Page itself:
+
+```silverstripe
+<% cached 'Navigation', $CacheKey, $SiteConfig.CacheKey %>
+    ...
+<% end_cached %>
+```
+
+**Note:* It is still really performant when we use a mixture of these cache keys together, as the values will be in
+memory after the first time they are used.
+
+### Example config and usage
+
+In this example we aim to have cache keys for the following areas:
+
+* Page content: We expect the Page content to be unique for each page, and for it to update any time the page itself, or
+  any of its related DataObjects are updated
+* Page footer navigation: We expect the footer navigation to be shared globally, and for it to update when changes are
+  made to any page record
+* Page primary navigation: We expect the primary navigation to update when changes are made to any page record, and we
+  also expect it to be unique per page (so that we can our "active page" features)
 
 ```yaml
 # All of our pages should have a cache key
@@ -225,41 +293,35 @@ Page:
 # We have also added a cache key for our Site settings, as we have some models that are managed there
 SilverStripe\SiteConfig\SiteConfig:
     has_cache_key: true
-        cares:
-            PrimaryButton: gorriecoe\Link\Models\Link
-            SecondaryButton: gorriecoe\Link\Models\Link
-            HeaderLinks: gorriecoe\Link\Models\Link
-            SearchPage: SilverStripe\CMS\Model\SiteTree
+    cares:
+        # Our SiteConfig has a couple of CTA buttons available that authors can edit
+        PrimaryButton: gorriecoe\Link\Models\Link
+        SecondaryButton: gorriecoe\Link\Models\Link
+    global_cares:
+        # SiteTree added as a global care, so that we can use this cache key for our global footer that we want to
+        # invalidate any time any page updates
+        SiteTree: SilverStripe\CMS\Model\SiteTree
 
 # Our BlockPage cares about changes that happen to our ElementalArea
 App\Elemental\BlockPage:
     cares:
         ElementalArea: DNADesign\Elemental\Models\ElementalArea
 
-# Our ElementalArea cares about any changes that happen to our Elements
+# Our ElementalArea cares about any changes that happen to its Elements
 DNADesign\Elemental\Models\ElementalArea:
     cares:
         Elements: DNADesign\Elemental\Models\BaseElement
-
-# Optionally, we might decide to add a cache key to our Elements, but it worth noting that we would ideally like to only
-# have to output the Page level cache key (if possible)
-DNADesign\Elemental\Models\BaseElement:
-    has_cache_key: true
 
 # Our Carousel block cares about any changes that are made to its Items
 App\Blocks\CarouselBlock:
     cares:
         Items: App\Blocks\CarouselItem
 
-# Our CarouselItem cares about any changes made to its associated Image
+# Our CarouselItem cares about any changes made to its associated Image, or to its CTA button
 App\Blocks\CarouselItem:
     cares:
         Image: SilverStripe\Assets\Image
-
-# If an internal page updates then any associated Link should too
-gorriecoe\Link\Models\Link:
-    cares:
-        SiteTree: SilverStripe\CMS\Model\SiteTree
+        PrimaryLink: gorriecoe\Link\Models\Link
 
 # Our Call to action block has an Image that it cares about, as well as two CTA buttons
 App\Blocks\CtaBlock:
@@ -267,34 +329,44 @@ App\Blocks\CtaBlock:
         Image: SilverStripe\Assets\Image
         PrimaryLink: gorriecoe\Link\Models\Link
         SecondaryLink: gorriecoe\Link\Models\Link
+
+# If an internal page updates then any associated Link should as well
+gorriecoe\Link\Models\Link:
+    cares:
+        SiteTree: SilverStripe\CMS\Model\SiteTree
+```
+
+In our template, we might now have something like this:
+
+```silverstripe
+<body>
+    <%-- Navigation is unique per page, and updates any time a global change is made to any page --%>
+    <% cached 'Navigation', $CacheKey, $SiteConfig.CacheKey %>
+        <% include Navigation %>
+    <% end_cached %>
+
+    <%-- Page content only changes when updates are made to the page or its direct dependencies --%>
+    <% cached 'Content', $CacheKey %>
+        $Layout
+    <% end_cached %>
+
+    <%-- Footer is shared globally, and updates any time a global change is made to any page --%>
+    <% cached 'Footer', $SiteConfig.CacheKey %>
+        <% include Footer %>
+    <% end_cached %>
+</body>
 ```
 
 ## Performance impact/considerations
 
 This will increase the queries to the database when DataObjects are updated. We are still pretty early into our
-performance tests, but so far it has not created an unreasonable additional load time to author actions.
+performance tests, but so far it has not created an unreasonable amount of additional load time to author actions.
 
 ### Queued jobs
 
 If you want to prevent content authors from getting slightly slower responses when editing in the CMS, you can queue a
 job to generate the cache updates by injecting over `CacheKeyExtension` and updating `triggerEvent` to create a job then
 call `CacheRelationService::singleton()->processChange($this->DataObject)` in the job.
-
-# SilverStripe supported module skeleton
-
-A useful skeleton to more easily create
-a [Silverstripe Module](https://docs.silverstripe.org/en/4/developer_guides/extending/modules/) that conform to the
-[Module Standard](https://docs.silverstripe.org/en/developer_guides/extending/modules/#module-standard).
-
-This readme contains descriptions of the parts of this module base you should customise to meet you own module needs.
-For example, the module name in the H1 above should be you own module name, and the description text you are reading now
-is where you should provide a good short explanation of what your module does.
-
-Where possible we have included default text that can be included as is into your module and indicated in other places
-where you need to customise it
-
-Below is a template of the sections of your readme.md you should ideally include to met the Module Standard and help
-others make use of your modules.
 
 ## License
 
