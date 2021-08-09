@@ -95,18 +95,20 @@ Page:
     has_cache_key: true
 ```
 
-By adding this configuration, you will have access to the `getCacheKey()` method on your DataObject.
+By adding this configuration, you will have access to the `getCacheKey()` method on your DataObject (and the `$CacheKey`
+variable in your template when you have the Page in scope).
 
-Next, you need to define your dependencies (how your DataObjects relate to each other). There are two important
+Next, you need to define your dependencies (how your DataObjects relate to each other). There are three important
 configurations to be aware of:
 
 * [Touches](#touches)
 * [Cares](#cares)
+* [Global cares](#global-cares)
 
 ### Touches
 
 This configuration determines how `$this` DataObject will affect others when it is updated. IE: when `$this` DataObject
-is updated, it should "touch" some other DataObjects.
+is updated, it should "touch" some other DataObjects so that they too are updated.
 
 For example if you have a `Carousel` with `CarouselItems` then you might configure it like so:
 
@@ -119,14 +121,14 @@ App\Blocks\CarouselItem:
 Or in your class like so:
 
 ```php
-class CarouselBlockItem extends DataObject
+class CarouselItem extends DataObject
 {
     private static array $has_one = [
-        'Parent' => Carousel::class,
+        'Parent' => CarouselBlock::class,
     ];
 
     private static array $touches = [
-        'Parent' => Carousel::class,
+        'Parent' => CarouselBlock::class,
     ];
 }
 ```
@@ -140,8 +142,8 @@ Alternatively, you could achieve the same outcome by using [Cares](#cares).
 
 ### Cares
 
-Take the above example where you have a `Carousel` with `CarouselItems`, rather than using [Touches](#touches), you
-could instead use `cares`, like so:
+Take the above example where you have a `Carousel` with `CarouselItems`, rather than using [Touches](#touches) on
+the `CarouselItem`, you could instead use `cares` on the `CarouselBlock`:
 
 ```yaml
 App\Blocks\CarouselBlock:
@@ -176,7 +178,7 @@ App\Blocks\CarouselItem:
 Or in your class like so:
 
 ```php
-class CarouselBlockItem extends DataObject
+class CarouselItem extends DataObject
 {
     private static array $has_one = [
         'Image' => Image::class,
@@ -192,18 +194,20 @@ Now whenever the linked image is updated, it will also update the carousel item.
 the linked carousel. Taking this a step further all the way back to `Page`, we can also add the following:
 
 ```yaml
-Page:
+# Our BlockPage cares about changes to its ElementalArea
+App\Elemental\BlockPage:
     cares:
         ElementalArea: DNADesign\Elemental\Models\ElementalArea
 
+# Our ElementalAreas care about any changes made to its Elements
 DNADesign\Elemental\Models\ElementalArea:
     cares:
         Elements: BaseElement::class
 ```
 
-Our `Page` now `cares` about our `ElementalArea`, and our `ElementalArea` now cares about all of its blocks/elements.
-This now means that any time a change is made to any of our blocks (so long as we have configured them similarly to how
-we have shown with the `Carousel`), we will get a new cache key value on our `Page`.
+Our `BlockPage` now `cares` about our `ElementalArea`, and our `ElementalArea` now cares about all of its
+blocks/elements. This now means that any time a change is made to any of our blocks (so long as we have configured them
+similarly to how we have shown with the `Carousel`), we will get a new cache key value on our `Page`.
 
 ### Global cares
 
@@ -339,21 +343,22 @@ gorriecoe\Link\Models\Link:
 In our template, we might now have something like this:
 
 ```silverstripe
+
 <body>
-    <%-- Navigation is unique per page, and updates any time a global change is made to any page --%>
-    <% cached 'Navigation', $CacheKey, $SiteConfig.CacheKey %>
-        <% include Navigation %>
-    <% end_cached %>
+<%-- Navigation is unique per page, and updates any time a global change is made to any page --%>
+<% cached 'Navigation', $CacheKey, $SiteConfig.CacheKey %>
+    <% include Navigation %>
+<% end_cached %>
 
-    <%-- Page content only changes when updates are made to the page or its direct dependencies --%>
-    <% cached 'Content', $CacheKey %>
-        $Layout
-    <% end_cached %>
+<%-- Page content only changes when updates are made to the page or its direct dependencies --%>
+<% cached 'Content', $CacheKey %>
+    $Layout
+<% end_cached %>
 
-    <%-- Footer is shared globally, and updates any time a global change is made to any page --%>
-    <% cached 'Footer', $SiteConfig.CacheKey %>
-        <% include Footer %>
-    <% end_cached %>
+<%-- Footer is shared globally, and updates any time a global change is made to any page --%>
+<% cached 'Footer', $SiteConfig.CacheKey %>
+    <% include Footer %>
+<% end_cached %>
 </body>
 ```
 
