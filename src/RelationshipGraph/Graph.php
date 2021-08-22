@@ -1,6 +1,6 @@
 <?php
 
-namespace Terraformers\KeysForCache;
+namespace Terraformers\KeysForCache\RelationshipGraph;
 
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
@@ -63,19 +63,59 @@ class Graph
             $node = $graph->findOrCreateNode($className);
 
             foreach ($touches as $relation => $touchClassName) {
-                [$touchClassName, $tRelation] = self::getClassAndRelation($touchClassName);
+                [$touchClassName, $touchRelation] = self::getClassAndRelation($touchClassName);
+
+                // No dot notation so we need to check if this is a has_many, and if it is, we need to find the has_one
+                // field on the other side of this relationship
+                if (!$touchRelation) {
+                    $hasMany = $config->get('has_many');
+
+                    // Has many exists for the relation
+                    if (array_key_exists($relation, $hasMany)) {
+                        $hasOnes = Config::forClass($careClassName)->get('has_one');
+
+                        foreach ($hasOnes as $hasOneRelation => $hasOneClassName) {
+                            if ($hasOneClassName !== $className) {
+                                continue;
+                            }
+
+                            $touchRelation = $hasOneRelation;
+                        }
+                    }
+                }
+
                 $touchNode = $graph->findOrCreateNode($touchClassName);
-                $edge = $tRelation
-                    ? new Edge($touchNode, $node, $tRelation)
+                $edge = $touchRelation
+                    ? new Edge($touchNode, $node, $touchRelation)
                     : new Edge($node, $touchNode, $relation);
                 $graph->addEdge($edge);
             }
 
             foreach ($cares as $relation => $careClassName) {
-                [$careClassName, $cRelation] = self::getClassAndRelation($careClassName);
+                [$careClassName, $caresRelation] = self::getClassAndRelation($careClassName);
+
+                // No dot notation so we need to check if this is a has_many, and if it is, we need to find the has_one
+                // field on the other side of this relationship
+                if (!$caresRelation) {
+                    $hasMany = $config->get('has_many');
+
+                    // Has many exists for the relation
+                    if (array_key_exists($relation, $hasMany)) {
+                        $hasOnes = Config::forClass($careClassName)->get('has_one');
+
+                        foreach ($hasOnes as $hasOneRelation => $hasOneClassName) {
+                            if ($hasOneClassName !== $className) {
+                                continue;
+                            }
+
+                            $caresRelation = $hasOneRelation;
+                        }
+                    }
+                }
+
                 $careNode = $graph->findOrCreateNode($careClassName);
-                $edge = $cRelation
-                    ? new Edge($node, $careNode, $cRelation)
+                $edge = $caresRelation
+                    ? new Edge($node, $careNode, $caresRelation)
                     : new Edge($careNode, $node, $relation);
                 $graph->addEdge($edge);
             }

@@ -1,9 +1,12 @@
 <?php
 
-namespace Terraformers\KeysForCache;
+namespace Terraformers\KeysForCache\Extensions;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
+use Terraformers\KeysForCache\CacheKeyDTO;
+use Terraformers\KeysForCache\CacheRelationService;
+use Terraformers\KeysForCache\Models\CacheKey;
 
 /**
  * @property DataObject|$this $owner

@@ -1,6 +1,6 @@
 <?php
 
-namespace Terraformers\KeysForCache;
+namespace Terraformers\KeysForCache\DataTransferObjects;
 
 class CacheKeyDTO
 {

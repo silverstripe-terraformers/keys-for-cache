@@ -5,9 +5,15 @@ namespace Terraformers\KeysForCache;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\Queries\SQLDelete;
+use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDTO;
+use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDTO;
+use Terraformers\KeysForCache\RelationshipGraph\Graph;
+use Terraformers\KeysForCache\Models\CacheKey;
+use Exception;
 
 class CacheRelationService
 {
@@ -62,11 +68,42 @@ class CacheRelationService
         $this->updateGlobalCares($className);
     }
 
+    /**
+     * Given a relation name, determine the relation type
+     *
+     * @param string $component Name of component
+     * @return string has_one, has_many, many_many, belongs_many_many or belongs_to
+     */
+    private function getRelationType(string $className, string $relation): ?string
+    {
+        $types = ['has_one', 'has_many', 'many_many', 'belongs_many_many', 'belongs_to'];
+        $config = Config::inst()->get($className);
+
+        foreach ($types as $type) {
+            $relations = $config->get($type);
+
+            if ($relations && isset($relations[$relation])) {
+                return $type;
+            }
+        }
+
+        return null;
+    }
+
     private function updateEdge(EdgeUpdateDTO $dto): array
     {
         $edge = $dto->getEdge();
         $instance = $dto->getInstance();
-        $relation = $instance->getRelationType($edge->getRelation());
+        $relation = $this->getRelationType($edge->getFromClassName(), $edge->getRelation());
+
+        if (!$relation) {
+            throw new Exception(sprintf(
+                'No relationship field found for "%s" between "%s" and "%s"',
+                $edge->getRelation(),
+                $edge->getFromClassName(),
+                $edge->getToClassName()
+            ));
+        }
 
         if ($relation === 'has_one') {
             if ($this->alreadyProcessed($instance->getField($edge->getRelation().'ID'),  $edge->getToClassName())) {
@@ -88,13 +125,6 @@ class CacheRelationService
 
         if ($relation === 'many_many') {
             // TODO: Handle this?
-        }
-
-        if (!$relation) {
-            $relatedInstances = DataObject::get($edge->getToClassName())
-                ->filter($edge->getRelation().'ID', $instance->ID);
-
-            return $this->updateInstances($relatedInstances, $dto);
         }
 
         return [];

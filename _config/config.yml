@@ -3,4 +3,4 @@ Name: keysforcache
 ---
 SilverStripe\ORM\DataObject:
   extensions:
-    CacheKeyExtension: Terraformers\KeysForCache\CacheKeyExtension
+    CacheKeyExtension: Terraformers\KeysForCache\Extensions\CacheKeyExtension
