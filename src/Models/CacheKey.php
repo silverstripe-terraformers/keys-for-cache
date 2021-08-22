@@ -1,6 +1,6 @@
 <?php
 
-namespace Terraformers\KeysForCache;
+namespace Terraformers\KeysForCache\Models;
 
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Terraformers\KeysForCache;
+namespace Terraformers\KeysForCache\RelationshipGraph;
 
 class Node
 {
