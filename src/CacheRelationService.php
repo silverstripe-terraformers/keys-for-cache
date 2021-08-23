@@ -25,6 +25,8 @@ class CacheRelationService
 
     private array $globalCares;
 
+    private bool $publishUpdates = false;
+
     public function __construct()
     {
         $this->graph = Graph::build();
@@ -40,9 +42,7 @@ class CacheRelationService
     public function processChange(DataObject $instance): void
     {
         $className = $instance->getClassName();
-        $id = $instance->ID;
-        CacheKey::updateOrCreateKey($className, $id);
-        $this->processedUpdates[] = new ProcessedUpdateDTO($className, $id);
+        $this->updateInstance($instance);
         $edgesToUpdate = $this->createEdges($instance);
 
         // Prevent edges from being used more than once
@@ -152,7 +152,18 @@ class CacheRelationService
     {
         $className = $instance->getClassName();
         $id = $instance->ID;
-        CacheKey::updateOrCreateKey($className, $id);
+        // Update or create the CacheKey for this instance. No write is performed
+        $cacheKey = CacheKey::updateOrCreateKey($className, $id);
+
+        if ($cacheKey) {
+            $cacheKey->write();
+
+            // Check to see if we need to publish this CacheKey
+            if ($this->getPublishUpdates()) {
+                $cacheKey->publishRecursive();
+            }
+        }
+
         $this->processedUpdates[] = new ProcessedUpdateDTO($className, $id);
 
         return $this->createEdges($instance);
@@ -201,10 +212,10 @@ class CacheRelationService
 
         $cacheKeyTable = CacheKey::config()->get('table_name');
 
-        foreach ($cares as $care) {
+        foreach ($cares as $careClass) {
             SQLDelete::create(
                 $cacheKeyTable,
-                ['RecordClass' => $care]
+                ['RecordClass' => $careClass]
             )->execute();
         }
     }
@@ -212,6 +223,16 @@ class CacheRelationService
     public function getGlobalCares(): array
     {
         return $this->globalCares;
+    }
+
+    public function getPublishUpdates(): bool
+    {
+        return $this->publishUpdates;
+    }
+
+    public function setPublishUpdates(bool $publishUpdates): void
+    {
+        $this->publishUpdates = $publishUpdates;
     }
 
     private function createGlobalCares(): array

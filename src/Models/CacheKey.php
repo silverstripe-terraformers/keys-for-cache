@@ -4,6 +4,8 @@ namespace Terraformers\KeysForCache\Models;
 
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Versioned\Versioned;
+use Terraformers\KeysForCache\CacheRelationService;
 
 /**
  * Maintain and manage cache keys for records
@@ -11,6 +13,7 @@ use SilverStripe\ORM\DataObject;
  * @property string RecordClass
  * @property int RecordID
  * @property string KeyHash
+ * @mixin Versioned
  */
 class CacheKey extends DataObject
 {
@@ -21,6 +24,10 @@ class CacheKey extends DataObject
         'KeyHash' => 'Varchar',
         'RecordClass' => 'Varchar',
         'RecordID' => 'Int',
+    ];
+
+    private static array $extensions = [
+        Versioned::class,
     ];
 
     /**
@@ -47,7 +54,6 @@ class CacheKey extends DataObject
         }
 
         $cacheKey->KeyHash = md5(implode('-', [$recordClass, $recordId, microtime()]));
-        $cacheKey->write();
 
         return $cacheKey;
     }
