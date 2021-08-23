@@ -4,12 +4,21 @@ namespace Terraformers\KeysForCache\RelationshipGraph;
 
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injectable;
+use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataObject;
 
 class Graph
 {
+    use Injectable;
+
     private array $nodes = [];
     private array $edges = [];
+
+    public function __construct()
+    {
+        $this->build();
+    }
 
     public function addNode(Node $node): self
     {
@@ -50,9 +59,8 @@ class Graph
         );
     }
 
-    public static function build(): Graph
+    private function build(): void
     {
-        $graph = new Graph();
         // Relations only exist from data objects
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
 
@@ -60,10 +68,10 @@ class Graph
             $config = Config::forClass($className);
             $touches = $config->get('touches') ?? [];
             $cares = $config->get('cares') ?? [];
-            $node = $graph->findOrCreateNode($className);
+            $node = $this->findOrCreateNode($className);
 
             foreach ($touches as $relation => $touchClassName) {
-                [$touchClassName, $touchRelation] = self::getClassAndRelation($touchClassName);
+                [$touchClassName, $touchRelation] = $this->getClassAndRelation($touchClassName);
 
                 // No dot notation so we need to check if this is a has_many, and if it is, we need to find the has_one
                 // field on the other side of this relationship
@@ -84,15 +92,15 @@ class Graph
                     }
                 }
 
-                $touchNode = $graph->findOrCreateNode($touchClassName);
+                $touchNode = $this->findOrCreateNode($touchClassName);
                 $edge = $touchRelation
                     ? new Edge($touchNode, $node, $touchRelation)
                     : new Edge($node, $touchNode, $relation);
-                $graph->addEdge($edge);
+                $this->addEdge($edge);
             }
 
             foreach ($cares as $relation => $careClassName) {
-                [$careClassName, $caresRelation] = self::getClassAndRelation($careClassName);
+                [$careClassName, $caresRelation] = $this->getClassAndRelation($careClassName);
 
                 // No dot notation so we need to check if this is a has_many, and if it is, we need to find the has_one
                 // field on the other side of this relationship
@@ -113,18 +121,16 @@ class Graph
                     }
                 }
 
-                $careNode = $graph->findOrCreateNode($careClassName);
+                $careNode = $this->findOrCreateNode($careClassName);
                 $edge = $caresRelation
                     ? new Edge($node, $careNode, $caresRelation)
                     : new Edge($careNode, $node, $relation);
-                $graph->addEdge($edge);
+                $this->addEdge($edge);
             }
         }
-
-        return $graph;
     }
 
-    private static function getClassAndRelation(string $input): array
+    private function getClassAndRelation(string $input): array
     {
         $res = explode('.', $input);
 

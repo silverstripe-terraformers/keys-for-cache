@@ -3,13 +3,14 @@
 namespace Terraformers\KeysForCache\Extensions;
 
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDTO;
-use Terraformers\KeysForCache\CacheRelationService;
 use Terraformers\KeysForCache\Models\CacheKey;
+use Terraformers\KeysForCache\Services\CacheRelationService;
+use Terraformers\KeysForCache\Services\StageCacheRelationService;
+use Terraformers\KeysForCache\Services\LiveCacheRelationService;
 
 /**
  * @property DataObject|$this $owner
@@ -65,8 +66,17 @@ class CacheKeyExtension extends DataExtension
 
     protected function triggerEvent(bool $publishUpdates = false): void
     {
-        CacheRelationService::singleton()->setPublishUpdates($publishUpdates);
-        CacheRelationService::singleton()->processChange($this->owner);
+        $blacklist = Config::forClass(CacheKey::class)->get('blacklist');
+
+        if (in_array($this->owner->ClassName, $blacklist)) {
+            return;
+        }
+
+        $service = $publishUpdates
+            ? LiveCacheRelationService::singleton()
+            : StageCacheRelationService::singleton();
+
+        $service->processChange($this->owner);
     }
 
     /**

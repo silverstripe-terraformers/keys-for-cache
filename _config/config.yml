@@ -4,3 +4,10 @@ Name: keysforcache
 SilverStripe\ORM\DataObject:
   extensions:
     CacheKeyExtension: Terraformers\KeysForCache\Extensions\CacheKeyExtension
+
+Terraformers\KeysForCache\Models\CacheKey:
+  blacklist:
+    - Terraformers\KeysForCache\Models\CacheKey
+    - SilverStripe\Versioned\ChangeSet
+    - SilverStripe\Versioned\ChangeSetItem
+    - SilverStripe\SessionManager\Models\LoginSession

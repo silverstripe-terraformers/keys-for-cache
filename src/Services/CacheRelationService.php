@@ -1,21 +1,20 @@
 <?php
 
-namespace Terraformers\KeysForCache;
+namespace Terraformers\KeysForCache\Services;
 
+use Exception;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
-use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\Queries\SQLDelete;
 use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDTO;
 use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDTO;
-use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Models\CacheKey;
-use Exception;
+use Terraformers\KeysForCache\RelationshipGraph\Graph;
 
-class CacheRelationService
+abstract class CacheRelationService
 {
     use Injectable;
 
@@ -25,11 +24,11 @@ class CacheRelationService
 
     private array $globalCares;
 
-    private bool $publishUpdates = false;
+    private bool $publishUpdates;
 
     public function __construct()
     {
-        $this->graph = Graph::build();
+        $this->graph = Graph::singleton();
         $this->globalCares = $this->createGlobalCares();
         $this->processedUpdates = [];
     }
@@ -77,10 +76,9 @@ class CacheRelationService
     private function getRelationType(string $className, string $relation): ?string
     {
         $types = ['has_one', 'has_many', 'many_many', 'belongs_many_many', 'belongs_to'];
-        $config = Config::inst()->get($className);
 
         foreach ($types as $type) {
-            $relations = $config->get($type);
+            $relations = Config::inst()->get($className, $type);
 
             if ($relations && isset($relations[$relation])) {
                 return $type;
@@ -97,12 +95,21 @@ class CacheRelationService
         $relation = $this->getRelationType($edge->getFromClassName(), $edge->getRelation());
 
         if (!$relation) {
-            throw new Exception(sprintf(
-                'No relationship field found for "%s" between "%s" and "%s"',
-                $edge->getRelation(),
-                $edge->getFromClassName(),
-                $edge->getToClassName()
-            ));
+            $relation = $this->getRelationType($edge->getToClassName(), $edge->getRelation());
+
+            if (!$relation) {
+                throw new Exception(sprintf(
+                    'No relationship field found for "%s" between "%s" and "%s"',
+                    $edge->getRelation(),
+                    $edge->getFromClassName(),
+                    $edge->getToClassName()
+                ));
+            }
+
+            $relatedInstances = DataObject::get($edge->getToClassName())
+                ->filter($edge->getRelation().'ID', $instance->ID);
+
+            return $this->updateInstances($relatedInstances, $dto);
         }
 
         if ($relation === 'has_one') {
@@ -159,7 +166,7 @@ class CacheRelationService
             $cacheKey->write();
 
             // Check to see if we need to publish this CacheKey
-            if ($this->getPublishUpdates()) {
+            if ($this->publishUpdates) {
                 $cacheKey->publishRecursive();
             }
         }
@@ -223,16 +230,6 @@ class CacheRelationService
     public function getGlobalCares(): array
     {
         return $this->globalCares;
-    }
-
-    public function getPublishUpdates(): bool
-    {
-        return $this->publishUpdates;
-    }
-
-    public function setPublishUpdates(bool $publishUpdates): void
-    {
-        $this->publishUpdates = $publishUpdates;
     }
 
     private function createGlobalCares(): array

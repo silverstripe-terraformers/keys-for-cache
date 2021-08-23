@@ -5,7 +5,7 @@ namespace Terraformers\KeysForCache\Models;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
-use Terraformers\KeysForCache\CacheRelationService;
+use Terraformers\KeysForCache\Services\CacheRelationService;
 
 /**
  * Maintain and manage cache keys for records
