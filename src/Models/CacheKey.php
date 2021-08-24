@@ -3,6 +3,7 @@
 namespace Terraformers\KeysForCache\Models;
 
 use SilverStripe\Core\Config\Config;
+use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 
@@ -55,10 +56,17 @@ class CacheKey extends DataObject
             return null;
         }
 
-        $cacheKey = static::get()->filter([
-            'RecordClass' => $recordClass,
-            'RecordID' => $recordId,
-        ])->first();
+        // We need to ensure that we fetch our CacheKey with our reading mode set to DRAFT. During a publish event, our
+        // reading mode is LIVE, which would mean that we won't ever find a DRAFT only CacheKey that matches our
+        // criteria
+        $cacheKey = Versioned::withVersionedMode(static function () use ($recordClass, $recordId): ?CacheKey {
+            Versioned::set_stage(Versioned::DRAFT);
+
+            return static::get()->filter([
+                'RecordClass' => $recordClass,
+                'RecordID' => $recordId,
+            ])->first();
+        });
 
         if ($cacheKey === null || !$cacheKey->exists()) {
             $cacheKey = static::create();
@@ -73,16 +81,22 @@ class CacheKey extends DataObject
 
     public static function remove(string $recordClass, int $recordId): void
     {
-        $cacheKey = static::get()->filter([
+        // There is a non-zero chance that we could have multiple CacheKeys for a single record. If everything always
+        // worked perfectly then it shouldn't happen, but from a data consistency point of view, it is possible. This
+        // is our opportunity to clean it up
+        /** @var DataList|CacheKey[] $cacheKeys */
+        $cacheKeys = static::get()->filter([
             'RecordClass' => $recordClass,
             'RecordID' => $recordId,
-        ])->first();
+        ]);
 
-        if (!$cacheKey) {
+        if ($cacheKeys->count() === 0) {
             return;
         }
 
-        $cacheKey->delete();
+        foreach ($cacheKeys as $cacheKey) {
+            $cacheKey->doArchive();
+        }
     }
 
     public function __toString(): string
