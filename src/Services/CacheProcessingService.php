@@ -10,7 +10,6 @@ use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\Queries\SQLDelete;
 use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDTO;
-use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDTO;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 
@@ -159,7 +158,7 @@ abstract class CacheProcessingService
         $className = $instance->getClassName();
         $id = $instance->ID;
         // Find or create the CacheKey for this instance
-        $cacheKey = CacheKey::findOrCreate($className, $id);
+        $cacheKey = CacheKey::updateOrCreateKey($className, $id);
         $processedUpdate = $this->getUpdatesService()->findOrCreateProcessedUpdate($className, $id);
 
         if ($cacheKey) {

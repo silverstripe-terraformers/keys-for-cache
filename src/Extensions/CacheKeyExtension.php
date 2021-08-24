@@ -8,9 +8,8 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDTO;
 use Terraformers\KeysForCache\Models\CacheKey;
-use Terraformers\KeysForCache\Services\CacheProcessingService;
-use Terraformers\KeysForCache\Services\StageCacheProcessingService;
 use Terraformers\KeysForCache\Services\LiveCacheProcessingService;
+use Terraformers\KeysForCache\Services\StageCacheProcessingService;
 
 /**
  * @property DataObject|$this $owner
