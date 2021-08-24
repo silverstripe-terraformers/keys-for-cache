@@ -18,7 +18,7 @@ abstract class CacheProcessingService
 {
     use Injectable;
 
-    abstract protected function publishUpdates(): bool;
+    abstract protected function shouldPublishUpdates(): bool;
 
     public function getGraph(): Graph
     {
@@ -164,7 +164,7 @@ abstract class CacheProcessingService
 
         if ($cacheKey) {
             // Check to see if we need to publish this CacheKey
-            if ($this->publishUpdates()) {
+            if ($this->shouldPublishUpdates()) {
                 $cacheKey->publishRecursive();
                 $processedUpdate->setPublished();
             }
@@ -198,7 +198,7 @@ abstract class CacheProcessingService
 
         // We are in a "Draft" context, so we don't care whether or not the ProcessedUpdateDTO has been published or
         // not. Its existence means that it has been processed
-        if (!$this->publishUpdates()) {
+        if (!$this->shouldPublishUpdates()) {
             return true;
         }
 

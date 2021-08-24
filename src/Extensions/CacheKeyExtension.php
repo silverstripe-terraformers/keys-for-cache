@@ -31,19 +31,10 @@ class CacheKeyExtension extends DataExtension
             return md5(microtime(false));
         }
 
-        $cacheKey = CacheKey::get()
-            ->filter([
-                'RecordClass' => $className,
-                'RecordID' => $id,
-            ])
-            ->first();
+        // Update or create (in this case, it will be create)
+        $cacheKey = CacheKey::findOrCreate($className, $id);
 
-        // No CacheKey exists for this record, but it should. It's possible that it was cleared during a global_cares
-        // purge, or perhaps the module was added after Models existed in the DB
-        if (!$cacheKey) {
-            // Update or create (in this case, it will be create)
-            $cacheKey = CacheKey::updateOrCreateKey($className, $id);
-
+        if (!$cacheKey->isPublished()) {
             // If the owner is not Versioned, or if it has been published, then we want to make sure we publish our
             // CacheKey at the same time
             if (!$this->owner->hasExtension(Versioned::class) || $this->owner->isPublished()) {

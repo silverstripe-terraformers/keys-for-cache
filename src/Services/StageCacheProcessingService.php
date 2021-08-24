@@ -4,7 +4,7 @@ namespace Terraformers\KeysForCache\Services;
 
 class StageCacheProcessingService extends CacheProcessingService
 {
-    protected function publishUpdates(): bool
+    protected function shouldPublishUpdates(): bool
     {
         return false;
     }
