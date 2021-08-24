@@ -7,9 +7,9 @@ SilverStripe\ORM\DataObject:
 
 Terraformers\KeysForCache\Models\CacheKey:
   blacklist:
-    - Terraformers\KeysForCache\Models\CacheKey
-    - SilverStripe\Versioned\ChangeSet
-    - SilverStripe\Versioned\ChangeSetItem
-    - SilverStripe\SessionManager\Models\LoginSession
-    - SilverStripe\Snapshots\SnapshotItem
-    - SilverStripe\Snapshots\Snapshot
+    CacheKey: Terraformers\KeysForCache\Models\CacheKey
+    ChangeSet: SilverStripe\Versioned\ChangeSet
+    ChangeSetItem: SilverStripe\Versioned\ChangeSetItem
+    LoginSession: SilverStripe\SessionManager\Models\LoginSession
+    SnapshotItem: SilverStripe\Snapshots\SnapshotItem
+    Snapshot: SilverStripe\Snapshots\Snapshot
