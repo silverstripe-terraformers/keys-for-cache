@@ -11,3 +11,5 @@ Terraformers\KeysForCache\Models\CacheKey:
     - SilverStripe\Versioned\ChangeSet
     - SilverStripe\Versioned\ChangeSetItem
     - SilverStripe\SessionManager\Models\LoginSession
+    - SilverStripe\Snapshots\SnapshotItem
+    - SilverStripe\Snapshots\Snapshot

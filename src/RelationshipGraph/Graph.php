@@ -14,10 +14,12 @@ class Graph
 
     private array $nodes = [];
     private array $edges = [];
+    private array $global_cares = [];
 
     public function __construct()
     {
         $this->build();
+        $this->createGlobalCares();
     }
 
     public function addNode(Node $node): self
@@ -57,6 +59,11 @@ class Graph
             $this->edges,
             fn($e) => $e->getFromClassName() === $from
         );
+    }
+
+    public function getGlobalCares(): array
+    {
+        return $this->global_cares;
     }
 
     private function build(): void
@@ -128,6 +135,39 @@ class Graph
                 $this->addEdge($edge);
             }
         }
+    }
+
+    private function createGlobalCares(): void
+    {
+        $classes = ClassInfo::getValidSubClasses(DataObject::class);
+
+        $classes = array_map(
+            fn($c) => ['className' => $c, 'cares' => Config::forClass($c)->get('global_cares')],
+            $classes
+        );
+
+        $classes = array_filter(
+            $classes,
+            fn($c) => is_array($c['cares']) && count($c['cares']) > 0
+        );
+
+        $classes = array_reduce(
+            $classes,
+            function($carry, $item) {
+                foreach ($item['cares'] as $care) {
+                    if (!array_key_exists($care, $carry)) {
+                        $carry[$care] = [];
+                    }
+
+                    $carry[$care][] = $item['className'];
+                }
+
+                return $carry;
+            },
+            []
+        );
+
+        $this->global_cares = $classes;
     }
 
     private function getClassAndRelation(string $input): array

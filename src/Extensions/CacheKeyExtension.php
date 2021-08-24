@@ -8,9 +8,9 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDTO;
 use Terraformers\KeysForCache\Models\CacheKey;
-use Terraformers\KeysForCache\Services\CacheRelationService;
-use Terraformers\KeysForCache\Services\StageCacheRelationService;
-use Terraformers\KeysForCache\Services\LiveCacheRelationService;
+use Terraformers\KeysForCache\Services\CacheProcessingService;
+use Terraformers\KeysForCache\Services\StageCacheProcessingService;
+use Terraformers\KeysForCache\Services\LiveCacheProcessingService;
 
 /**
  * @property DataObject|$this $owner
@@ -43,7 +43,6 @@ class CacheKeyExtension extends DataExtension
         if (!$cacheKey) {
             // Update or create (in this case, it will be create)
             $cacheKey = CacheKey::updateOrCreateKey($className, $id);
-            $cacheKey->write();
 
             // If the owner is not Versioned, or if it has been published, then we want to make sure we publish our
             // CacheKey at the same time
@@ -73,8 +72,8 @@ class CacheKeyExtension extends DataExtension
         }
 
         $service = $publishUpdates
-            ? LiveCacheRelationService::singleton()
-            : StageCacheRelationService::singleton();
+            ? LiveCacheProcessingService::singleton()
+            : StageCacheProcessingService::singleton();
 
         $service->processChange($this->owner);
     }

@@ -5,7 +5,6 @@ namespace Terraformers\KeysForCache\Models;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
-use Terraformers\KeysForCache\Services\CacheRelationService;
 
 /**
  * Maintain and manage cache keys for records
@@ -36,6 +35,20 @@ class CacheKey extends DataObject
      */
     public static function updateOrCreateKey(string $recordClass, int $recordId): ?CacheKey
     {
+        $cacheKey = static::findOrCreate($recordClass, $recordId);
+
+        if (!$cacheKey) {
+            return null;
+        }
+
+        $cacheKey->KeyHash = md5(implode('-', [$recordClass, $recordId, microtime()]));
+        $cacheKey->write();
+
+        return $cacheKey;
+    }
+
+    public static function findOrCreate(string $recordClass, int $recordId): ?CacheKey
+    {
         $hasCacheKey = Config::forClass($recordClass)->get('has_cache_key');
 
         if (!$hasCacheKey) {
@@ -51,9 +64,9 @@ class CacheKey extends DataObject
             $cacheKey = static::create();
             $cacheKey->RecordClass = $recordClass;
             $cacheKey->RecordID = $recordId;
+            $cacheKey->KeyHash = md5(implode('-', [$recordClass, $recordId, microtime()]));
+            $cacheKey->write();
         }
-
-        $cacheKey->KeyHash = md5(implode('-', [$recordClass, $recordId, microtime()]));
 
         return $cacheKey;
     }

@@ -8,7 +8,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Dev\BuildTask;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
-use Terraformers\KeysForCache\Services\LiveCacheRelationService;
+use Terraformers\KeysForCache\Services\LiveCacheProcessingService;
 
 class CacheTestTask extends BuildTask
 {
@@ -27,7 +27,7 @@ class CacheTestTask extends BuildTask
 
     public function simulateClassUpdate(string $className): void
     {
-        $config = LiveCacheRelationService::singleton()->getGraph();
+        $config = LiveCacheProcessingService::singleton()->getGraph();
         $classesToUpdate = [$className];
         $edgesUpdated = [];
 
