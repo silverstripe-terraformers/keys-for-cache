@@ -5,6 +5,6 @@ Terraformers\KeysForCache\Tests\Mocks\CachePage:
 
 Terraformers\KeysForCache\Models\CacheKey:
   key1:
-    RecordClass: Page
+    RecordClass: Terraformers\KeysForCache\Tests\Mocks\CachePage
     RecordID: 999
     KeyHash: 1

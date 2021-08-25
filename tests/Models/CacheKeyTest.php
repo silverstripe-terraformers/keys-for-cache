@@ -45,24 +45,24 @@ class CacheKeyTest extends SapphireTest
 
     public function testFindOrCreateDoesFind(): void
     {
-        $key = $this->objFromFixture(CacheKey::class, 'key1');
+        $originKey = $this->objFromFixture(CacheKey::class, 'key1');
         // Check we're set up correctly
-        $this->assertNotNull($key);
+        $this->assertNotNull($originKey);
 
         // Keep our KeyHash around so that we can check it changes
-        $keyHash = $key->KeyHash;
+        $keyHash = $originKey->KeyHash;
 
         // Trigger findOrCreate, which should just find
-        $key = CacheKey::findOrCreate(Page::class, 999);
+        $key = CacheKey::findOrCreate(CachePage::class, 999);
 
         // Check that the CacheKey exists, and that the KeyHash has not been updated
-        $this->assertNotNull($key);
+        $this->assertNotNull($originKey);
         $this->assertEquals($keyHash, $key->KeyHash);
     }
 
     public function testFindOrCreateDoesCreate(): void
     {
-        $key = CacheKey::findOrCreate(Page::class, 998);
+        $key = CacheKey::findOrCreate(CachePage::class, 998);
 
         // Check that the CacheKey exists, and that KeyHash is a new hash
         $this->assertNotNull($key);
@@ -80,7 +80,7 @@ class CacheKeyTest extends SapphireTest
         $keyHash = $key->KeyHash;
 
         // Trigger updateOrCreate (we should update)
-        $key = CacheKey::updateOrCreateKey(Page::class, 999);
+        $key = CacheKey::updateOrCreateKey(CachePage::class, 999);
 
         // Check that the CacheKey exists, and that the KeyHash has been updated
         $this->assertNotNull($key);
@@ -90,7 +90,7 @@ class CacheKeyTest extends SapphireTest
     public function testUpdateOrCreateDoesCreate(): void
     {
         // Trigger updateOrCreate (we should create)
-        $key = CacheKey::updateOrCreateKey(Page::class, 997);
+        $key = CacheKey::updateOrCreateKey(CachePage::class, 997);
 
         // Check that the CacheKey exists, and that the KeyHash has been updated
         $this->assertNotNull($key);
