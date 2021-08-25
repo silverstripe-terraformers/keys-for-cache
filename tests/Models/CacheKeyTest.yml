@@ -1,0 +1,10 @@
+# Creation of a Page will itself generate a CacheKey
+Terraformers\KeysForCache\Tests\Mocks\CachePage:
+  page1:
+    Title: Page 1
+
+Terraformers\KeysForCache\Models\CacheKey:
+  key1:
+    RecordClass: Page
+    RecordID: 999
+    KeyHash: 1

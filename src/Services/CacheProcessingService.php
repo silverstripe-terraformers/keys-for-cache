@@ -19,16 +19,6 @@ abstract class CacheProcessingService
 
     abstract protected function shouldPublishUpdates(): bool;
 
-    public function getGraph(): Graph
-    {
-        return Graph::singleton();
-    }
-
-    public function getUpdatesService(): ProcessedUpdatesService
-    {
-        return ProcessedUpdatesService::singleton();
-    }
-
     public function processChange(DataObject $instance): void
     {
         $className = $instance->getClassName();
@@ -205,7 +195,7 @@ abstract class CacheProcessingService
         return $processedUpdate->isPublished();
     }
 
-    public function updateGlobalCares(string $className): void
+    private function updateGlobalCares(string $className): void
     {
         $cares = $this->getGraph()->getGlobalCares();
         $possibleClassNames = ClassInfo::ancestry($className);
@@ -235,5 +225,15 @@ abstract class CacheProcessingService
             $classes,
             fn($c) => Config::forClass($c)->get('has_cache_key') === true
         );
+    }
+
+    private function getGraph(): Graph
+    {
+        return Graph::singleton();
+    }
+
+    private function getUpdatesService(): ProcessedUpdatesService
+    {
+        return ProcessedUpdatesService::singleton();
     }
 }

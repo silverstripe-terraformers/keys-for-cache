@@ -4,40 +4,46 @@ namespace Terraformers\KeysForCache\Tests\Extensions;
 
 use App\Models\MenuGroup;
 use App\Models\MenuItem;
-use Page;
 use SilverStripe\Dev\SapphireTest;
-use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
-use Terraformers\KeysForCache\Tests\Models\NoCachePage;
+use Terraformers\KeysForCache\Models\CacheKey;
+use Terraformers\KeysForCache\Tests\Mocks\CachePage;
+use Terraformers\KeysForCache\Tests\Mocks\NoCachePage;
 
 class CacheKeyExtensionTest extends SapphireTest
 {
 
     protected static $fixture_file = 'CacheKeyExtensionTest.yml';
 
-    protected static $required_extensions = [
-        Page::class => [
-            CacheKeyExtension::class,
-        ],
-    ];
-
-    public function testOnAfterWriteWithCacheKey(): void
+    public function testWriteGeneratesCacheKey(): void
     {
-        /** @var Page|CacheKeyExtension $page */
-        $page = Page::create();
-        $page->Title = 'Test';
+        // Page config is $has_cache_key = true, so when we write this record it should generate a CacheKey
+        $page = CachePage::create();
         $page->write();
 
-        $this->assertCount(1, $page->CacheKeys());
+        // Fetch all CacheKeys for this ClassName and ID
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
+
+        // There should be exactly 1
+        $this->assertCount(1, $keys);
     }
 
-    public function testOnAfterWriteWithoutCacheKey(): void
+    public function testWriteDoesNotGenerateCacheKey(): void
     {
-        /** @var Page|CacheKeyExtension $page */
+        // Page config is $has_cache_key = false, so when we write this record it should not generate a CacheKey
         $page = NoCachePage::create();
-        $page->Title = 'Test';
         $page->write();
 
-        $this->assertCount(0, $page->CacheKeys());
+        // Fetch all CacheKeys for this ClassName and ID
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
+
+        // There shouldn't be any
+        $this->assertCount(0, $keys);
     }
 
 }
