@@ -6,7 +6,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
-use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDTO;
+use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDto;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\Services\LiveCacheProcessingService;
 use Terraformers\KeysForCache\Services\StageCacheProcessingService;
@@ -46,9 +46,9 @@ class CacheKeyExtension extends DataExtension
 
     public function getCacheKey(): string
     {
-        $key = new CacheKeyDTO($this->findCacheKeyHash());
+        $key = new CacheKeyDto($this->findCacheKeyHash());
 
-        $this->owner->extend('updateCacheKey', $key);
+        $this->owner->invokeWithExtensions('updateCacheKey', $key);
 
         return $key->getKey();
     }

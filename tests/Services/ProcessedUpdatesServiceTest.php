@@ -3,7 +3,7 @@
 namespace Terraformers\KeysForCache\Tests\Services;
 
 use SilverStripe\Dev\SapphireTest;
-use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDTO;
+use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDto;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Page;
 
@@ -15,10 +15,10 @@ class ProcessedUpdatesServiceTest extends SapphireTest
 
         $this->assertCount(0, $service->getProcessedUpdates());
 
-        $service->addProcessedUpdate(new ProcessedUpdateDTO(Page::class, 99));
+        $service->addProcessedUpdate(new ProcessedUpdateDto(Page::class, 99));
         // There are no checks for duplication between DTOs
-        $service->addProcessedUpdate(new ProcessedUpdateDTO(Page::class, 98));
-        $service->addProcessedUpdate(new ProcessedUpdateDTO(Page::class, 98));
+        $service->addProcessedUpdate(new ProcessedUpdateDto(Page::class, 98));
+        $service->addProcessedUpdate(new ProcessedUpdateDto(Page::class, 98));
 
         $this->assertCount(3, $service->getProcessedUpdates());
     }
@@ -33,7 +33,7 @@ class ProcessedUpdatesServiceTest extends SapphireTest
         $this->assertNull($service->findProcessedUpdate($className, $classId));
 
         // Add the Update
-        $service->addProcessedUpdate(new ProcessedUpdateDTO($className, $classId));
+        $service->addProcessedUpdate(new ProcessedUpdateDto($className, $classId));
 
         $this->assertNotNull($service->findProcessedUpdate($className, $classId));
     }

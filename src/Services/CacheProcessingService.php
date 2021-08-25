@@ -9,7 +9,7 @@ use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\Queries\SQLDelete;
-use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDTO;
+use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDto;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 
@@ -36,7 +36,7 @@ abstract class CacheProcessingService
         $edgesUpdated = [];
 
         while (count($edgesToUpdate) > 0) {
-            /** @var EdgeUpdateDTO $current */
+            /** @var EdgeUpdateDto $current */
             $current = array_pop($edgesToUpdate);
             $from = $current->getEdge()->getFromClassName();
 
@@ -52,7 +52,7 @@ abstract class CacheProcessingService
             $edgesUpdated[] = $from;
         }
 
-        $this->updateGlobalCares($className);
+        $this->processGlobalCares($className);
     }
 
     /**
@@ -76,7 +76,7 @@ abstract class CacheProcessingService
         return null;
     }
 
-    private function updateEdge(EdgeUpdateDTO $dto): array
+    private function updateEdge(EdgeUpdateDto $dto): array
     {
         $edge = $dto->getEdge();
         $instance = $dto->getInstance();
@@ -125,7 +125,7 @@ abstract class CacheProcessingService
         return [];
     }
 
-    private function updateInstances(DataList $instances, EdgeUpdateDTO $dto): array
+    private function updateInstances(DataList $instances, EdgeUpdateDto $dto): array
     {
         $results = [];
 
@@ -171,7 +171,7 @@ abstract class CacheProcessingService
         }
 
         return array_map(
-            fn($e) => new EdgeUpdateDTO($e, $instance),
+            fn($e) => new EdgeUpdateDto($e, $instance),
             $applicableEdges
         );
     }
@@ -195,7 +195,7 @@ abstract class CacheProcessingService
         return $processedUpdate->isPublished();
     }
 
-    private function updateGlobalCares(string $className): void
+    private function processGlobalCares(string $className): void
     {
         $cares = $this->getGraph()->getGlobalCares();
         $possibleClassNames = ClassInfo::ancestry($className);
@@ -215,16 +215,6 @@ abstract class CacheProcessingService
                 ['RecordClass' => $careClass]
             )->execute();
         }
-    }
-
-    private function getClassesWithCacheKey(): array
-    {
-        $classes = ClassInfo::getValidSubClasses(DataObject::class);
-
-        return array_filter(
-            $classes,
-            fn($c) => Config::forClass($c)->get('has_cache_key') === true
-        );
     }
 
     private function getGraph(): Graph

@@ -3,7 +3,7 @@
 namespace Terraformers\KeysForCache\Services;
 
 use SilverStripe\Core\Injector\Injectable;
-use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDTO;
+use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDto;
 
 class ProcessedUpdatesService
 {
@@ -16,12 +16,12 @@ class ProcessedUpdatesService
         return $this->processedUpdates;
     }
 
-    public function addProcessedUpdate(ProcessedUpdateDTO $processedUpdate): void
+    public function addProcessedUpdate(ProcessedUpdateDto $processedUpdate): void
     {
         $this->processedUpdates[] = $processedUpdate;
     }
 
-    public function findProcessedUpdate(string $className, int $id): ?ProcessedUpdateDTO
+    public function findProcessedUpdate(string $className, int $id): ?ProcessedUpdateDto
     {
         foreach ($this->processedUpdates as $processedUpdate) {
             $classNameMatches = $processedUpdate->getClassName() === $className;
@@ -35,7 +35,7 @@ class ProcessedUpdatesService
         return null;
     }
 
-    public function findOrCreateProcessedUpdate(string $className, int $id): ProcessedUpdateDTO
+    public function findOrCreateProcessedUpdate(string $className, int $id): ProcessedUpdateDto
     {
         $processedUpdate = $this->findProcessedUpdate($className, $id);
 
@@ -43,7 +43,7 @@ class ProcessedUpdatesService
             return $processedUpdate;
         }
 
-        $processedUpdate = new ProcessedUpdateDTO($className, $id);
+        $processedUpdate = new ProcessedUpdateDto($className, $id);
         $this->processedUpdates[] = $processedUpdate;
 
         return $processedUpdate;

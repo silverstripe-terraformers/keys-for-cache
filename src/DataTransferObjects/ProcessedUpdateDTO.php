@@ -2,7 +2,7 @@
 
 namespace Terraformers\KeysForCache\DataTransferObjects;
 
-class ProcessedUpdateDTO
+class ProcessedUpdateDto
 {
     private string $className;
 

@@ -22,37 +22,6 @@ class Graph
         $this->createGlobalCares();
     }
 
-    public function addNode(Node $node): self
-    {
-        $this->nodes[$node->getClassName()] = $node;
-
-        return $this;
-    }
-
-    public function getNode(string $className): ?Node
-    {
-        return $this->nodes[$className] ?? null;
-    }
-
-    public function findOrCreateNode(string $className): Node
-    {
-        $node = $this->getNode($className);
-
-        if (!$node) {
-            $node = new Node($className);
-            $this->addNode($node);
-        }
-
-        return $node;
-    }
-
-    public function addEdge(Edge $edge): self
-    {
-        $this->edges[] = $edge;
-
-        return $this;
-    }
-
     public function getEdges(string $from): array
     {
         return array_filter(
@@ -64,6 +33,37 @@ class Graph
     public function getGlobalCares(): array
     {
         return $this->global_cares;
+    }
+
+    private function addNode(Node $node): self
+    {
+        $this->nodes[$node->getClassName()] = $node;
+
+        return $this;
+    }
+
+    private function getNode(string $className): ?Node
+    {
+        return $this->nodes[$className] ?? null;
+    }
+
+    private function findOrCreateNode(string $className): Node
+    {
+        $node = $this->getNode($className);
+
+        if (!$node) {
+            $node = new Node($className);
+            $this->addNode($node);
+        }
+
+        return $node;
+    }
+
+    private function addEdge(Edge $edge): self
+    {
+        $this->edges[] = $edge;
+
+        return $this;
     }
 
     private function build(): void

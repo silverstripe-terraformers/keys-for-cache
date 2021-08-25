@@ -2,7 +2,7 @@
 
 namespace Terraformers\KeysForCache\DataTransferObjects;
 
-class CacheKeyDTO
+class CacheKeyDto
 {
     private string $key;
 

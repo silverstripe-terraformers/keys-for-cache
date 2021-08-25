@@ -5,7 +5,7 @@ namespace Terraformers\KeysForCache\DataTransferObjects;
 use SilverStripe\ORM\DataObject;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
 
-class EdgeUpdateDTO
+class EdgeUpdateDto
 {
     private Edge $edge;
     private DataObject $instance;
