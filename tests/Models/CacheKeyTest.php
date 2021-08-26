@@ -37,23 +37,29 @@ class CacheKeyTest extends SapphireTest
 
     public function testFindOrCreateReturnsNull(): void
     {
+        $page = $this->objFromFixture(NoCachePage::class, 'page1');
         // Page config is $has_cache_key = false, so when we call findOrCreate() it should return null
-        $key = CacheKey::findOrCreate(NoCachePage::class, 1);
+        $key = CacheKey::findOrCreate($page);
 
         $this->assertNull($key);
     }
 
     public function testFindOrCreateDoesFind(): void
     {
-        $originKey = $this->objFromFixture(CacheKey::class, 'key1');
+        $page = $this->objFromFixture(CachePage::class, 'page1');
+        // Find our associated Key
+        $originKey = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ])->first();
         // Check we're set up correctly
         $this->assertNotNull($originKey);
 
-        // Keep our KeyHash around so that we can check it changes
+        // Keep our KeyHash around so that we can check it does not change when we findOrCreate()
         $keyHash = $originKey->KeyHash;
 
         // Trigger findOrCreate, which should just find
-        $key = CacheKey::findOrCreate(CachePage::class, 999);
+        $key = CacheKey::findOrCreate($page);
 
         // Check that the CacheKey exists, and that the KeyHash has not been updated
         $this->assertNotNull($originKey);
@@ -62,38 +68,84 @@ class CacheKeyTest extends SapphireTest
 
     public function testFindOrCreateDoesCreate(): void
     {
-        $key = CacheKey::findOrCreate(CachePage::class, 998);
+        $page = $this->objFromFixture(CachePage::class, 'page1');
+        // Find our associated Key
+        $originKey = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ])->first();
+
+        // Check we found it
+        $this->assertNotNull($originKey);
+
+        // Keep our KeyHash around so that we can check it changes after we delete it and findOrCreate()
+        $keyHash = $originKey->KeyHash;
+
+        // Delete all existing Keys before we kick off
+        foreach (CacheKey::get() as $cacheKey) {
+            $cacheKey->doArchive();
+        }
+
+        // Make sure we're set up correctly
+        $this->assertCount(0, CacheKey::get());
+
+        $key = CacheKey::findOrCreate($page);
 
         // Check that the CacheKey exists, and that KeyHash is a new hash
         $this->assertNotNull($key);
-        $this->assertNotEmpty($key->KeyHash);
+        $this->assertNotEquals($keyHash, $key->KeyHash);
     }
 
     public function testUpdateOrCreateDoesFind(): void
     {
-        $key = $this->objFromFixture(CacheKey::class, 'key1');
+        $page = $this->objFromFixture(CachePage::class, 'page1');
+        // Find our associated Key
+        $originKey = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ])->first();
         // Check we're set up correctly
-        $this->assertNotNull($key);
-        $this->assertNotEmpty($key->KeyHash);
+        $this->assertNotNull($originKey);
 
-        // Keep our KeyHash around so that we can check it changes
-        $keyHash = $key->KeyHash;
+        // Keep our KeyHash around so that we can check it does change when we updateOrCreate()
+        $keyHash = $originKey->KeyHash;
 
-        // Trigger updateOrCreate (we should update)
-        $key = CacheKey::updateOrCreateKey(CachePage::class, 999);
+        // Trigger findOrCreate, which should just find
+        $key = CacheKey::updateOrCreateKey($page);
 
         // Check that the CacheKey exists, and that the KeyHash has been updated
-        $this->assertNotNull($key);
+        $this->assertNotNull($originKey);
         $this->assertNotEquals($keyHash, $key->KeyHash);
     }
 
     public function testUpdateOrCreateDoesCreate(): void
     {
-        // Trigger updateOrCreate (we should create)
-        $key = CacheKey::updateOrCreateKey(CachePage::class, 997);
 
-        // Check that the CacheKey exists, and that the KeyHash has been updated
+        $page = $this->objFromFixture(CachePage::class, 'page1');
+        // Find our associated Key
+        $originKey = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ])->first();
+
+        // Check we found it
+        $this->assertNotNull($originKey);
+
+        // Keep our KeyHash around so that we can check it changes after we delete it and findOrCreate()
+        $keyHash = $originKey->KeyHash;
+
+        // Delete all existing Keys before we kick off
+        foreach (CacheKey::get() as $cacheKey) {
+            $cacheKey->doArchive();
+        }
+
+        // Make sure we're set up correctly
+        $this->assertCount(0, CacheKey::get());
+
+        $key = CacheKey::updateOrCreateKey($page);
+
+        // Check that the CacheKey exists, and that KeyHash is a new hash
         $this->assertNotNull($key);
-        $this->assertNotEmpty($key->KeyHash);
+        $this->assertNotEquals($keyHash, $key->KeyHash);
     }
 }

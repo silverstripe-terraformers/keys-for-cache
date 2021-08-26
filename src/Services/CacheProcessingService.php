@@ -145,11 +145,9 @@ abstract class CacheProcessingService
 
     private function updateInstance(DataObject $instance): array
     {
-        $className = $instance->getClassName();
-        $id = $instance->ID;
         // Find or create the CacheKey for this instance
-        $cacheKey = CacheKey::updateOrCreateKey($className, $id);
-        $processedUpdate = $this->getUpdatesService()->findOrCreateProcessedUpdate($className, $id);
+        $cacheKey = CacheKey::updateOrCreateKey($instance);
+        $processedUpdate = $this->getUpdatesService()->findOrCreateProcessedUpdate($instance->ClassName, $instance->ID);
 
         if ($cacheKey) {
             // Check to see if we need to publish this CacheKey

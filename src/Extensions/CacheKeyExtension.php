@@ -22,16 +22,14 @@ class CacheKeyExtension extends DataExtension
             return null;
         }
 
-        $className = $this->owner->ClassName;
-        $id = $this->owner->ID;
-        $hasCacheKey = Config::forClass($className)->get('has_cache_key');
+        $hasCacheKey = $this->owner->config()->get('has_cache_key');
 
         if (!$hasCacheKey) {
             return null;
         }
 
         // Update or create (in this case, it will be create)
-        $cacheKey = CacheKey::findOrCreate($className, $id);
+        $cacheKey = CacheKey::findOrCreate($this->owner);
 
         if (!$cacheKey->isPublished()) {
             // If the owner is not Versioned, or if it has been published, then we want to make sure we publish our
