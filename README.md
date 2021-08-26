@@ -22,6 +22,7 @@ The overall aim of this module is twofold:
     * [Global cares](#global-cares)
     * [Headers, Footers, and other "global" content areas](#headers-footers-and-other-global-content-areas)
     * [Example config and usage](#example-config-and-usage)
+* [Fluent support](#fluent-support)
 * [Performance impact/considerations](#performance-impactconsiderations)
     * [Queued jobs](#queued-jobs)
 * [License](#license)
@@ -396,6 +397,15 @@ In our template, we might now have something like this:
 **Important note:** Definitely consider the performance consideration of invalidating your `Page` cache any time an
 element is updated. It has been added above purely as an example of what it technically possible; it has not been added
 as a recommendation.
+
+## Fluent support
+
+If you are using Silverstripe Framework >= 4.7, then you're already good to go. `CacheKey::generateKeyHash()` uses
+`DataObject::getUniqueKey()`, and Fluent considerations are already covered by this method.
+
+If you are using Silverstripe Framework <= 4.6, then you will need to supplement the key hash that we generate by
+implementing a method on your class (or in an extension) called `updateGenerateKeyHash()`. You will want to add any
+relevant Locale codes as part of this.
 
 ## Performance impact/considerations
 
