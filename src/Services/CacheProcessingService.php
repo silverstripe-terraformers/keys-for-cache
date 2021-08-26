@@ -1,55 +1,42 @@
 <?php
 
-namespace Terraformers\KeysForCache;
+namespace Terraformers\KeysForCache\Services;
 
+use Exception;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
-use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\Queries\SQLDelete;
-use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDTO;
-use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDTO;
-use Terraformers\KeysForCache\RelationshipGraph\Graph;
+use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDto;
 use Terraformers\KeysForCache\Models\CacheKey;
-use Exception;
+use Terraformers\KeysForCache\RelationshipGraph\Graph;
 
-class CacheRelationService
+abstract class CacheProcessingService
 {
     use Injectable;
 
-    private Graph $graph;
-
-    private array $processedUpdates;
-
-    private array $globalCares;
-
-    public function __construct()
-    {
-        $this->graph = Graph::build();
-        $this->globalCares = $this->createGlobalCares();
-        $this->processedUpdates = [];
-    }
-
-    public function getGraph(): Graph
-    {
-        return $this->graph;
-    }
+    abstract protected function shouldPublishUpdates(): bool;
 
     public function processChange(DataObject $instance): void
     {
         $className = $instance->getClassName();
-        $id = $instance->ID;
-        CacheKey::updateOrCreateKey($className, $id);
-        $this->processedUpdates[] = new ProcessedUpdateDTO($className, $id);
+
+        // This record has already been processed in full. It is possible for multiple write() actions to be performed
+        // on a single record through the publishing process
+        if ($this->alreadyProcessed($className, $instance->ID)) {
+            return;
+        }
+
+        $this->updateInstance($instance);
         $edgesToUpdate = $this->createEdges($instance);
 
         // Prevent edges from being used more than once
         $edgesUpdated = [];
 
         while (count($edgesToUpdate) > 0) {
-            /** @var EdgeUpdateDTO $current */
+            /** @var EdgeUpdateDto $current */
             $current = array_pop($edgesToUpdate);
             $from = $current->getEdge()->getFromClassName();
 
@@ -65,7 +52,7 @@ class CacheRelationService
             $edgesUpdated[] = $from;
         }
 
-        $this->updateGlobalCares($className);
+        $this->processGlobalCares($className);
     }
 
     /**
@@ -77,10 +64,9 @@ class CacheRelationService
     private function getRelationType(string $className, string $relation): ?string
     {
         $types = ['has_one', 'has_many', 'many_many', 'belongs_many_many', 'belongs_to'];
-        $config = Config::inst()->get($className);
 
         foreach ($types as $type) {
-            $relations = $config->get($type);
+            $relations = Config::inst()->get($className, $type);
 
             if ($relations && isset($relations[$relation])) {
                 return $type;
@@ -90,23 +76,32 @@ class CacheRelationService
         return null;
     }
 
-    private function updateEdge(EdgeUpdateDTO $dto): array
+    private function updateEdge(EdgeUpdateDto $dto): array
     {
         $edge = $dto->getEdge();
         $instance = $dto->getInstance();
         $relation = $this->getRelationType($edge->getFromClassName(), $edge->getRelation());
 
         if (!$relation) {
-            throw new Exception(sprintf(
-                'No relationship field found for "%s" between "%s" and "%s"',
-                $edge->getRelation(),
-                $edge->getFromClassName(),
-                $edge->getToClassName()
-            ));
+            $relation = $this->getRelationType($edge->getToClassName(), $edge->getRelation());
+
+            if (!$relation) {
+                throw new Exception(sprintf(
+                    'No relationship field found for "%s" between "%s" and "%s"',
+                    $edge->getRelation(),
+                    $edge->getFromClassName(),
+                    $edge->getToClassName()
+                ));
+            }
+
+            $relatedInstances = DataObject::get($edge->getToClassName())
+                ->filter($edge->getRelation().'ID', $instance->ID);
+
+            return $this->updateInstances($relatedInstances, $dto);
         }
 
         if ($relation === 'has_one') {
-            if ($this->alreadyProcessed($instance->getField($edge->getRelation().'ID'),  $edge->getToClassName())) {
+            if ($this->alreadyProcessed($edge->getToClassName(), $instance->getField($edge->getRelation().'ID'))) {
                 return [];
             }
 
@@ -130,12 +125,12 @@ class CacheRelationService
         return [];
     }
 
-    private function updateInstances(DataList $instances, EdgeUpdateDTO $dto): array
+    private function updateInstances(DataList $instances, EdgeUpdateDto $dto): array
     {
         $results = [];
 
         foreach ($instances as $relatedInstance) {
-            if ($this->alreadyProcessed($relatedInstance->ID,  $dto->getEdge()->getToClassName())) {
+            if ($this->alreadyProcessed($dto->getEdge()->getToClassName(), $relatedInstance->ID)) {
                 continue;
             }
 
@@ -152,8 +147,17 @@ class CacheRelationService
     {
         $className = $instance->getClassName();
         $id = $instance->ID;
-        CacheKey::updateOrCreateKey($className, $id);
-        $this->processedUpdates[] = new ProcessedUpdateDTO($className, $id);
+        // Find or create the CacheKey for this instance
+        $cacheKey = CacheKey::updateOrCreateKey($className, $id);
+        $processedUpdate = $this->getUpdatesService()->findOrCreateProcessedUpdate($className, $id);
+
+        if ($cacheKey) {
+            // Check to see if we need to publish this CacheKey
+            if ($this->shouldPublishUpdates()) {
+                $cacheKey->publishRecursive();
+                $processedUpdate->setPublished();
+            }
+        }
 
         return $this->createEdges($instance);
     }
@@ -167,29 +171,33 @@ class CacheRelationService
         }
 
         return array_map(
-            fn($e) => new EdgeUpdateDTO($e, $instance),
+            fn($e) => new EdgeUpdateDto($e, $instance),
             $applicableEdges
         );
     }
 
-    private function alreadyProcessed(int $id, string $getToClassName): bool
+    private function alreadyProcessed(string $className, int $id): bool
     {
-        /** @var ProcessedUpdateDTO $processedUpdate */
-        foreach ($this->processedUpdates as $processedUpdate) {
-            $classNameMatches = $processedUpdate->getClassName() === $getToClassName;
-            $idMatches = $processedUpdate->getId() === $id;
+        $processedUpdate = $this->getUpdatesService()->findProcessedUpdate($className, $id);
 
-            if ($idMatches && $classNameMatches) {
-                return true;
-            }
+        // No ProcessedUpdateDTO exists, so no, this has not been processed
+        if (!$processedUpdate) {
+            return false;
         }
 
-        return false;
+        // We are in a "Draft" context, so we don't care whether or not the ProcessedUpdateDTO has been published or
+        // not. Its existence means that it has been processed
+        if (!$this->shouldPublishUpdates()) {
+            return true;
+        }
+
+        // We are in a "Live" context, so we need to return whether or not this ProcessedUpdateDTO has been published
+        return $processedUpdate->isPublished();
     }
 
-    public function updateGlobalCares(string $className): void
+    private function processGlobalCares(string $className): void
     {
-        $cares = $this->getGlobalCares();
+        $cares = $this->getGraph()->getGlobalCares();
         $possibleClassNames = ClassInfo::ancestry($className);
         $cares = array_map(
             fn($c) => $cares[$c] ?? null,
@@ -201,59 +209,21 @@ class CacheRelationService
 
         $cacheKeyTable = CacheKey::config()->get('table_name');
 
-        foreach ($cares as $care) {
+        foreach ($cares as $careClass) {
             SQLDelete::create(
                 $cacheKeyTable,
-                ['RecordClass' => $care]
+                ['RecordClass' => $careClass]
             )->execute();
         }
     }
 
-    public function getGlobalCares(): array
+    private function getGraph(): Graph
     {
-        return $this->globalCares;
+        return Graph::singleton();
     }
 
-    private function createGlobalCares(): array
+    private function getUpdatesService(): ProcessedUpdatesService
     {
-        $classes = ClassInfo::getValidSubClasses(DataObject::class);
-
-        $classes = array_map(
-            fn($c) => ['className' => $c, 'cares' => Config::forClass($c)->get('global_cares')],
-            $classes
-        );
-
-        $classes = array_filter(
-            $classes,
-            fn($c) => is_array($c['cares']) && count($c['cares']) > 0
-        );
-
-        $classes = array_reduce(
-            $classes,
-            function($carry, $item) {
-                foreach ($item['cares'] as $care) {
-                    if (!array_key_exists($care, $carry)) {
-                        $carry[$care] = [];
-                    }
-
-                    $carry[$care][] = $item['className'];
-                }
-
-                return $carry;
-            },
-            []
-        );
-
-        return $classes;
-    }
-
-    private function getClassesWithCacheKey(): array
-    {
-        $classes = ClassInfo::getValidSubClasses(DataObject::class);
-
-        return array_filter(
-            $classes,
-            fn($c) => Config::forClass($c)->get('has_cache_key') === true
-        );
+        return ProcessedUpdatesService::singleton();
     }
 }

@@ -4,26 +4,50 @@ namespace Terraformers\KeysForCache\RelationshipGraph;
 
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injectable;
+use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataObject;
 
 class Graph
 {
+    use Injectable;
+
     private array $nodes = [];
     private array $edges = [];
+    private array $global_cares = [];
 
-    public function addNode(Node $node): self
+    public function __construct()
+    {
+        $this->build();
+        $this->createGlobalCares();
+    }
+
+    public function getEdges(string $from): array
+    {
+        return array_filter(
+            $this->edges,
+            fn($e) => $e->getFromClassName() === $from
+        );
+    }
+
+    public function getGlobalCares(): array
+    {
+        return $this->global_cares;
+    }
+
+    private function addNode(Node $node): self
     {
         $this->nodes[$node->getClassName()] = $node;
 
         return $this;
     }
 
-    public function getNode(string $className): ?Node
+    private function getNode(string $className): ?Node
     {
         return $this->nodes[$className] ?? null;
     }
 
-    public function findOrCreateNode(string $className): Node
+    private function findOrCreateNode(string $className): Node
     {
         $node = $this->getNode($className);
 
@@ -35,24 +59,15 @@ class Graph
         return $node;
     }
 
-    public function addEdge(Edge $edge): self
+    private function addEdge(Edge $edge): self
     {
         $this->edges[] = $edge;
 
         return $this;
     }
 
-    public function getEdges(string $from): array
+    private function build(): void
     {
-        return array_filter(
-            $this->edges,
-            fn($e) => $e->getFromClassName() === $from
-        );
-    }
-
-    public static function build(): Graph
-    {
-        $graph = new Graph();
         // Relations only exist from data objects
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
 
@@ -60,10 +75,10 @@ class Graph
             $config = Config::forClass($className);
             $touches = $config->get('touches') ?? [];
             $cares = $config->get('cares') ?? [];
-            $node = $graph->findOrCreateNode($className);
+            $node = $this->findOrCreateNode($className);
 
             foreach ($touches as $relation => $touchClassName) {
-                [$touchClassName, $touchRelation] = self::getClassAndRelation($touchClassName);
+                [$touchClassName, $touchRelation] = $this->getClassAndRelation($touchClassName);
 
                 // No dot notation so we need to check if this is a has_many, and if it is, we need to find the has_one
                 // field on the other side of this relationship
@@ -84,15 +99,15 @@ class Graph
                     }
                 }
 
-                $touchNode = $graph->findOrCreateNode($touchClassName);
+                $touchNode = $this->findOrCreateNode($touchClassName);
                 $edge = $touchRelation
                     ? new Edge($touchNode, $node, $touchRelation)
                     : new Edge($node, $touchNode, $relation);
-                $graph->addEdge($edge);
+                $this->addEdge($edge);
             }
 
             foreach ($cares as $relation => $careClassName) {
-                [$careClassName, $caresRelation] = self::getClassAndRelation($careClassName);
+                [$careClassName, $caresRelation] = $this->getClassAndRelation($careClassName);
 
                 // No dot notation so we need to check if this is a has_many, and if it is, we need to find the has_one
                 // field on the other side of this relationship
@@ -113,18 +128,49 @@ class Graph
                     }
                 }
 
-                $careNode = $graph->findOrCreateNode($careClassName);
+                $careNode = $this->findOrCreateNode($careClassName);
                 $edge = $caresRelation
                     ? new Edge($node, $careNode, $caresRelation)
                     : new Edge($careNode, $node, $relation);
-                $graph->addEdge($edge);
+                $this->addEdge($edge);
             }
         }
-
-        return $graph;
     }
 
-    private static function getClassAndRelation(string $input): array
+    private function createGlobalCares(): void
+    {
+        $classes = ClassInfo::getValidSubClasses(DataObject::class);
+
+        $classes = array_map(
+            fn($c) => ['className' => $c, 'cares' => Config::forClass($c)->get('global_cares')],
+            $classes
+        );
+
+        $classes = array_filter(
+            $classes,
+            fn($c) => is_array($c['cares']) && count($c['cares']) > 0
+        );
+
+        $classes = array_reduce(
+            $classes,
+            function($carry, $item) {
+                foreach ($item['cares'] as $care) {
+                    if (!array_key_exists($care, $carry)) {
+                        $carry[$care] = [];
+                    }
+
+                    $carry[$care][] = $item['className'];
+                }
+
+                return $carry;
+            },
+            []
+        );
+
+        $this->global_cares = $classes;
+    }
+
+    private function getClassAndRelation(string $input): array
     {
         $res = explode('.', $input);
 

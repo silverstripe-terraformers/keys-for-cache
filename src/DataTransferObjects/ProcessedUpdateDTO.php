@@ -2,10 +2,13 @@
 
 namespace Terraformers\KeysForCache\DataTransferObjects;
 
-class ProcessedUpdateDTO
+class ProcessedUpdateDto
 {
     private string $className;
+
     private int $id;
+
+    private bool $published = false;
 
     public function __construct(string $className, int $id)
     {
@@ -21,5 +24,15 @@ class ProcessedUpdateDTO
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->published;
+    }
+
+    public function setPublished(): void
+    {
+        $this->published = true;
     }
 }

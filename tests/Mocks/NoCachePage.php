@@ -1,13 +1,11 @@
 <?php
 
-namespace Terraformers\KeysForCache\Tests\Models;
+namespace Terraformers\KeysForCache\Tests\Mocks;
 
 use SilverStripe\Dev\TestOnly;
 use Page;
 
 class NoCachePage extends Page implements TestOnly
 {
-
     private static bool $has_cache_key = false;
-
 }

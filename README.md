@@ -17,8 +17,8 @@ The overall aim of this module is twofold:
 * [How we aim to solve these difficulties](#how-we-aim-to-solve-these-difficulties)
 * [Setup and configuration](#setup-and-configuration)
     * [Has cache key](#has-cache-key)
-    * [Touches](#touches)
     * [Cares](#cares)
+    * [Touches](#touches)
     * [Global cares](#global-cares)
     * [Headers, Footers, and other "global" content areas](#headers-footers-and-other-global-content-areas)
     * [Example config and usage](#example-config-and-usage)
@@ -30,7 +30,8 @@ The overall aim of this module is twofold:
 
 ## API warning:
 
-This module is still in the early days of its life and therefore could have its API changed/updated
+This module is still in the early days of its life and therefore could have its API changed/updated. That said, the
+public API is very small, so we will do our best to make no changes to it.
 
 ## Installation
 
@@ -83,67 +84,45 @@ We want to move the cost of calculating cache keys to when the changes are made 
 an end user's request. We will do this by having you configure the links between dependencies, and then we'll manage
 updating any relevant cache keys when those dependencies change.
 
+To reiterate:
+We no longer want to create cache keys that contain tonnes or info based on all of our dependencies. Instead, we want to
+create really simple cache keys which we invalidate when dependencies require them to be.
+
 ## Setup and configuration
 
 ### Has cache key
 
 First, you need to tell us which DataObjects you would like cache keys to be generated for. For example, we might like a
-key for all pages:
+key for all pages and all Elements:
 
 ```yaml
 Page:
     has_cache_key: true
+
+DNADesign\Elemental\Models\BaseElement:
+    has_cache_key: true
 ```
 
-By adding this configuration, you will have access to the `getCacheKey()` method on your DataObject (and the `$CacheKey`
-variable in your template when you have the Page in scope).
+By adding this configuration, you will have access to the `getCacheKey()` method on your `DataObject`, and
+the `$CacheKey` variable in your template when you have that `DataObject` in scope.
 
-Next, you need to define your dependencies (how your DataObjects relate to each other). There are three important
+Next, you need to define your dependencies (how your `DataObjects` relate to each other). There are three important
 configurations to be aware of:
 
-* [Touches](#touches)
 * [Cares](#cares)
+* [Touches](#touches)
 * [Global cares](#global-cares)
-
-### Touches
-
-This configuration determines how `$this` DataObject will affect others when it is updated. IE: when `$this` DataObject
-is updated, it should "touch" some other DataObjects so that they too are updated.
-
-For example if you have a `Carousel` with `CarouselItems` then you might configure it like so:
-
-```yaml
-App\Blocks\CarouselItem:
-    touches:
-        Parent: App\Blocks\CarouselBlock
-```
-
-Or in your class like so:
-
-```php
-class CarouselItem extends DataObject
-{
-    private static array $has_one = [
-        'Parent' => CarouselBlock::class,
-    ];
-
-    private static array $touches = [
-        'Parent' => CarouselBlock::class,
-    ];
-}
-```
-
-Where the `key` is the field relationship name, and the value is the `class` that it relates to:
-
-This would mean that any time the Carousel Item is updated it would also update the parent Carousel (and if that parent
-had a cache key then it would also update its cachekey)
-
-Alternatively, you could achieve the same outcome by using [Cares](#cares).
 
 ### Cares
 
-Take the above example where you have a `Carousel` with `CarouselItems`, rather than using [Touches](#touches) on
-the `CarouselItem`, you could instead use `cares` on the `CarouselBlock`:
+This configuration determines how `$this` `DataObject` will be affected when other (related) `DataObjects` are
+manipulated.
+
+For example: We have requested that all Elements have cache keys. If you have a `CarouselBlock` that contains
+`CarouselItems`, then you will want to make sure that the cache key for the `CarouselBlock` is invalidated any time
+a `CourselItem` is updated.
+
+You can do that by telling us that your `CarouselBlock` `cares` about its `Items`.
 
 ```yaml
 App\Blocks\CarouselBlock:
@@ -151,7 +130,7 @@ App\Blocks\CarouselBlock:
         Items: App\Blocks\CarouselItem
 ```
 
-Or in your class like so:
+Or in your class:
 
 ```php
 class CarouselBlock extends BaseElement
@@ -166,8 +145,9 @@ class CarouselBlock extends BaseElement
 }
 ```
 
-Take the original example where we also wanted to include changes to Images as part of our cache key. We could now also
-add a `cares` config to our `CarouselItem`:
+Take the original example where we also wanted our `CarouselItem` to include changes to Images as part of its cache key.
+We could now also add a `cares` config to our `CarouselItem` (where the `key` is the field relationship name, and the
+value is the `class` that it relates to):
 
 ```yaml
 App\Blocks\CarouselItem:
@@ -190,8 +170,8 @@ class CarouselItem extends DataObject
 }
 ```
 
-Now whenever the linked image is updated, it will also update the carousel item. The carousel item will then also update
-the linked carousel. Taking this a step further all the way back to `Page`, we can also add the following:
+Now whenever the linked `Image` is updated, it will also update the `CarouselItem`, and in turn the `CarouselItem`
+update the linked `Carousel`. Taking this a step further all the way back to `Page`, we could also add the following:
 
 ```yaml
 # Our BlockPage cares about changes to its ElementalArea
@@ -208,6 +188,57 @@ DNADesign\Elemental\Models\ElementalArea:
 Our `BlockPage` now `cares` about our `ElementalArea`, and our `ElementalArea` now cares about all of its
 blocks/elements. This now means that any time a change is made to any of our blocks (so long as we have configured them
 similarly to how we have shown with the `Carousel`), we will get a new cache key value on our `Page`.
+
+Alternatively, you could achieve the same outcome by using [Touches](#touches).
+
+**Important note:** Your `DataObject` does not need to `has_cache_key` in order for it to `care` or `touch` other
+`DataObjects`. In fact, we very much rely on you providing us with the full relationship tree through
+`cares/touches`. We will only generate the cache key for `DataObjects` that `has_cache_key`, but we will continue to
+follow the paths you create until we run out of them.
+
+**Important note:** Definitely consider the performance consideration of invalidating your `Page` cache any time an
+element is updated. It has been added above purely as an example of what it technically possible; it has not been added
+as a recommendation.
+
+### Touches
+
+This configuration determines how `$this` `DataObject` will affect others when it is updated. EG:
+when `$this` `DataObject` is updated, it should "touch" some other `DataObjects` so that they too have their cache keys
+invalidated.
+
+Using the example from above, if you have a `CarouselBlock` with `CarouselItems` then you could alternatively configure
+it like so (where the `key` is the field relationship name, and the value is the `class` that it relates to):
+
+```yaml
+App\Blocks\CarouselItem:
+    touches:
+        Parent: App\Blocks\CarouselBlock
+```
+
+Or in your class like so:
+
+```php
+class CarouselItem extends DataObject
+{
+    private static array $has_one = [
+        'Parent' => CarouselBlock::class,
+    ];
+
+    private static array $touches = [
+        'Parent' => CarouselBlock::class,
+    ];
+}
+```
+
+This would mean that any time the `CarouselItem` is updated it would also update the cache key of the parent
+`CarouselBlock`.
+
+Alternatively, you could achieve the same outcome by using [Cares](#cares).
+
+**Important note:** Your `DataObject` does not need to `has_cache_key` in order for it to `care` or `touch` other
+`DataObjects`. In fact, we very much rely on you providing us with the full relationship tree through
+`cares/touches`. We will only generate the cache key for `DataObjects` that `has_cache_key`, but we will continue to
+follow the paths you create until we run out of them.
 
 ### Global cares
 
@@ -362,9 +393,13 @@ In our template, we might now have something like this:
 </body>
 ```
 
+**Important note:** Definitely consider the performance consideration of invalidating your `Page` cache any time an
+element is updated. It has been added above purely as an example of what it technically possible; it has not been added
+as a recommendation.
+
 ## Performance impact/considerations
 
-This will increase the queries to the database when DataObjects are updated. We are still pretty early into our
+This will increase the queries to the database when `DataObjects` are updated. We are still pretty early into our
 performance tests, but so far it has not created an unreasonable amount of additional load time to author actions.
 
 ### Queued jobs

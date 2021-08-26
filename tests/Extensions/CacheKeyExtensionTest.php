@@ -1,81 +1,49 @@
 <?php
 
-namespace Terraformers\KeysForCache\Tests;
+namespace Terraformers\KeysForCache\Tests\Extensions;
 
 use App\Models\MenuGroup;
 use App\Models\MenuItem;
-use Page;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\ORM\Connect\Database;
-use SilverStripe\ORM\DataList;
-use Terraformers\KeysForCache\EventManager;
-use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
 use Terraformers\KeysForCache\Models\CacheKey;
-use Terraformers\KeysForCache\Tests\Models\NoCachePage;
+use Terraformers\KeysForCache\Tests\Mocks\CachePage;
+use Terraformers\KeysForCache\Tests\Mocks\NoCachePage;
 
 class CacheKeyExtensionTest extends SapphireTest
 {
 
     protected static $fixture_file = 'CacheKeyExtensionTest.yml';
 
-    protected static $required_extensions = [
-        Page::class => [
-            CacheKeyExtension::class,
-        ],
-    ];
-
-    public function testOnAfterWriteWithCacheKey(): void
+    public function testWriteGeneratesCacheKey(): void
     {
-        /** @var Page|CacheKeyExtension $page */
-        $page = Page::create();
-        $page->Title = 'Test';
+        // Page config is $has_cache_key = true, so when we write this record it should generate a CacheKey
+        $page = CachePage::create();
         $page->write();
 
-        $this->assertCount(1, $page->CacheKeys());
+        // Fetch all CacheKeys for this ClassName and ID
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
+
+        // There should be exactly 1
+        $this->assertCount(1, $keys);
     }
 
-    public function testOnAfterWriteWithoutCacheKey(): void
+    public function testWriteDoesNotGenerateCacheKey(): void
     {
-        /** @var Page|CacheKeyExtension $page */
+        // Page config is $has_cache_key = false, so when we write this record it should not generate a CacheKey
         $page = NoCachePage::create();
-        $page->Title = 'Test';
         $page->write();
 
-        $this->assertCount(0, $page->CacheKeys());
-    }
+        // Fetch all CacheKeys for this ClassName and ID
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
 
-    public function testGiveThisAName(): void
-    {
-        $group = MenuGroup::create();
-        $group->Title = 'Group 1';
-        $group->write();
-
-        $page = Page::create();
-        $page->Title = 'Page 1';
-        $page->MenuGroupID = $group->ID;
-        $page->write();
-
-        Debug::dump('-----------------------------');
-        Debug::dump('-----------------------------');
-        Debug::dump('-----------------------------');
-        Debug::dump('-----------------------------');
-        Debug::dump('-----------------------------');
-
-//        foreach (CacheKey::get() as $cacheKey) {
-//            $cacheKey->delete();
-//        }
-
-        EventManager::singleton()->flushCache();
-//        $item = MenuItem::create();
-//        $item->Title = 'Item 1';
-//        $item->write();
-
-        $group->Title = 'Group 1a';
-        $group->write();
-
-//        /** @var DataList|CacheKey[] $cacheKeys */
-//        $cacheKeys = CacheKey::get();
+        // There shouldn't be any
+        $this->assertCount(0, $keys);
     }
 
 }

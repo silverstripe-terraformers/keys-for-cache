@@ -3,14 +3,13 @@
 namespace Terraformers\KeysForCache;
 
 use App\Elemental\Blocks\HeroImageBlock;
-use DNADesign\Elemental\Models\BaseElement;
-use Page;
 use SilverStripe\Assets\Image;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\BuildTask;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
+use Terraformers\KeysForCache\RelationshipGraph\Graph;
+use Terraformers\KeysForCache\Services\LiveCacheProcessingService;
 
 class CacheTestTask extends BuildTask
 {
@@ -29,7 +28,7 @@ class CacheTestTask extends BuildTask
 
     public function simulateClassUpdate(string $className): void
     {
-        $config = CacheRelationService::singleton()->getGraph();
+        $config = Graph::singleton();
         $classesToUpdate = [$className];
         $edgesUpdated = [];
 
