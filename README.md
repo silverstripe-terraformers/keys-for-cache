@@ -20,8 +20,7 @@ The overall aim of this module is twofold:
     * [Cares](#cares)
     * [Touches](#touches)
     * [Global cares](#global-cares)
-    * [Headers, Footers, and other "global" content areas](#headers-footers-and-other-global-content-areas)
-    * [Example config and usage](#example-config-and-usage)
+    * [Usage and Examples](docs/en/examples.md)
 * [Fluent support](#fluent-support)
 * [Performance impact/considerations](#performance-impactconsiderations)
     * [Queued jobs](#queued-jobs)
@@ -90,6 +89,8 @@ We no longer want to create cache keys that contain tonnes or info based on all 
 create really simple cache keys which we invalidate when dependencies require them to be.
 
 ## Setup and configuration
+
+Preamble: When we talk about "changes to records", this includes all C.R.U.D. actions.
 
 ### Has cache key
 
@@ -258,145 +259,9 @@ App\Blocks\RecentUpdates:
 if `Blocks\RecentUpdates` had a `touches` of `Link:  SilverStripe\CMS\Model\SiteTree`, The site tree wouldn't be
 updated. This is a mechanism of global updates to ensure we don't run into performance issues
 
-### Headers, Footers, and other "global" content areas
+### Usage and examples
 
-We quite often have global footers on our sites - that being, the same footer for every page. For areas like this,
-rather than having a `global_cares` for each of your pages, it might make more sense to keep a separate cache key.
-
-You might decide to just provide that cache key in (probably) the same way that you already do. EG:
-
-```php
-class PageController extends ContentController
-{
-    public function getFooterCacheKey(): string
-    {
-        return implode(
-            '-',
-            'Footer',
-            SiteTree::get()->count(),
-            SiteTree::get()->max('LastEdited')
-        );
-    }
-}
-```
-
-Or, you could add a `global_cares` to your `SiteConfig`:
-
-```yaml
-SilverStripe\SiteConfig\SiteConfig:
-    has_cache_key: true
-    cares:
-        SiteTree: SilverStripe\CMS\Model\SiteTree
-```
-
-And then your cache key for the footer might be:
-
-```silverstripe
-<% cached 'Footer', $SiteConfig.CacheKey %>
-    ...
-<% end_cached %>
-```
-
-Similarly, it's quite common for our Primary Navigation to need to care about global changes to `SiteTree`, but also to
-be aware of the "active page", so we might use this same cache key from our `SiteConfig`, and supplement it with the
-cache key from the Page itself:
-
-```silverstripe
-<% cached 'Navigation', $CacheKey, $SiteConfig.CacheKey %>
-    ...
-<% end_cached %>
-```
-
-**Note:* It is still really performant when we use a mixture of these cache keys together, as the values will be in
-memory after the first time they are used.
-
-### Example config and usage
-
-In this example we aim to have cache keys for the following areas:
-
-* Page content: We expect the Page content to be unique for each page, and for it to update any time the page itself, or
-  any of its related DataObjects are updated
-* Page footer navigation: We expect the footer navigation to be shared globally, and for it to update when changes are
-  made to any page record
-* Page primary navigation: We expect the primary navigation to update when changes are made to any page record, and we
-  also expect it to be unique per page (so that we can our "active page" features)
-
-```yaml
-# All of our pages should have a cache key
-Page:
-    has_cache_key: true
-
-# We have also added a cache key for our Site settings, as we have some models that are managed there
-SilverStripe\SiteConfig\SiteConfig:
-    has_cache_key: true
-    cares:
-        # Our SiteConfig has a couple of CTA buttons available that authors can edit
-        PrimaryButton: gorriecoe\Link\Models\Link
-        SecondaryButton: gorriecoe\Link\Models\Link
-    global_cares:
-        # SiteTree added as a global care, so that we can use this cache key for our global footer that we want to
-        # invalidate any time any page updates
-        SiteTree: SilverStripe\CMS\Model\SiteTree
-
-# Our BlockPage cares about changes that happen to our ElementalArea
-App\Elemental\BlockPage:
-    cares:
-        ElementalArea: DNADesign\Elemental\Models\ElementalArea
-
-# Our ElementalArea cares about any changes that happen to its Elements
-DNADesign\Elemental\Models\ElementalArea:
-    cares:
-        Elements: DNADesign\Elemental\Models\BaseElement
-
-# Our Carousel block cares about any changes that are made to its Items
-App\Blocks\CarouselBlock:
-    cares:
-        Items: App\Blocks\CarouselItem
-
-# Our CarouselItem cares about any changes made to its associated Image, or to its CTA button
-App\Blocks\CarouselItem:
-    cares:
-        Image: SilverStripe\Assets\Image
-        PrimaryLink: gorriecoe\Link\Models\Link
-
-# Our Call to action block has an Image that it cares about, as well as two CTA buttons
-App\Blocks\CtaBlock:
-    cares:
-        Image: SilverStripe\Assets\Image
-        PrimaryLink: gorriecoe\Link\Models\Link
-        SecondaryLink: gorriecoe\Link\Models\Link
-
-# If an internal page updates then any associated Link should as well
-gorriecoe\Link\Models\Link:
-    cares:
-        SiteTree: SilverStripe\CMS\Model\SiteTree
-```
-
-In our template, we might now have something like this:
-
-```silverstripe
-
-<body>
-<%-- Navigation is unique per page, and updates any time a global change is made to any page --%>
-<% cached 'Navigation', $CacheKey, $SiteConfig.CacheKey %>
-    <% include Navigation %>
-<% end_cached %>
-
-<%-- Page content only changes when updates are made to the page or its direct dependencies --%>
-<% cached 'Content', $CacheKey %>
-    $Layout
-<% end_cached %>
-
-<%-- Footer is shared globally, and updates any time a global change is made to any page --%>
-<% cached 'Footer', $SiteConfig.CacheKey %>
-    <% include Footer %>
-<% end_cached %>
-</body>
-```
-
-**Important note:** Definitely consider the performance consideration of invalidating your `Page` cache any time an
-element is updated. It has been added above purely as an example of what it technically possible; it has not been added
-as a recommendation.
+See: [Usage and Examples](docs/en/examples.md)
 
 ## Fluent support
 

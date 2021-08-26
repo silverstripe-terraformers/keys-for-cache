@@ -39,10 +39,10 @@ class CacheKeyExtension extends DataExtension
             }
         }
 
-        return $cacheKey;
+        return $cacheKey->KeyHash;
     }
 
-    public function getCacheKey(): string
+    public function getCacheKey(): ?string
     {
         $key = new CacheKeyDto($this->findCacheKeyHash());
 
