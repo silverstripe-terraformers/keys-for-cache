@@ -37,4 +37,23 @@ class CacheKeyDtoTest extends SapphireTest
 
         $this->assertEquals('test-1-2-3', $cacheKeyDto->getKey());
     }
+
+    public function testNullCreation(): void
+    {
+        $cacheKeyDto = new CacheKeyDto(null);
+
+        $this->assertNull($cacheKeyDto->getKey());
+
+        $cacheKeyDto->appendKey(1);
+
+        $this->assertEquals('-1', $cacheKeyDto->getKey());
+
+        $cacheKeyDto = new CacheKeyDto(null);
+
+        $this->assertNull($cacheKeyDto->getKey());
+
+        $cacheKeyDto->addArrayToKey([1, 2, 3]);
+
+        $this->assertEquals('-1-2-3', $cacheKeyDto->getKey());
+    }
 }

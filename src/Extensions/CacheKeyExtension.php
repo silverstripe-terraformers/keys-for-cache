@@ -16,10 +16,10 @@ use Terraformers\KeysForCache\Services\StageCacheProcessingService;
  */
 class CacheKeyExtension extends DataExtension
 {
-    public function findCacheKeyHash(): string
+    public function findCacheKeyHash(): ?string
     {
         if (!$this->owner->isInDB()) {
-            return md5(microtime(false));
+            return null;
         }
 
         $className = $this->owner->ClassName;
@@ -27,7 +27,7 @@ class CacheKeyExtension extends DataExtension
         $hasCacheKey = Config::forClass($className)->get('has_cache_key');
 
         if (!$hasCacheKey) {
-            return md5(microtime(false));
+            return null;
         }
 
         // Update or create (in this case, it will be create)

@@ -4,14 +4,14 @@ namespace Terraformers\KeysForCache\DataTransferObjects;
 
 class CacheKeyDto
 {
-    private string $key;
+    private ?string $key;
 
-    public function __construct(string $key)
+    public function __construct(?string $key)
     {
         $this->key = $key;
     }
 
-    public function getKey(): string
+    public function getKey(): ?string
     {
         return $this->key;
     }

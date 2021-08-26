@@ -30,6 +30,11 @@ class CacheKey extends DataObject
         Versioned::class,
     ];
 
+    public function __toString(): string
+    {
+        return $this->KeyHash ?? 'no-hash';
+    }
+
     /**
      * Update the CacheKey if it is invalidated,
      * Create a CacheKey if it is empty
@@ -42,7 +47,7 @@ class CacheKey extends DataObject
             return null;
         }
 
-        $cacheKey->KeyHash = md5(implode('-', [$recordClass, $recordId, microtime()]));
+        $cacheKey->KeyHash = static::generateKeyHash($recordClass, $recordId);
         $cacheKey->write();
 
         return $cacheKey;
@@ -72,7 +77,7 @@ class CacheKey extends DataObject
             $cacheKey = static::create();
             $cacheKey->RecordClass = $recordClass;
             $cacheKey->RecordID = $recordId;
-            $cacheKey->KeyHash = md5(implode('-', [$recordClass, $recordId, microtime()]));
+            $cacheKey->KeyHash = static::generateKeyHash($recordClass, $recordId);
             $cacheKey->write();
         }
 
@@ -99,8 +104,8 @@ class CacheKey extends DataObject
         }
     }
 
-    public function __toString(): string
+    public static function generateKeyHash(string $recordClass, int $recordId): string
     {
-        return $this->KeyHash ?? 'no-hash';
+        return implode('-', [$recordClass, $recordId, microtime()]);
     }
 }
