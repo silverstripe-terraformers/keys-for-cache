@@ -17,7 +17,6 @@ use SilverStripe\Versioned\Versioned;
  */
 class CacheKey extends DataObject
 {
-
     private static string $table_name = 'CacheKey';
 
     private static array $db = [
@@ -29,11 +28,6 @@ class CacheKey extends DataObject
     private static array $extensions = [
         Versioned::class,
     ];
-
-    public function __toString(): string
-    {
-        return $this->KeyHash ?? 'no-hash';
-    }
 
     /**
      * Update the CacheKey if it is invalidated,
