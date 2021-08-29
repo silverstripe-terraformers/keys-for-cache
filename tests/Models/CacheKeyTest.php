@@ -4,6 +4,7 @@ namespace Terraformers\KeysForCache\Tests\Models;
 
 use Page;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\Tests\Mocks\CachePage;
 use Terraformers\KeysForCache\Tests\Mocks\NoCachePage;
@@ -24,7 +25,7 @@ class CacheKeyTest extends SapphireTest
         $this->assertCount(1, $keys);
 
         // Trigger archive
-        CacheKey::remove($page->ClassName, $page->ID);
+        CacheKey::remove($page);
 
         // Check we removed the record
         $keys = CacheKey::get()->filter([
@@ -96,6 +97,59 @@ class CacheKeyTest extends SapphireTest
         $this->assertNotEquals($keyHash, $key->KeyHash);
     }
 
+    public function testFindOrCreateOnPublish(): void
+    {
+        $page = $this->objFromFixture(CachePage::class, 'page1');
+        // Fetch any/all keys for this ClassName and ID
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
+
+        // Check that there is only 1
+        $this->assertCount(1, $keys);
+
+        // Within a LIVE reading mode, we shouldn't find any CacheKey
+        Versioned::withVersionedMode(function() use ($page): void {
+            Versioned::set_stage(Versioned::LIVE);
+
+            // Fetch any/all keys for this ClassName and ID
+            $keys = CacheKey::get()->filter([
+                'RecordClass' => $page->ClassName,
+                'RecordID' => $page->ID,
+            ]);
+
+            // Check that there are none
+            $this->assertCount(0, $keys);
+        });
+
+        // Publish the Page
+        $page->publishRecursive();
+
+        // Fetch any/all keys for this ClassName and ID
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
+
+        // Check that there is still only 1
+        $this->assertCount(1, $keys);
+
+        // Within a LIVE reading mode, we should now find 1
+        Versioned::withVersionedMode(function() use ($page): void {
+            Versioned::set_stage(Versioned::LIVE);
+
+            // Fetch any/all keys for this ClassName and ID
+            $keys = CacheKey::get()->filter([
+                'RecordClass' => $page->ClassName,
+                'RecordID' => $page->ID,
+            ]);
+
+            // Check that there is 1
+            $this->assertCount(1, $keys);
+        });
+    }
+
     public function testUpdateOrCreateDoesFind(): void
     {
         $page = $this->objFromFixture(CachePage::class, 'page1');
@@ -120,7 +174,6 @@ class CacheKeyTest extends SapphireTest
 
     public function testUpdateOrCreateDoesCreate(): void
     {
-
         $page = $this->objFromFixture(CachePage::class, 'page1');
         // Find our associated Key
         $originKey = CacheKey::get()->filter([

@@ -2,17 +2,18 @@
 
 namespace Terraformers\KeysForCache\Models;
 
-use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\ValidationException;
 use SilverStripe\Versioned\Versioned;
+use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
 
 /**
  * Maintain and manage cache keys for records
  *
- * @property string RecordClass
- * @property int RecordID
- * @property string KeyHash
+ * @property string $RecordClass
+ * @property int $RecordID
+ * @property string $KeyHash
+ * @method DataObject|CacheKeyExtension Record()
  * @mixin Versioned
  */
 class CacheKey extends DataObject
@@ -21,8 +22,10 @@ class CacheKey extends DataObject
 
     private static array $db = [
         'KeyHash' => 'Varchar',
-        'RecordClass' => 'Varchar',
-        'RecordID' => 'Int',
+    ];
+
+    private static $has_one = [
+        'Record' => DataObject::class,
     ];
 
     private static array $extensions = [
@@ -47,6 +50,11 @@ class CacheKey extends DataObject
         return $cacheKey;
     }
 
+    /**
+     * @param DataObject|CacheKeyExtension $dataObject
+     * @return CacheKey|null
+     * @throws ValidationException
+     */
     public static function findOrCreate(DataObject $dataObject): ?CacheKey
     {
         $hasCacheKey = $dataObject->config()->get('has_cache_key');
@@ -78,22 +86,15 @@ class CacheKey extends DataObject
         return $cacheKey;
     }
 
-    public static function remove(string $recordClass, int $recordId): void
+    /**
+     * @param DataObject|CacheKeyExtension $dataObject
+     */
+    public static function remove(DataObject $dataObject): void
     {
         // There is a non-zero chance that we could have multiple CacheKeys for a single record. If everything always
         // worked perfectly then it shouldn't happen, but from a data consistency point of view, it is possible. This
         // is our opportunity to clean it up
-        /** @var DataList|CacheKey[] $cacheKeys */
-        $cacheKeys = static::get()->filter([
-            'RecordClass' => $recordClass,
-            'RecordID' => $recordId,
-        ]);
-
-        if ($cacheKeys->count() === 0) {
-            return;
-        }
-
-        foreach ($cacheKeys as $cacheKey) {
+        foreach ($dataObject->CacheKeys() as $cacheKey) {
             $cacheKey->doArchive();
         }
     }

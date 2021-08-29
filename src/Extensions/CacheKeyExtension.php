@@ -5,6 +5,7 @@ namespace Terraformers\KeysForCache\Extensions;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\HasManyList;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDto;
 use Terraformers\KeysForCache\Models\CacheKey;
@@ -13,9 +14,14 @@ use Terraformers\KeysForCache\Services\StageCacheProcessingService;
 
 /**
  * @property DataObject|$this $owner
+ * @method HasManyList|CacheKey CacheKeys()
  */
 class CacheKeyExtension extends DataExtension
 {
+    private static array $has_many = [
+        'CacheKeys' => CacheKey::class . '.Record',
+    ];
+
     public function findCacheKeyHash(): ?string
     {
         if (!$this->owner->isInDB()) {
@@ -84,7 +90,7 @@ class CacheKeyExtension extends DataExtension
         // Versioned (the changes should be seen immediately even though the object wasn't Published)
         $publishUpdates = !$this->owner->hasExtension(Versioned::class);
         $this->triggerEvent();
-        CacheKey::remove($this->owner->getClassName(), $this->owner->ID);
+        CacheKey::remove($this->owner);
     }
 
     public function onAfterPublish(): void
