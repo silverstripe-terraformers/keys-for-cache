@@ -24,14 +24,6 @@
             "Terraformers\\KeysForCache\\Tests\\": "tests/"
         }
     },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.x-dev"
-        },
-        "expose": [
-            "client/dist"
-        ]
-    },
     "minimum-stability": "dev",
     "prefer-stable": true
 }
