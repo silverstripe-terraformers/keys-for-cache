@@ -5,6 +5,7 @@ namespace Terraformers\KeysForCache\Extensions;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\HasManyList;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDto;
 use Terraformers\KeysForCache\Models\CacheKey;
@@ -13,9 +14,17 @@ use Terraformers\KeysForCache\Services\StageCacheProcessingService;
 
 /**
  * @property DataObject|$this $owner
+ * @method HasManyList|CacheKey CacheKeys()
  */
 class CacheKeyExtension extends DataExtension
 {
+    private static array $has_many = [
+        // Programmatically we know that we will only ever create one of these CacheKey records per unique DataObject,
+        // however, there is no unique index on CacheKey, and Silverstripe requires that our polymorphic relationships
+        // be defined in this way (because a has_many will technically be possible, from a data integrety p.o.v.)
+        'CacheKeys' => CacheKey::class . '.Record',
+    ];
+
     public function findCacheKeyHash(): ?string
     {
         if (!$this->owner->isInDB()) {
@@ -84,7 +93,7 @@ class CacheKeyExtension extends DataExtension
         // Versioned (the changes should be seen immediately even though the object wasn't Published)
         $publishUpdates = !$this->owner->hasExtension(Versioned::class);
         $this->triggerEvent();
-        CacheKey::remove($this->owner->getClassName(), $this->owner->ID);
+        CacheKey::remove($this->owner);
     }
 
     public function onAfterPublish(): void
