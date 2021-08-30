@@ -19,6 +19,9 @@ use Terraformers\KeysForCache\Services\StageCacheProcessingService;
 class CacheKeyExtension extends DataExtension
 {
     private static array $has_many = [
+        // Programmatically we know that we will only ever create one of these CacheKey records per unique DataObject,
+        // however, there is no unique index on CacheKey, and Silverstripe requires that our polymorphic relationships
+        // be defined in this way (because a has_many will technically be possible, from a data integrety p.o.v.)
         'CacheKeys' => CacheKey::class . '.Record',
     ];
 
