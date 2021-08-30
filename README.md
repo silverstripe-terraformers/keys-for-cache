@@ -265,12 +265,7 @@ See: [Usage and Examples](docs/en/examples.md)
 
 ## Fluent support
 
-If you are using Silverstripe Framework >= 4.7, then you're already good to go. `CacheKey::generateKeyHash()` uses
-`DataObject::getUniqueKey()`, and Fluent considerations are already covered by this method.
-
-If you are using Silverstripe Framework <= 4.6, then you will need to supplement the key hash that we generate by
-implementing a method on your class (or in an extension) called `updateGenerateKeyHash()`. You will want to add any
-relevant Locale codes as part of this.
+See: [Fluent support](docs/en/fluent.md)
 
 ## Performance impact/considerations
 
