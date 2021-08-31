@@ -32,24 +32,15 @@ abstract class CacheProcessingService
         $this->updateInstance($instance);
         $edgesToUpdate = $this->createEdges($instance);
 
-        // Prevent edges from being used more than once
-        $edgesUpdated = [];
-
         while (count($edgesToUpdate) > 0) {
             /** @var EdgeUpdateDto $current */
             $current = array_pop($edgesToUpdate);
             $from = $current->getEdge()->getFromClassName();
 
-            if (in_array($from, $edgesUpdated)) {
-                continue;
-            }
-
             $edgesToUpdate = array_merge(
                 $edgesToUpdate,
                 $this->updateEdge($current)
             );
-
-            $edgesUpdated[] = $from;
         }
 
         $this->processGlobalCares($className);
@@ -82,9 +73,12 @@ abstract class CacheProcessingService
         $instance = $dto->getInstance();
         $relation = $this->getRelationType($edge->getFromClassName(), $edge->getRelation());
 
+        // No relationship exists for this From class
         if (!$relation) {
+            // Check to see whether it is a has_one relationship in the other direction
             $relation = $this->getRelationType($edge->getToClassName(), $edge->getRelation());
 
+            // If we still can't find a relationship, then we're in an error state
             if (!$relation) {
                 throw new Exception(sprintf(
                     'No relationship field found for "%s" between "%s" and "%s"',

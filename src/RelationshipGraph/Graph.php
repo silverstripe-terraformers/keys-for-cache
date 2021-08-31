@@ -5,7 +5,6 @@ namespace Terraformers\KeysForCache\RelationshipGraph;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
-use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataObject;
 
 class Graph
