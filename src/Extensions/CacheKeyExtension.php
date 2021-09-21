@@ -3,6 +3,7 @@
 namespace Terraformers\KeysForCache\Extensions;
 
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
@@ -24,6 +25,15 @@ class CacheKeyExtension extends DataExtension
         // be defined in this way (because a has_many will technically be possible, from a data integrety p.o.v.)
         'CacheKeys' => CacheKey::class . '.Record',
     ];
+
+    public function updateCMSFields(FieldList $fields): void
+    {
+        if (!$this->owner->config()->get('remove-cache-keys-field')) {
+            return;
+        }
+
+        $fields->removeByName('CacheKeys');
+    }
 
     public function findCacheKeyHash(): ?string
     {
