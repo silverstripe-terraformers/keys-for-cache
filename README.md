@@ -1,5 +1,8 @@
 # Cache Keys
 
+[![Build Status](http://img.shields.io/travis/silverstripe-terraformers/keys-for-cache.svg?style=flat)](https://travis-ci.org/silverstripe-terraformers/keys-for-cache)
+[![codecov](https://codecov.io/gh/silverstripe-terraformers/keys-for-cache/branch/master/graph/badge.svg)](https://codecov.io/gh/silverstripe-terraformers/keys-for-cache)
+
 This module helps you create singular cache keys which can be used in your templates as part
 of [Silverstripe's Partial Caching](https://docs.silverstripe.org/en/4/developer_guides/performance/partial_caching/)
 feature.
