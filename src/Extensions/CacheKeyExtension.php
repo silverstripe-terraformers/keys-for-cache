@@ -4,6 +4,8 @@ namespace Terraformers\KeysForCache\Extensions;
 
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
@@ -28,13 +30,23 @@ class CacheKeyExtension extends DataExtension
 
     public function updateCMSFields(FieldList $fields): void
     {
-        if ($this->owner->config()->get('remove-cache-keys-field')) {
-            $fields->removeByName('CacheKeys');
+        // Field is initially a GridField (with too many options) within a Tab. We don't want that
+        $fields->removeByName([
+            'CacheKeys',
+        ]);
+
+        if (!$this->owner->config()->get('enable-cache-keys-field')) {
+            return;
         }
 
         if (!$this->owner->config()->get('has_cache_key')) {
-            $fields->removeByName('CacheKeys');
+            return;
         }
+
+        $fields->addFieldToTab(
+            'Root.Settings',
+            GridField::create('CacheKeys', 'Cache Keys', $this->owner->CacheKeys(), GridFieldConfig_RecordViewer::create())
+        );
     }
 
     public function getCacheKey(): ?string
