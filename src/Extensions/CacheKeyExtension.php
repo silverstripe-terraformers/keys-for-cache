@@ -28,37 +28,13 @@ class CacheKeyExtension extends DataExtension
 
     public function updateCMSFields(FieldList $fields): void
     {
-        if (!$this->owner->config()->get('remove-cache-keys-field')) {
-            return;
+        if ($this->owner->config()->get('remove-cache-keys-field')) {
+            $fields->removeByName('CacheKeys');
         }
 
-        $fields->removeByName('CacheKeys');
-    }
-
-    public function findCacheKeyHash(): ?string
-    {
-        if (!$this->owner->isInDB()) {
-            return null;
+        if (!$this->owner->config()->get('has_cache_key')) {
+            $fields->removeByName('CacheKeys');
         }
-
-        $hasCacheKey = $this->owner->config()->get('has_cache_key');
-
-        if (!$hasCacheKey) {
-            return null;
-        }
-
-        // Update or create (in this case, it will be create)
-        $cacheKey = CacheKey::findOrCreate($this->owner);
-
-        if (!$cacheKey->isPublished()) {
-            // If the owner is not Versioned, or if it has been published, then we want to make sure we publish our
-            // CacheKey at the same time
-            if (!$this->owner->hasExtension(Versioned::class) || $this->owner->isPublished()) {
-                $cacheKey->publishRecursive();
-            }
-        }
-
-        return $cacheKey->KeyHash;
     }
 
     public function getCacheKey(): ?string
@@ -68,21 +44,6 @@ class CacheKeyExtension extends DataExtension
         $this->owner->invokeWithExtensions('updateCacheKey', $key);
 
         return $key->getKey();
-    }
-
-    protected function triggerEvent(bool $publishUpdates = false): void
-    {
-        $blacklist = Config::forClass(CacheKey::class)->get('blacklist');
-
-        if (in_array($this->owner->ClassName, $blacklist)) {
-            return;
-        }
-
-        $service = $publishUpdates
-            ? LiveCacheProcessingService::singleton()
-            : StageCacheProcessingService::singleton();
-
-        $service->processChange($this->owner);
     }
 
     /**
@@ -114,5 +75,46 @@ class CacheKeyExtension extends DataExtension
     public function onAfterUnpublish(): void
     {
         $this->triggerEvent(true);
+    }
+
+    protected function triggerEvent(bool $publishUpdates = false): void
+    {
+        $blacklist = Config::forClass(CacheKey::class)->get('blacklist');
+
+        if (in_array($this->owner->ClassName, $blacklist)) {
+            return;
+        }
+
+        $service = $publishUpdates
+            ? LiveCacheProcessingService::singleton()
+            : StageCacheProcessingService::singleton();
+
+        $service->processChange($this->owner);
+    }
+
+    protected function findCacheKeyHash(): ?string
+    {
+        if (!$this->owner->isInDB()) {
+            return null;
+        }
+
+        $hasCacheKey = $this->owner->config()->get('has_cache_key');
+
+        if (!$hasCacheKey) {
+            return null;
+        }
+
+        // Update or create (in this case, it will be create)
+        $cacheKey = CacheKey::findOrCreate($this->owner);
+
+        if (!$cacheKey->isPublished()) {
+            // If the owner is not Versioned, or if it has been published, then we want to make sure we publish our
+            // CacheKey at the same time
+            if (!$this->owner->hasExtension(Versioned::class) || $this->owner->isPublished()) {
+                $cacheKey->publishRecursive();
+            }
+        }
+
+        return $cacheKey->KeyHash;
     }
 }

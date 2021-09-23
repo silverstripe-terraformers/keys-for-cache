@@ -11,6 +11,11 @@ class ProcessedUpdatesService
 
     private array $processedUpdates = [];
 
+    public function flush(): void
+    {
+        $this->processedUpdates = [];
+    }
+
     public function getProcessedUpdates(): array
     {
         return $this->processedUpdates;
