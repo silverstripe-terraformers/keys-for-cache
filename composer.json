@@ -10,8 +10,7 @@
     "license": "BSD-3-Clause",
     "require": {
         "php": ">=7.4",
-        "silverstripe/framework": "^4",
-        "symfony/event-dispatcher": "^5.3"
+        "silverstripe/framework": "^4.6"
     },
     "require-dev": {
         "sminnee/phpunit": "^5.7",

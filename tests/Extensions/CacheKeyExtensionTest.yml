@@ -2,3 +2,7 @@
 Terraformers\KeysForCache\Tests\Mocks\CachePage:
   page1:
     Title: Page 1
+
+Terraformers\KeysForCache\Tests\Mocks\GlobalCaresPage:
+  page1:
+    Title: Global Cares Page 1

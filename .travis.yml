@@ -3,15 +3,10 @@ version: ~> 1.0
 import:
   - silverstripe/silverstripe-travis-shared:config/provision/standard.yml
 
-env:
-  global:
-    - REQUIRE_RECIPE="4.x-dev"
-
 jobs:
-  fast_finish: true
   include:
     - php: 7.4
       env:
         - DB=MYSQL
-        - REQUIRE_INSTALLER="$REQUIRE_RECIPE"
+        - REQUIRE_INSTALLER="4.x-dev"
         - PHPUNIT_TEST=1

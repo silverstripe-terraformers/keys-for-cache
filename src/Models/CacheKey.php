@@ -99,7 +99,7 @@ class CacheKey extends DataObject
         }
     }
 
-    public static function generateKeyHash(DataObject $dataObject): string
+    protected static function generateKeyHash(DataObject $dataObject): string
     {
         // getUniqueKey() has only been around since 4.7, but ideally this is what we would like to use as the base for
         // our KeyHash

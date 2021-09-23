@@ -25,13 +25,20 @@ class Graph
     {
         return array_filter(
             $this->edges,
-            fn($e) => $e->getFromClassName() === $from
+            fn(Edge $e) => $e->getFromClassName() === $from
         );
     }
 
     public function getGlobalCares(): array
     {
         return $this->global_cares;
+    }
+
+    public function flush(): void
+    {
+        $this->nodes = [];
+        $this->edges = [];
+        $this->global_cares = [];
     }
 
     private function addNode(Node $node): self
@@ -65,6 +72,13 @@ class Graph
         return $this;
     }
 
+    private function getClassAndRelation(string $input): array
+    {
+        $res = explode('.', $input);
+
+        return [$res[0], $res[1] ?? null];
+    }
+
     private function build(): void
     {
         // Relations only exist from data objects
@@ -86,7 +100,7 @@ class Graph
 
                     // Has many exists for the relation
                     if (array_key_exists($relation, $hasMany)) {
-                        $hasOnes = Config::forClass($careClassName)->get('has_one');
+                        $hasOnes = Config::forClass($touchClassName)->get('has_one');
 
                         foreach ($hasOnes as $hasOneRelation => $hasOneClassName) {
                             if ($hasOneClassName !== $className) {
@@ -167,12 +181,5 @@ class Graph
         );
 
         $this->global_cares = $classes;
-    }
-
-    private function getClassAndRelation(string $input): array
-    {
-        $res = explode('.', $input);
-
-        return [$res[0], $res[1] ?? null];
     }
 }

@@ -35,7 +35,6 @@ abstract class CacheProcessingService
         while (count($edgesToUpdate) > 0) {
             /** @var EdgeUpdateDto $current */
             $current = array_pop($edgesToUpdate);
-            $from = $current->getEdge()->getFromClassName();
 
             $edgesToUpdate = array_merge(
                 $edgesToUpdate,
@@ -95,6 +94,13 @@ abstract class CacheProcessingService
         }
 
         if ($relation === 'has_one') {
+            $idValue = $instance->getField($edge->getRelation().'ID');
+
+            // A relationship field does exist here, but there is no relationship active
+            if (!$idValue) {
+                return [];
+            }
+
             if ($this->alreadyProcessed($edge->getToClassName(), $instance->getField($edge->getRelation().'ID'))) {
                 return [];
             }
