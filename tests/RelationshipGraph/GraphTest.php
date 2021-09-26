@@ -4,16 +4,23 @@ namespace Terraformers\KeysForCache\Tests\RelationshipGraph;
 
 use ReflectionClass;
 use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\SiteConfig\SiteConfig;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\RelationshipGraph\Node;
-use Terraformers\KeysForCache\Tests\Mocks\CachePage;
-use Terraformers\KeysForCache\Tests\Mocks\CaresPage;
-use Terraformers\KeysForCache\Tests\Mocks\GlobalCaresPage;
-use Terraformers\KeysForCache\Tests\Mocks\NoCachePage;
-use Terraformers\KeysForCache\Tests\Mocks\TouchesPage;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\CachePage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\GlobalCaresPage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage;
 
 class GraphTest extends SapphireTest
 {
@@ -151,6 +158,39 @@ class GraphTest extends SapphireTest
         $this->assertEquals('Relationship', $relationship);
     }
 
+    public function testGetRelationshipConfig(): void
+    {
+        $graph = Graph::singleton();
+
+        $reflectionClass = new ReflectionClass(Graph::class);
+        $method = $reflectionClass->getMethod('getRelationshipConfig');
+        $method->setAccessible(true);
+
+        $pageOne = TouchesPage::config();
+        $pageTwo = CaresPage::config();
+
+        $pageOneTouch = $method->invoke($graph, $pageOne->get('touches'), $pageOne);
+        $pageOneCares = $method->invoke($graph, $pageOne->get('cares'), $pageOne);
+        $pageTwoTouch = $method->invoke($graph, $pageTwo->get('touches'), $pageTwo);
+        $pageTwoCares = $method->invoke($graph, $pageTwo->get('cares'), $pageTwo);
+
+        $expectPageOneTouch = [
+            'TouchedBelongsToModel' => TouchedBelongsToModel::class,
+            'TouchedHasOneModel' => TouchedHasOneModel::class,
+            'TouchedHasManyModels' => TouchedHasManyModel::class,
+        ];
+        $expectPageTwoCares = [
+            'CaredBelongsToModel' => CaredBelongsToModel::class,
+            'CaredHasOneModel' => CaredHasOneModel::class,
+            'CaredHasManyModels' => CaredHasManyModel::class,
+        ];
+
+        $this->assertEquals($expectPageOneTouch, $pageOneTouch, '', 0.0, 10, true);
+        $this->assertEquals([], $pageOneCares, '', 0.0, 10, true);
+        $this->assertEquals([], $pageTwoTouch, '', 0.0, 10, true);
+        $this->assertEquals($expectPageTwoCares, $pageTwoCares, '', 0.0, 10, true);
+    }
+
     public function testGetEdges(): void
     {
         $graph = Graph::singleton();
@@ -162,14 +202,15 @@ class GraphTest extends SapphireTest
             function(Edge $edge) {
                 return $edge->getToClassName();
             },
-            $graph->getEdges(SiteTree::class)
+            $graph->getEdges(CaredHasOneModel::class)
         );
 
         $this->assertEquals($expected, $result, '', 0.0, 10, true);
 
         $expected = [
-            SiteConfig::class,
-            SiteTree::class,
+            TouchedBelongsToModel::class,
+            TouchedHasOneModel::class,
+            TouchedHasManyModel::class,
         ];
         $result = array_map(
             fn(Edge $edge) => $edge->getToClassName(),
@@ -187,15 +228,15 @@ class GraphTest extends SapphireTest
         $this->assertCount(2, $globalCares);
 
         $siteConfigClears = $globalCares[SiteConfig::class] ?? null;
-        $siteTreeClears = $globalCares[SiteTree::class] ?? null;
+        $cachePageClears = $globalCares[CachePage::class] ?? null;
 
         $this->assertNotNull($siteConfigClears);
-        $this->assertNotNull($siteTreeClears);
+        $this->assertNotNull($cachePageClears);
 
         $this->assertCount(1, $siteConfigClears);
-        $this->assertCount(1, $siteTreeClears);
+        $this->assertCount(1, $cachePageClears);
 
         $this->assertEquals(GlobalCaresPage::class, array_pop($siteConfigClears));
-        $this->assertEquals(GlobalCaresPage::class, array_pop($siteTreeClears));
+        $this->assertEquals(GlobalCaresPage::class, array_pop($cachePageClears));
     }
 }

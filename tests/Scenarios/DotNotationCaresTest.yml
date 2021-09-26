@@ -1,0 +1,29 @@
+Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredBelongsToModel:
+  model1:
+    Title: Belongs To Model 1
+  model2:
+    Title: Belongs To Model 2
+
+Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasOneModel:
+  model1:
+    Title: Has One Model 1
+  model2:
+    Title: Has One Model 2
+
+Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasManyModel:
+  model1:
+    Title: Has Many Model 1
+  model2:
+    Title: Has Many Model 2
+
+Terraformers\KeysForCache\Tests\Mocks\Pages\DotNotationCaresPage:
+  page1:
+    Title: Page 1
+    CaredBelongsToModelFirst: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredBelongsToModel.model1
+    CaredBelongsToModelSecond: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredBelongsToModel.model2
+    CaredHasOneModelFirst: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasOneModel.model1
+    CaredHasOneModelSecond: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasOneModel.model2
+    CaredHasManyModelsFirst:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasManyModel.model1
+    CaredHasManyModelsSecond:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasManyModel.model2

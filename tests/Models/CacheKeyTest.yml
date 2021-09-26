@@ -1,8 +1,8 @@
-Terraformers\KeysForCache\Tests\Mocks\NoCachePage:
+Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage:
   page1:
     Title: Page 1
 
 # Creation of a Page will itself generate a CacheKey
-Terraformers\KeysForCache\Tests\Mocks\CachePage:
+Terraformers\KeysForCache\Tests\Mocks\Pages\CachePage:
   page1:
     Title: Page 1
