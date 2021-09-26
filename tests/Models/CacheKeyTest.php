@@ -2,12 +2,11 @@
 
 namespace Terraformers\KeysForCache\Tests\Models;
 
-use Page;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\Models\CacheKey;
-use Terraformers\KeysForCache\Tests\Mocks\CachePage;
-use Terraformers\KeysForCache\Tests\Mocks\NoCachePage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\CachePage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 
 class CacheKeyTest extends SapphireTest
 {

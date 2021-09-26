@@ -8,7 +8,7 @@ use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDto;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
 use Terraformers\KeysForCache\RelationshipGraph\Node;
-use Terraformers\KeysForCache\Tests\Mocks\NoCachePage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 
 class EdgeUpdateDtoTest extends SapphireTest
 {

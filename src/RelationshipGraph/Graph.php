@@ -2,8 +2,10 @@
 
 namespace Terraformers\KeysForCache\RelationshipGraph;
 
+use Exception;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Config\Config_ForClass;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DataObject;
 
@@ -79,6 +81,57 @@ class Graph
         return [$res[0], $res[1] ?? null];
     }
 
+    private function getRelationshipConfig(?array $keys, Config_ForClass $config): array
+    {
+        if (!$keys) {
+            return [];
+        }
+
+        $relationshipConfigs = array_merge(
+            $config->get('has_one') ?? [],
+            $config->get('has_many') ?? [],
+            $config->get('belongs_to') ?? [],
+        );
+
+        return array_filter(
+            $relationshipConfigs,
+            function ($relationship) use ($keys) {
+                return in_array($relationship, $keys);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    private function getRelationshipForClassName(string $className, string $relationship, ?array $config): ?string
+    {
+        if (!$config) {
+            return null;
+        }
+
+        foreach ($config as $relation => $relationString) {
+            [$relationClassName, $relationField] = $this->getClassAndRelation($relationString);
+
+            if ($relationClassName !== $className) {
+                continue;
+            }
+
+            // This relation matches the class and there is no dot notation, indicating that it is the only relationship
+            // available. We can return here
+            if (!$relationField) {
+                return $relation;
+            }
+
+            // There is a dot notation, and this $relationField does not match the expected $relationship
+            if ($relationField !== $relationship) {
+                continue;
+            }
+
+            return $relation;
+        }
+
+        return null;
+    }
+
     private function build(): void
     {
         // Relations only exist from data objects
@@ -86,66 +139,101 @@ class Graph
 
         foreach ($classes as $className) {
             $config = Config::forClass($className);
-            $touches = $config->get('touches') ?? [];
-            $cares = $config->get('cares') ?? [];
+            $touches = $this->getRelationshipConfig($config->get('touches'), $config);
+            $cares = $this->getRelationshipConfig($config->get('cares'), $config);
             $node = $this->findOrCreateNode($className);
 
+            // $touches Edges always need to go $from this class $to the class that they touch
             foreach ($touches as $relation => $touchClassName) {
-                [$touchClassName, $touchRelation] = $this->getClassAndRelation($touchClassName);
-
-                // No dot notation so we need to check if this is a has_many, and if it is, we need to find the has_one
-                // field on the other side of this relationship
-                if (!$touchRelation) {
-                    $hasMany = $config->get('has_many');
-
-                    // Has many exists for the relation
-                    if (array_key_exists($relation, $hasMany)) {
-                        $hasOnes = Config::forClass($touchClassName)->get('has_one');
-
-                        foreach ($hasOnes as $hasOneRelation => $hasOneClassName) {
-                            if ($hasOneClassName !== $className) {
-                                continue;
-                            }
-
-                            $touchRelation = $hasOneRelation;
-                        }
-                    }
-                }
+                [$touchClassName] = $this->getClassAndRelation($touchClassName);
 
                 $touchNode = $this->findOrCreateNode($touchClassName);
-                $edge = $touchRelation
-                    ? new Edge($touchNode, $node, $touchRelation)
-                    : new Edge($node, $touchNode, $relation);
+                $edge = new Edge($node, $touchNode, $relation);
                 $this->addEdge($edge);
             }
 
+            // $cares Edges always need to go $from the class being cared about $to this class
             foreach ($cares as $relation => $careClassName) {
                 [$careClassName, $caresRelation] = $this->getClassAndRelation($careClassName);
 
-                // No dot notation so we need to check if this is a has_many, and if it is, we need to find the has_one
-                // field on the other side of this relationship
-                if (!$caresRelation) {
-                    $hasMany = $config->get('has_many');
+                // A dot notation is available, so we can map this immediately and continue
+                if ($caresRelation) {
+                    $careNode = $this->findOrCreateNode($careClassName);
+                    $this->addEdge(new Edge($careNode, $node, $caresRelation));
 
-                    // Has many exists for the relation
-                    if (array_key_exists($relation, $hasMany)) {
-                        $hasOnes = Config::forClass($careClassName)->get('has_one');
+                    continue;
+                }
 
-                        foreach ($hasOnes as $hasOneRelation => $hasOneClassName) {
-                            if ($hasOneClassName !== $className) {
-                                continue;
-                            }
+                // No dot notation was available, so we need to figure out the relationship ourselves
 
-                            $caresRelation = $hasOneRelation;
-                        }
+                // Before we get too far, we'll make sure this isn't a many_many, as that is not currently supported
+                if (array_key_exists($relation, $config->get('man_many') ?? [])) {
+                    // TODO add support for many_many and belongs_many_many
+                    continue;
+                }
+
+                $has_many = array_key_exists($relation, $config->get('has_many'));
+                $belongs_to = array_key_exists($relation, $config->get('belongs_to'));
+
+                // If this relationship is a has_many or a belongs_to, then we need to find the has_one on the other
+                // side of the relationship. This relationship should always exist; if it doesn't, then that is invalid
+                // ORM config
+                if ($has_many || $belongs_to) {
+                    $caresRelation = $this->getRelationshipForClassName(
+                        $className,
+                        $relation,
+                        Config::forClass($careClassName)->get('has_one')
+                    );
+
+                    if (!$caresRelation) {
+                        throw new Exception(sprintf(
+                            'No valid has_one found between %s and %s for %s relationship %s',
+                            $careClassName,
+                            $className,
+                            $has_many ? 'has_many' : 'belongs_to',
+                            $relation
+                        ));
                     }
+
+                    $careNode = $this->findOrCreateNode($careClassName);
+                    $this->addEdge(new Edge($careNode, $node, $caresRelation));
+
+                    continue;
+                }
+
+                // This relationship is a has_one, so it could be a belongs_to <-> has_one, or has_one <-> has_many
+                // We'll first check to see if it is a has_many
+                $caresRelation = $this->getRelationshipForClassName(
+                    $className,
+                    $relation,
+                    Config::forClass($careClassName)->get('has_many')
+                );
+
+                // Yes, it was a has_many on the other end of the relationship. We can add this Edge and continue
+                if ($caresRelation) {
+                    $careNode = $this->findOrCreateNode($careClassName);
+                    $this->addEdge(new Edge($careNode, $node, $caresRelation));
+
+                    continue;
+                }
+
+                // The only remaining possibility is that this is a belongs_to on the other end of this relationship
+                // (a has_one <-> has_one)
+                $caresRelation = $this->getRelationshipForClassName(
+                    $className,
+                    $relation,
+                    Config::forClass($careClassName)->get('belongs_to')
+                );
+
+                if (!$caresRelation) {
+                    throw new Exception(sprintf(
+                        'No valid belongs_to found between %s and %s for has_many relationship %s',
+                        $careClassName, $className, $relation
+                    ));
                 }
 
                 $careNode = $this->findOrCreateNode($careClassName);
-                $edge = $caresRelation
-                    ? new Edge($node, $careNode, $caresRelation)
-                    : new Edge($careNode, $node, $relation);
-                $this->addEdge($edge);
+                $this->addEdge(new Edge($careNode, $node, $caresRelation));
             }
         }
     }

@@ -114,6 +114,12 @@ abstract class CacheProcessingService
             return $this->updateInstance($relatedInstance);
         }
 
+        // belongs_to is a has_one <-> has_one, however, there is no ID field present here. Instead we just need to call
+        // the method that the ORM provides
+        if ($relation === 'belongs_to') {
+            return $this->updateInstance($instance->{$edge->getRelation()}());
+        }
+
         if ($relation === 'has_many') {
             return $this->updateInstances($instance->{$edge->getRelation()}(), $dto);
         }

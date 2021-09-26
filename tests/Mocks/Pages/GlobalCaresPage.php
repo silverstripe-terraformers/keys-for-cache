@@ -1,10 +1,9 @@
 <?php
 
-namespace Terraformers\KeysForCache\Tests\Mocks;
+namespace Terraformers\KeysForCache\Tests\Mocks\Pages;
 
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Dev\TestOnly;
 use Page;
+use SilverStripe\Dev\TestOnly;
 use SilverStripe\SiteConfig\SiteConfig;
 use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
 
@@ -13,10 +12,12 @@ use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
  */
 class GlobalCaresPage extends Page implements TestOnly
 {
-    private static bool $has_cache_key = true;
-
     private static array $global_cares = [
-        'SiteTree' => SiteTree::class,
         'SiteConfig' => SiteConfig::class,
+        'CachePage' => CachePage::class,
     ];
+
+    private static string $table_name = 'GlobalCaresPage';
+
+    private static bool $has_cache_key = true;
 }

@@ -5,9 +5,9 @@ namespace Terraformers\KeysForCache\Tests\Extensions;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
-use Terraformers\KeysForCache\Tests\Mocks\CachePage;
-use Terraformers\KeysForCache\Tests\Mocks\GlobalCaresPage;
-use Terraformers\KeysForCache\Tests\Mocks\NoCachePage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\GlobalCaresPage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\CachePage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 
 class CacheKeyExtensionTest extends SapphireTest
 {
@@ -84,6 +84,9 @@ class CacheKeyExtensionTest extends SapphireTest
 
     public function testDeleteUpdatesCacheKey(): void
     {
+        // Flush our update service before we begin to trigger changes
+        ProcessedUpdatesService::singleton()->flush();
+
         $parent = $this->objFromFixture(CachePage::class, 'page1');
         $child = $this->objFromFixture(GlobalCaresPage::class, 'page1');
 

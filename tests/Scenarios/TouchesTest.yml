@@ -1,0 +1,28 @@
+Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel:
+  model1:
+    Title: Belongs To Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel:
+  model1:
+    Title: Has One Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel:
+  model1:
+    Title: Has Many Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsToModel:
+  model1:
+    Title: Belongs To Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage:
+  page1:
+    Title: Page 1
+    TouchedBelongsToModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel.model1
+    TouchedHasOneModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel.model1
+    TouchedHasManyModels:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel.model1
+
+Terraformers\KeysForCache\Tests\Mocks\Pages\TouchedPage:
+  page1:
+    Title: Page 1
+    TouchesBelongsToModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsToModel.model1

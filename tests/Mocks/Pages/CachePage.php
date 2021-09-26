@@ -1,9 +1,9 @@
 <?php
 
-namespace Terraformers\KeysForCache\Tests\Mocks;
+namespace Terraformers\KeysForCache\Tests\Mocks\Pages;
 
-use SilverStripe\Dev\TestOnly;
 use Page;
+use SilverStripe\Dev\TestOnly;
 use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
 
 /**
@@ -11,5 +11,7 @@ use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
  */
 class CachePage extends Page implements TestOnly
 {
+    private static string $table_name = 'CachePage';
+
     private static bool $has_cache_key = true;
 }
