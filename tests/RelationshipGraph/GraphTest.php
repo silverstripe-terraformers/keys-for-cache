@@ -172,7 +172,9 @@ class GraphTest extends SapphireTest
             SiteTree::class,
         ];
         $result = array_map(
-            fn(Edge $edge) => $edge->getToClassName(),
+            function (Edge $edge) {
+                return $edge->getToClassName();
+            },
             $graph->getEdges(TouchesPage::class)
         );
 
