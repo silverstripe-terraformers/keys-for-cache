@@ -129,7 +129,7 @@ You can do that by telling us that your `CarouselBlock` `cares` about its `Items
 ```yaml
 App\Blocks\CarouselBlock:
     cares:
-        Items: App\Blocks\CarouselItem
+        - Items
 ```
 
 Or in your class:
@@ -142,7 +142,7 @@ class CarouselBlock extends BaseElement
     ];
 
     private static array $cares = [
-        'Items' => CarouselItem::class,
+        'Items',
     ];
 }
 ```
@@ -154,7 +154,7 @@ value is the `class` that it relates to):
 ```yaml
 App\Blocks\CarouselItem:
     cares:
-        Image: SilverStripe\Assets\Image
+        - Image
 ```
 
 Or in your class like so:
@@ -167,7 +167,7 @@ class CarouselItem extends DataObject
     ];
 
     private static array $cares = [
-        'Image' => Image::class,
+        'Image',
     ];
 }
 ```
@@ -179,7 +179,7 @@ update the linked `Carousel`. Taking this a step further all the way back to `Pa
 # Our BlockPage cares about changes to its ElementalArea
 App\Elemental\BlockPage:
     cares:
-        ElementalArea: DNADesign\Elemental\Models\ElementalArea
+        - ElementalArea
 
 # Our ElementalAreas care about any changes made to its Elements
 DNADesign\Elemental\Models\ElementalArea:
@@ -214,7 +214,7 @@ it like so (where the `key` is the field relationship name, and the value is the
 ```yaml
 App\Blocks\CarouselItem:
     touches:
-        Parent: App\Blocks\CarouselBlock
+        - Parent
 ```
 
 Or in your class like so:
@@ -227,7 +227,7 @@ class CarouselItem extends DataObject
     ];
 
     private static array $touches = [
-        'Parent' => CarouselBlock::class,
+        'Parent',
     ];
 }
 ```
@@ -252,7 +252,7 @@ for any DataObject that cares about global changes to our pages.
 ```yaml
 App\Blocks\RecentUpdates:
     global_cares:
-        SiteTree: SilverStripe\CMS\Model\SiteTree
+        - SilverStripe\CMS\Model\SiteTree
 ```
 
 **Important note:** These global updates won't use the touches/cares when they occur. For example,
