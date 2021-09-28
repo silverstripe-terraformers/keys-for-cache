@@ -13,8 +13,8 @@ use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
 class GlobalCaresPage extends Page implements TestOnly
 {
     private static array $global_cares = [
-        'SiteConfig' => SiteConfig::class,
-        'CachePage' => CachePage::class,
+        SiteConfig::class,
+        CachePage::class,
     ];
 
     private static string $table_name = 'GlobalCaresPage';

@@ -119,8 +119,8 @@ Or, you could now do (something like) adding a `global_cares` to your `SiteConfi
 ```yaml
 SilverStripe\SiteConfig\SiteConfig:
     has_cache_key: true
-    cares:
-        SiteTree: SilverStripe\CMS\Model\SiteTree
+    global_cares:
+        - SilverStripe\CMS\Model\SiteTree
 ```
 
 Your `SiteConfig` now has a cache key, and that cache key is going to be invalidated any time a change is made to any
@@ -173,41 +173,41 @@ SilverStripe\SiteConfig\SiteConfig:
     has_cache_key: true
     cares:
         # Our SiteConfig has a couple of CTA buttons available that authors can edit, we want to care about those
-        FacebookLink: gorriecoe\Link\Models\Link
-        TwitterLink: gorriecoe\Link\Models\Link
+        FacebookLink
+        TwitterLink
     global_cares:
         # SiteTree added as a global care. This will mean that the SiteConfig cache key will be invalidated any time
         # any change is made to a SiteTree record
-        SiteTree: SilverStripe\CMS\Model\SiteTree
+        - SilverStripe\CMS\Model\SiteTree
 
 # When changes are made to our BlockPage, we want it to "touch" our ElementalArea, this is because some of our Elements
 # "care" about changes to the BlockPage (more on this further down)
 App\Elemental\BlockPage:
     touches:
-        ElementalArea: DNADesign\Elemental\Models\ElementalArea
+        - ElementalArea
 
 # Our Carousel block cares about any changes that are made to its Items. Note, CarouselBlock does *not* care about
 # changes to ElementalArea, so its cache key will not be invalidated when changes are made to BlockPage
 App\Blocks\CarouselBlock:
     cares:
-        Items: App\Blocks\CarouselItem
+        - Items
 
 # Our CarouselItem cares about any changes made to its associated Image, or to its CTA button
 App\Blocks\CarouselItem:
     cares:
-        Image: SilverStripe\Assets\Image
-        PrimaryLink: gorriecoe\Link\Models\Link
+        - Image
+        - PrimaryLink
 
 # We have a Block that displays the Page::$Title. Understanding that BlockPage "touches" ElementalArea, this will mean
 # that any change to BlockPage willa lso invalidate the cache key for this Block.
 App\Blocks\TitleBlock:
     cares:
-        Parent: DNADesign\Elemental\Models\ElementalArea
+        - Parent
 
 # If an internal page updates then any associated Link should as well
 gorriecoe\Link\Models\Link:
     cares:
-        SiteTree: SilverStripe\CMS\Model\SiteTree
+        - SiteTree
 ```
 
 In our `Page.ss` template, we might now have something like this:
