@@ -4,7 +4,6 @@ namespace Terraformers\KeysForCache\Tests\RelationshipGraph;
 
 use ReflectionClass;
 use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\SiteConfig\SiteConfig;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
@@ -18,6 +17,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CachePage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\GlobalCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage;
@@ -197,6 +197,7 @@ class GraphTest extends SapphireTest
 
         $expected = [
             CaresPage::class,
+            ExtendedCaresPage::class,
         ];
         $result = array_map(
             function(Edge $edge) {
