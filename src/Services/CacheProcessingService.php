@@ -175,7 +175,9 @@ abstract class CacheProcessingService
         }
 
         return array_map(
-            fn($e) => new EdgeUpdateDto($e, $instance),
+            function ($e) use ($instance) {
+                return new EdgeUpdateDto($e, $instance);
+            },
             $applicableEdges
         );
     }
@@ -201,13 +203,20 @@ abstract class CacheProcessingService
 
     private function processGlobalCares(string $className): void
     {
-        $cares = $this->getGraph()->getGlobalCares();
+        $globalCares = $this->getGraph()->getGlobalCares();
         $possibleClassNames = ClassInfo::ancestry($className);
         $cares = array_map(
-            fn($c) => $cares[$c] ?? null,
+            function ($c) use ($globalCares) {
+                return $globalCares[$c] ?? null;
+            },
             $possibleClassNames,
         );
-        $cares = array_filter($cares, fn($c) => !is_null($c));
+        $cares = array_filter(
+            $cares,
+            function ($c) {
+                return !is_null($c);
+            }
+        );
         $cares = array_merge(...array_values($cares));
         $cares = array_unique($cares);
 
