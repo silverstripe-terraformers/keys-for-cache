@@ -90,7 +90,10 @@ create really simple cache keys which we invalidate when dependencies require th
 
 ## Setup and configuration
 
-Preamble: When we talk about "changes to records", this includes all C.R.U.D. actions.
+**Preamble:** When we talk about "changes to records", this includes all C.R.U.D. actions.
+
+**Relationship config:** In order for this module to function, we need to understand **both directions** of any
+relationship that you create a `care` for. [More on this here](docs/en/relationship-config.md).
 
 ### Has cache key
 
