@@ -8,16 +8,18 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage;
 
-class CaresTest extends SapphireTest
+class ExtendedCaresTest extends SapphireTest
 {
-    protected static $fixture_file = 'CaresTest.yml'; // phpcs:ignore
+    protected static $fixture_file = 'ExtendedCaresTest.yml'; // phpcs:ignore
 
     protected static $extra_dataobjects = [
         CaresPage::class,
         CaredBelongsToModel::class,
         CaredHasManyModel::class,
         CaredHasOneModel::class,
+        ExtendedCaresPage::class,
     ];
 
     public function testCaresPureHasOne(): void
@@ -25,7 +27,7 @@ class CaresTest extends SapphireTest
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
 
-        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        $page = $this->objFromFixture(ExtendedCaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredBelongsToModel::class, 'model1');
 
         // Check that we're set up correctly
@@ -53,7 +55,7 @@ class CaresTest extends SapphireTest
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
 
-        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        $page = $this->objFromFixture(ExtendedCaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredBelongsToModel::class, 'model1');
 
         // Check that we're set up correctly
@@ -81,7 +83,7 @@ class CaresTest extends SapphireTest
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
 
-        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        $page = $this->objFromFixture(ExtendedCaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredHasOneModel::class, 'model1');
 
         // Check that we're set up correctly
@@ -112,7 +114,7 @@ class CaresTest extends SapphireTest
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
 
-        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        $page = $this->objFromFixture(ExtendedCaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredHasManyModel::class, 'model1');
 
         $originalKey = $page->getCacheKey();

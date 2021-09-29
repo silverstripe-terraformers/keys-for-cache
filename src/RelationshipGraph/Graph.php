@@ -122,7 +122,8 @@ class Graph
         foreach ($originConfig as $relation => $relationString) {
             [$relationClassName, $relationField] = $this->getClassAndRelation($relationString);
 
-            if ($relationClassName !== $destinationClassName) {
+            // Using is_a() here so that we find relationships to descendent classes as well
+            if (!is_a(Injectable::singleton($destinationClassName), $relationClassName)) {
                 continue;
             }
 
