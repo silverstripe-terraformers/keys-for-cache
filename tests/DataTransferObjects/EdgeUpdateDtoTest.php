@@ -21,7 +21,7 @@ class EdgeUpdateDtoTest extends SapphireTest
         $nodeFrom = new Node(Page::class);
         $nodeTo = new Node(SiteTree::class);
         $relationship = 'Parent';
-        $edge = new Edge($nodeFrom, $nodeTo, $relationship);
+        $edge = new Edge($nodeFrom, $nodeTo, $relationship, 'has_one');
         $edgeUpdate = new EdgeUpdateDto($edge, $page);
 
         $this->assertNotNull($edgeUpdate->getInstance());

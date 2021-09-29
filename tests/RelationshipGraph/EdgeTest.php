@@ -16,10 +16,11 @@ class EdgeTest extends SapphireTest
         $nodeTo = new Node(SiteTree::class);
         $relationship = 'Parent';
 
-        $edge = new Edge($nodeFrom, $nodeTo, $relationship);
+        $edge = new Edge($nodeFrom, $nodeTo, $relationship, 'has_one');
 
         $this->assertEquals(Page::class, $edge->getFromClassName());
         $this->assertEquals(SiteTree::class, $edge->getToClassName());
         $this->assertEquals('Parent', $edge->getRelation());
+        $this->assertEquals('has_one', $edge->getRelationType());
     }
 }

@@ -77,7 +77,7 @@ class GraphTest extends SapphireTest
         $fromNode = new Node(SiteTree::class);
         $to = new Node(CaresPage::class);
 
-        $edge = new Edge($fromNode, $to, 'Parent');
+        $edge = new Edge($fromNode, $to, 'Parent', 'has_one');
 
         $add->invoke($graph, $edge);
 
@@ -107,7 +107,7 @@ class GraphTest extends SapphireTest
         $fromNode = new Node(SiteTree::class);
         $to = new Node(CaresPage::class);
 
-        $edge = new Edge($fromNode, $to, 'Parent');
+        $edge = new Edge($fromNode, $to, 'Parent', 'has_one');
 
         $add->invoke($graph, $edge);
 

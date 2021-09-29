@@ -134,6 +134,26 @@ class Graph
         return null;
     }
 
+    /**
+     * Given a relation name, determine the relation type
+     *
+     * @return string has_one, has_many, many_many, belongs_many_many or belongs_to
+     */
+    private function getRelationType(string $className, string $relation): ?string
+    {
+        $types = ['has_one', 'has_many', 'many_many', 'belongs_many_many', 'belongs_to'];
+
+        foreach ($types as $type) {
+            $relations = Config::inst()->get($className, $type);
+
+            if ($relations && isset($relations[$relation])) {
+                return $type;
+            }
+        }
+
+        return null;
+    }
+
     private function build(): void
     {
         // Relations only exist from data objects
@@ -150,7 +170,7 @@ class Graph
                 [$touchClassName] = $this->getClassAndRelation($touchClassName);
 
                 $touchNode = $this->findOrCreateNode($touchClassName);
-                $edge = new Edge($node, $touchNode, $relation);
+                $edge = new Edge($node, $touchNode, $relation, $this->getRelationType($className, $relation));
                 $this->addEdge($edge);
             }
 
@@ -161,7 +181,12 @@ class Graph
                 // A dot notation is available, so we can map this immediately and continue
                 if ($caresRelation) {
                     $careNode = $this->findOrCreateNode($careClassName);
-                    $this->addEdge(new Edge($careNode, $node, $caresRelation));
+                    $this->addEdge(new Edge(
+                        $careNode,
+                        $node,
+                        $caresRelation,
+                        $this->getRelationType($careClassName, $caresRelation)
+                    ));
 
                     continue;
                 }
@@ -198,7 +223,12 @@ class Graph
                     }
 
                     $careNode = $this->findOrCreateNode($careClassName);
-                    $this->addEdge(new Edge($careNode, $node, $caresRelation));
+                    $this->addEdge(new Edge(
+                        $careNode,
+                        $node,
+                        $caresRelation,
+                        $this->getRelationType($careClassName, $caresRelation)
+                    ));
 
                     continue;
                 }
@@ -214,7 +244,12 @@ class Graph
                 // Yes, it was a has_many on the other end of the relationship. We can add this Edge and continue
                 if ($caresRelation) {
                     $careNode = $this->findOrCreateNode($careClassName);
-                    $this->addEdge(new Edge($careNode, $node, $caresRelation));
+                    $this->addEdge(new Edge(
+                        $careNode,
+                        $node,
+                        $caresRelation,
+                        $this->getRelationType($careClassName, $caresRelation)
+                    ));
 
                     continue;
                 }
@@ -235,7 +270,12 @@ class Graph
                 }
 
                 $careNode = $this->findOrCreateNode($careClassName);
-                $this->addEdge(new Edge($careNode, $node, $caresRelation));
+                $this->addEdge(new Edge(
+                    $careNode,
+                    $node,
+                    $caresRelation,
+                    $this->getRelationType($careClassName, $caresRelation)
+                ));
             }
         }
     }
