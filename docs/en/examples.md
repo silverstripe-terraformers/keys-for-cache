@@ -173,8 +173,8 @@ SilverStripe\SiteConfig\SiteConfig:
     has_cache_key: true
     cares:
         # Our SiteConfig has a couple of CTA buttons available that authors can edit, we want to care about those
-        FacebookLink
-        TwitterLink
+        - FacebookLink
+        - TwitterLink
     global_cares:
         # SiteTree added as a global care. This will mean that the SiteConfig cache key will be invalidated any time
         # any change is made to a SiteTree record
