@@ -7,16 +7,14 @@ class Edge
     private Node $from;
     private Node $to;
     private string $relation;
+    private string $relationType;
 
-    /**
-     * @param Node $from
-     * @param Node $to
-     */
-    public function __construct(Node $from, Node $to, string $relation)
+    public function __construct(Node $from, Node $to, string $relation, string $relationType)
     {
         $this->from = $from;
         $this->to = $to;
         $this->relation = $relation;
+        $this->relationType = $relationType;
     }
 
     public function getFromClassName(): string
@@ -32,5 +30,10 @@ class Edge
     public function getRelation(): string
     {
         return $this->relation;
+    }
+
+    public function getRelationType(): string
+    {
+        return $this->relationType;
     }
 }

@@ -2,9 +2,7 @@
 
 namespace Terraformers\KeysForCache\Services;
 
-use Exception;
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
@@ -45,55 +43,13 @@ abstract class CacheProcessingService
         $this->processGlobalCares($className);
     }
 
-    /**
-     * Given a relation name, determine the relation type
-     *
-     * @param string $component Name of component
-     * @return string has_one, has_many, many_many, belongs_many_many or belongs_to
-     */
-    private function getRelationType(string $className, string $relation): ?string
-    {
-        $types = ['has_one', 'has_many', 'many_many', 'belongs_many_many', 'belongs_to'];
-
-        foreach ($types as $type) {
-            $relations = Config::inst()->get($className, $type);
-
-            if ($relations && isset($relations[$relation])) {
-                return $type;
-            }
-        }
-
-        return null;
-    }
-
     private function updateEdge(EdgeUpdateDto $dto): array
     {
         $edge = $dto->getEdge();
         $instance = $dto->getInstance();
-        $relation = $this->getRelationType($edge->getFromClassName(), $edge->getRelation());
+        $relationType = $edge->getRelationType();
 
-        // No relationship exists for this From class
-        if (!$relation) {
-            // Check to see whether it is a has_one relationship in the other direction
-            $relation = $this->getRelationType($edge->getToClassName(), $edge->getRelation());
-
-            // If we still can't find a relationship, then we're in an error state
-            if (!$relation) {
-                throw new Exception(sprintf(
-                    'No relationship field found for "%s" between "%s" and "%s"',
-                    $edge->getRelation(),
-                    $edge->getFromClassName(),
-                    $edge->getToClassName()
-                ));
-            }
-
-            $relatedInstances = DataObject::get($edge->getToClassName())
-                ->filter($edge->getRelation().'ID', $instance->ID);
-
-            return $this->updateInstances($relatedInstances, $dto);
-        }
-
-        if ($relation === 'has_one') {
+        if ($relationType === 'has_one') {
             $idValue = $instance->getField($edge->getRelation().'ID');
 
             // A relationship field does exist here, but there is no relationship active
@@ -116,15 +72,15 @@ abstract class CacheProcessingService
 
         // belongs_to is a has_one <-> has_one, however, there is no ID field present here. Instead we just need to call
         // the method that the ORM provides
-        if ($relation === 'belongs_to') {
+        if ($relationType === 'belongs_to') {
             return $this->updateInstance($instance->{$edge->getRelation()}());
         }
 
-        if ($relation === 'has_many') {
+        if ($relationType === 'has_many') {
             return $this->updateInstances($instance->{$edge->getRelation()}(), $dto);
         }
 
-        if ($relation === 'many_many') {
+        if ($relationType === 'many_many') {
             // TODO: Handle this?
         }
 
