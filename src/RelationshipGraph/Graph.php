@@ -27,7 +27,9 @@ class Graph
     {
         return array_filter(
             $this->edges,
-            fn(Edge $e) => $e->getFromClassName() === $from
+            function (Edge $e) use ($from) {
+                return $e->getFromClassName() === $from;
+            }
         );
     }
 
@@ -243,13 +245,17 @@ class Graph
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
 
         $classes = array_map(
-            fn($c) => ['className' => $c, 'cares' => Config::forClass($c)->get('global_cares')],
+            function ($c) {
+                return ['className' => $c, 'cares' => Config::forClass($c)->get('global_cares')];
+            },
             $classes
         );
 
         $classes = array_filter(
             $classes,
-            fn($c) => is_array($c['cares']) && count($c['cares']) > 0
+            function ($c) {
+                return is_array($c['cares']) && count($c['cares']) > 0;
+            }
         );
 
         $classes = array_reduce(

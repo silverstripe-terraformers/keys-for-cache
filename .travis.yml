@@ -9,4 +9,4 @@ jobs:
       env:
         - DB=MYSQL
         - REQUIRE_INSTALLER="4.x-dev"
-        - PHPUNIT_TEST=1
+        - PHPUNIT_COVERAGE_TEST=1

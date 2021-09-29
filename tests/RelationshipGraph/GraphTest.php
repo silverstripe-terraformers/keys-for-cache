@@ -213,7 +213,9 @@ class GraphTest extends SapphireTest
             TouchedHasManyModel::class,
         ];
         $result = array_map(
-            fn(Edge $edge) => $edge->getToClassName(),
+            function (Edge $edge) {
+                return $edge->getToClassName();
+            },
             $graph->getEdges(TouchesPage::class)
         );
 
