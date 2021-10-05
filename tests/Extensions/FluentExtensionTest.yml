@@ -1,0 +1,11 @@
+TractorCow\Fluent\Model\Locale:
+  nz:
+    Title: English
+    Locale: en_NZ
+    URLSegment: nz
+    IsGlobalDefault: 1
+
+# Creation of a Page will itself generate a CacheKey
+Terraformers\KeysForCache\Tests\Mocks\Pages\CachePage:
+  page1:
+    Title: Page 1

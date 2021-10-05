@@ -15,6 +15,7 @@
     "require-dev": {
         "sminnee/phpunit": "^5.7",
         "sminnee/phpunit-mock-objects": "^3.4",
+        "tractorcow/silverstripe-fluent": ">=4.0.0",
         "squizlabs/php_codesniffer": "^3.0"
     },
     "autoload": {

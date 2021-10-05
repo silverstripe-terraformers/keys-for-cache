@@ -2,11 +2,13 @@
 
 namespace Terraformers\KeysForCache\Tests\Extensions;
 
+use Page;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ORM\DataList;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
-use Terraformers\KeysForCache\Tests\Mocks\Pages\GlobalCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CachePage;
+use Terraformers\KeysForCache\Tests\Mocks\Pages\GlobalCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 
 class CacheKeyExtensionTest extends SapphireTest
@@ -121,6 +123,143 @@ class CacheKeyExtensionTest extends SapphireTest
 
         $this->assertNotNull($pageKey);
         $this->assertEquals($key->KeyHash, $pageKey);
+    }
+
+    public function testGetCacheKeyRegenerated(): void
+    {
+        // Page config is $has_cache_key = true, so when we write this record it should generate a CacheKey
+        $page = CachePage::create();
+        $page->write();
+
+        // Fetch all CacheKeys for this ClassName and ID
+        /** @var DataList|CacheKey[] $keys */
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
+
+        // Delete them, so we know we're at square one with no keys available in the DB
+        foreach ($keys as $key) {
+            $key->doArchive();
+        }
+
+        // Make sure we're set up correctly with no existing cache key
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
+
+        $this->assertCount(0, $keys);
+
+        // Requesting getCacheKey should regenerate the key
+        $pageKey = $page->getCacheKey();
+
+        /** @var CacheKey $key */
+        $key = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ])->first();
+
+        $this->assertNotNull($key);
+
+        $this->assertNotNull($pageKey);
+        $this->assertNotEmpty($pageKey);
+
+        // And check that the key itself was not published (as our page wasn't)
+        $this->assertFalse($key->isPublished());
+    }
+
+    public function testGetCacheKeyRegeneratedAndPublished(): void
+    {
+        // Page config is $has_cache_key = true, so when we write this record it should generate a CacheKey
+        $page = CachePage::create();
+        $page->write();
+        $page->publishRecursive();
+
+        // Fetch all CacheKeys for this ClassName and ID
+        /** @var DataList|CacheKey[] $keys */
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
+
+        // Delete them, so we know we're at square one with no keys available in the DB
+        foreach ($keys as $key) {
+            $key->doArchive();
+        }
+
+        // Make sure we're set up correctly with no existing cache key
+        $keys = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ]);
+
+        $this->assertCount(0, $keys);
+
+        // Requesting getCacheKey should regenerate the key
+        $pageKey = $page->getCacheKey();
+
+        /** @var CacheKey $key */
+        $key = CacheKey::get()->filter([
+            'RecordClass' => $page->ClassName,
+            'RecordID' => $page->ID,
+        ])->first();
+
+        $this->assertNotNull($key);
+
+        $this->assertNotNull($pageKey);
+        $this->assertNotEmpty($pageKey);
+
+        // And check that the key itself was published (as our page was)
+        $this->assertTrue($key->isPublished());
+    }
+
+    public function testGetCacheKeyNoDb(): void
+    {
+        $page = CachePage::create();
+
+        $this->assertNull($page->getCacheKey());
+    }
+
+    public function testGetCacheKeyNoKeyConfig(): void
+    {
+        $page = NoCachePage::create();
+        $page->write();
+
+        $this->assertNull($page->getCacheKey());
+    }
+
+    public function testUpdateCMSFields(): void
+    {
+        Page::config()->set('enable-cache-keys-field', true);
+
+        $page = CachePage::create();
+        $page->write();
+
+        $fields = $page->getCMSFields();
+        $this->assertNotNull($fields->dataFieldByName('CacheKeys'));
+    }
+
+    public function testUpdateCMSFieldsNoDisplay(): void
+    {
+        Page::config()->set('enable-cache-keys-field', false);
+
+        $page = CachePage::create();
+        $page->write();
+
+        $fields = $page->getCMSFields();
+        $this->assertNull($fields->dataFieldByName('CacheKeys'));
+    }
+
+    public function testUpdateCMSFieldsNoKeyConfig(): void
+    {
+        Page::config()->set('enable-cache-keys-field', true);
+
+        $page = NoCachePage::create();
+        $page->write();
+
+        $fields = $page->getCMSFields();
+        $this->assertNull($fields->dataFieldByName('CacheKeys'));
     }
 
 }
