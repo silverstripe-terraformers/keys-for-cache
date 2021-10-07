@@ -7,9 +7,12 @@ use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchedPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage;
+use Terraformers\KeysForCache\Tests\Mocks\Relation\TouchesPageTouchedThroughModel;
 
 class TouchesTest extends SapphireTest
 {
@@ -18,9 +21,12 @@ class TouchesTest extends SapphireTest
     protected static $extra_dataobjects = [
         TouchedPage::class,
         TouchesPage::class,
+        TouchesPageTouchedThroughModel::class,
         TouchedBelongsToModel::class,
         TouchedHasManyModel::class,
         TouchedHasOneModel::class,
+        TouchedManyManyModel::class,
+        TouchedThroughModel::class,
         TouchesBelongsToModel::class,
     ];
 
@@ -93,6 +99,62 @@ class TouchesTest extends SapphireTest
         $this->assertNotNull($originalKey);
         $this->assertNotEmpty($originalKey);
 
+        $page->forceChange();
+        $page->write();
+
+        $newKey = $model->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($originalKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    public function testTouchesManyMany(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(TouchesPage::class, 'page1');
+        $model = $this->objFromFixture(TouchedManyManyModel::class, 'model1');
+
+        // Check we're set up correctly
+        $this->assertCount(1, $page->TouchedManyManyModels());
+        $this->assertEquals($model->ID, $page->TouchedManyManyModels()->first()->ID);
+
+        $originalKey = $model->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        // Begin triggering changes
+        $page->forceChange();
+        $page->write();
+
+        $newKey = $model->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($originalKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    public function testTouchesThrough(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(TouchesPage::class, 'page1');
+        $model = $this->objFromFixture(TouchedThroughModel::class, 'model1');
+
+        // Check we're set up correctly
+        $this->assertCount(1, $page->TouchedThroughModels());
+        $this->assertEquals($model->ID, $page->TouchedThroughModels()->first()->ID);
+
+        $originalKey = $model->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        // Begin triggering changes
         $page->forceChange();
         $page->write();
 

@@ -76,12 +76,11 @@ abstract class CacheProcessingService
             return $this->updateInstance($instance->{$edge->getRelation()}());
         }
 
-        if ($relationType === 'has_many') {
+        if ($relationType === 'has_many'
+            || $relationType === 'many_many'
+            || $relationType === 'belongs_many_many'
+        ) {
             return $this->updateInstances($instance->{$edge->getRelation()}(), $dto);
-        }
-
-        if ($relationType === 'many_many') {
-            // TODO: Handle this?
         }
 
         return [];
