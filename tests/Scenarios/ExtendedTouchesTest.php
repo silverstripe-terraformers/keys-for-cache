@@ -7,11 +7,14 @@ use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedTouchedPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedTouchesPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchedPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage;
+use Terraformers\KeysForCache\Tests\Mocks\Relation\TouchesPageTouchedThroughModel;
 
 class ExtendedTouchesTest extends SapphireTest
 {
@@ -22,9 +25,12 @@ class ExtendedTouchesTest extends SapphireTest
         ExtendedTouchesPage::class,
         TouchedPage::class,
         TouchesPage::class,
+        TouchesPageTouchedThroughModel::class,
         TouchedBelongsToModel::class,
         TouchedHasManyModel::class,
         TouchedHasOneModel::class,
+        TouchedManyManyModel::class,
+        TouchedThroughModel::class,
         TouchesBelongsToModel::class,
     ];
 

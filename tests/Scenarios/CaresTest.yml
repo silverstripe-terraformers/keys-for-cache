@@ -10,6 +10,14 @@ Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel:
   model1:
     Title: Has Many Model 1
 
+Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel:
+  model1:
+    Title: Many Many Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel:
+  model1:
+    Title: Through Model 1
+
 Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage:
   page1:
     Title: Page 1
@@ -17,3 +25,7 @@ Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage:
     CaredHasOneModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel.model1
     CaredHasManyModels:
       - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel.model1
+    CaredManyManyModels:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel.model1
+    CaredThroughModels:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel.model1

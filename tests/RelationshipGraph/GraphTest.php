@@ -12,15 +12,21 @@ use Terraformers\KeysForCache\RelationshipGraph\Node;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CachePage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\GlobalCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage;
+use Terraformers\KeysForCache\Tests\Mocks\Relation\CaresPageCaredThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relation\TouchesPageTouchedThroughModel;
 
 class GraphTest extends SapphireTest
 {
@@ -178,11 +184,23 @@ class GraphTest extends SapphireTest
             'TouchedBelongsToModel' => TouchedBelongsToModel::class,
             'TouchedHasOneModel' => TouchedHasOneModel::class,
             'TouchedHasManyModels' => TouchedHasManyModel::class,
+            'TouchedManyManyModels' => TouchedManyManyModel::class,
+            'TouchedThroughModels' => [
+                'through' => TouchesPageTouchedThroughModel::class,
+                'from' => 'Parent',
+                'to' => 'TouchedThroughModel',
+            ],
         ];
         $expectPageTwoCares = [
             'CaredBelongsToModel' => CaredBelongsToModel::class,
             'CaredHasOneModel' => CaredHasOneModel::class,
             'CaredHasManyModels' => CaredHasManyModel::class,
+            'CaredManyManyModels' => CaredManyManyModel::class,
+            'CaredThroughModels' => [
+                'through' => CaresPageCaredThroughModel::class,
+                'from' => 'Parent',
+                'to' => 'CaredThroughModel',
+            ],
         ];
 
         $this->assertEquals($expectPageOneTouch, $pageOneTouch, '', 0.0, 10, true);
@@ -212,6 +230,8 @@ class GraphTest extends SapphireTest
             TouchedBelongsToModel::class,
             TouchedHasOneModel::class,
             TouchedHasManyModel::class,
+            TouchedManyManyModel::class,
+            TouchedThroughModel::class,
         ];
         $result = array_map(
             function (Edge $edge) {

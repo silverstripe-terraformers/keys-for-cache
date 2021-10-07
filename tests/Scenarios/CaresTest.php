@@ -2,12 +2,16 @@
 
 namespace Terraformers\KeysForCache\Tests\Scenarios;
 
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
+use Terraformers\KeysForCache\Tests\Mocks\Relation\CaresPageCaredThroughModel;
 
 class CaresTest extends SapphireTest
 {
@@ -15,9 +19,12 @@ class CaresTest extends SapphireTest
 
     protected static $extra_dataobjects = [
         CaresPage::class,
+        CaresPageCaredThroughModel::class,
         CaredBelongsToModel::class,
         CaredHasManyModel::class,
         CaredHasOneModel::class,
+        CaredManyManyModel::class,
+        CaredThroughModel::class,
     ];
 
     public function testCaresPureHasOne(): void
@@ -44,7 +51,7 @@ class CaresTest extends SapphireTest
         $newKey = $page->getCacheKey();
 
         $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
+        $this->assertNotEmpty($newKey);
         $this->assertNotEquals($originalKey, $newKey);
     }
 
@@ -72,7 +79,7 @@ class CaresTest extends SapphireTest
         $newKey = $page->getCacheKey();
 
         $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
+        $this->assertNotEmpty($newKey);
         $this->assertNotEquals($originalKey, $newKey);
     }
 
@@ -100,7 +107,7 @@ class CaresTest extends SapphireTest
         $newKey = $page->getCacheKey();
 
         $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
+        $this->assertNotEmpty($newKey);
         $this->assertNotEquals($originalKey, $newKey);
     }
 
@@ -126,7 +133,58 @@ class CaresTest extends SapphireTest
         $newKey = $page->getCacheKey();
 
         $this->assertNotNull($newKey);
+        $this->assertNotEmpty($newKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    public function testManyMany(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        $model = $this->objFromFixture(CaredManyManyModel::class, 'model1');
+
+        // Check we're set up correctly
+        $this->assertCount(1, $page->CaredManyManyModels());
+        $this->assertEquals($model->ID, $page->CaredManyManyModels()->first()->ID);
+
+        $originalKey = $page->getCacheKey();
+
+        $this->assertNotNull($originalKey);
         $this->assertNotEmpty($originalKey);
+
+        // Begin triggering changes
+        $model->forceChange();
+        $model->write();
+
+        $newKey = $page->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($newKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    public function testManyManyThrough(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        $model = $this->objFromFixture(CaredThroughModel::class, 'model1');
+
+        $originalKey = $page->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        $model->forceChange();
+        $model->write();
+
+        $newKey = $page->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($newKey);
         $this->assertNotEquals($originalKey, $newKey);
     }
 }

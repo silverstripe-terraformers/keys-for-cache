@@ -7,8 +7,11 @@ use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage;
+use Terraformers\KeysForCache\Tests\Mocks\Relation\CaresPageCaredThroughModel;
 
 class ExtendedCaresTest extends SapphireTest
 {
@@ -16,9 +19,12 @@ class ExtendedCaresTest extends SapphireTest
 
     protected static $extra_dataobjects = [
         CaresPage::class,
+        CaresPageCaredThroughModel::class,
         CaredBelongsToModel::class,
         CaredHasManyModel::class,
         CaredHasOneModel::class,
+        CaredManyManyModel::class,
+        CaredThroughModel::class,
         ExtendedCaresPage::class,
     ];
 
