@@ -77,7 +77,7 @@ class GraphTest extends SapphireTest
         $reflectionClass = new ReflectionClass(Graph::class);
         $add = $reflectionClass->getMethod('addEdge');
         $add->setAccessible(true);
-        $get = $reflectionClass->getMethod('getEdges');
+        $get = $reflectionClass->getMethod('getEdgesFrom');
         $get->setAccessible(true);
 
         $fromNode = new Node(SiteTree::class);
@@ -107,7 +107,7 @@ class GraphTest extends SapphireTest
         $reflectionClass = new ReflectionClass(Graph::class);
         $add = $reflectionClass->getMethod('addEdge');
         $add->setAccessible(true);
-        $get = $reflectionClass->getMethod('getEdges');
+        $get = $reflectionClass->getMethod('getEdgesFrom');
         $get->setAccessible(true);
 
         $fromNode = new Node(SiteTree::class);
@@ -209,7 +209,7 @@ class GraphTest extends SapphireTest
         $this->assertEquals($expectPageTwoCares, $pageTwoCares, '', 0.0, 10, true);
     }
 
-    public function testGetEdges(): void
+    public function testGetEdgesFrom(): void
     {
         $graph = Graph::singleton();
 
@@ -221,7 +221,7 @@ class GraphTest extends SapphireTest
             function(Edge $edge) {
                 return $edge->getToClassName();
             },
-            $graph->getEdges(CaredHasOneModel::class)
+            $graph->getEdgesFrom(CaredHasOneModel::class)
         );
 
         $this->assertEquals($expected, $result, '', 0.0, 10, true);
@@ -237,7 +237,7 @@ class GraphTest extends SapphireTest
             function (Edge $edge) {
                 return $edge->getToClassName();
             },
-            $graph->getEdges(TouchesPage::class)
+            $graph->getEdgesFrom(TouchesPage::class)
         );
 
         $this->assertEquals($expected, $result, '', 0.0, 10, true);

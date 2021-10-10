@@ -19,11 +19,11 @@ class Graph
 
     public function __construct()
     {
-        $this->build();
-        $this->createGlobalCares();
+        $this->buildEdges();
+        $this->buildGlobalCares();
     }
 
-    public function getEdges(string $from): array
+    public function getEdgesFrom(string $from): array
     {
         return array_filter(
             $this->edges,
@@ -174,7 +174,7 @@ class Graph
         return null;
     }
 
-    private function build(): void
+    private function buildEdges(): void
     {
         // Relations only exist from data objects
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
@@ -332,7 +332,7 @@ class Graph
         }
     }
 
-    private function createGlobalCares(): void
+    private function buildGlobalCares(): void
     {
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
 

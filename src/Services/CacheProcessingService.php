@@ -123,7 +123,7 @@ abstract class CacheProcessingService
 
     private function createEdges(DataObject $instance): array
     {
-        $applicableEdges = $this->getGraph()->getEdges($instance->getClassName());
+        $applicableEdges = $this->getGraph()->getEdgesFrom($instance->getClassName());
 
         if (count($applicableEdges) === 0) {
             return [];
