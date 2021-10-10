@@ -41,7 +41,7 @@ class CacheTestTask extends BuildTask
             }
 
             self::log(sprintf("Updating %s", $current));
-            $edges = $config->getEdges($current);
+            $edges = $config->getEdgesFrom($current);
             $edgesUpdated[] = $current;
 
             /** @var Edge $edge */
