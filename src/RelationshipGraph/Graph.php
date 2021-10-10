@@ -472,14 +472,13 @@ class Graph
         // A dot notation is available, so we can map this immediately and continue
         if ($caresRelation) {
             $careNode = $this->findOrCreateNode($careClassName);
-            $this->addEdge(new Edge(
+
+            return new Edge(
                 $careNode,
                 $node,
                 $caresRelation,
                 $this->getRelationType($careClassName, $caresRelation)
-            ));
-
-            return null;
+            );
         }
 
         $careConfig = Config::forClass($careClassName);
