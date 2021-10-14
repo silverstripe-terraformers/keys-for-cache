@@ -3,7 +3,7 @@
 namespace Terraformers\KeysForCache\Tests\RelationshipGraph;
 
 use ReflectionClass;
-use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\SiteConfig\SiteConfig;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
@@ -13,7 +13,6 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
@@ -33,9 +32,16 @@ class GraphTest extends SapphireTest
     public function testAddGetNode(): void
     {
         $graph = Graph::singleton();
-        $graph->flush();
 
+        // Need to use ReflectionClass as the properties and methods we want to test are private
         $reflectionClass = new ReflectionClass(Graph::class);
+
+        // Need to flush these properties so that we can explicitly test these methods
+        $property = $reflectionClass->getProperty('nodes');
+        $property->setAccessible(true);
+        $property->setValue($graph, []);
+
+        // Set accessible for the methods we are testing
         $add = $reflectionClass->getMethod('addNode');
         $add->setAccessible(true);
         $get = $reflectionClass->getMethod('getNode');
@@ -54,9 +60,16 @@ class GraphTest extends SapphireTest
     public function testAddGetNodeNull(): void
     {
         $graph = Graph::singleton();
-        $graph->flush();
 
+        // Need to use ReflectionClass as the properties and methods we want to test are private
         $reflectionClass = new ReflectionClass(Graph::class);
+
+        // Need to flush these properties so that we can explicitly test these methods
+        $property = $reflectionClass->getProperty('nodes');
+        $property->setAccessible(true);
+        $property->setValue($graph, []);
+
+        // Set accessible for the methods we are testing
         $add = $reflectionClass->getMethod('addNode');
         $add->setAccessible(true);
         $get = $reflectionClass->getMethod('getNode');
@@ -69,66 +82,19 @@ class GraphTest extends SapphireTest
         $this->assertNull($get->invoke($graph, NoCachePage::class));
     }
 
-    public function testAddGetEdge(): void
-    {
-        $graph = Graph::singleton();
-        $graph->flush();
-
-        $reflectionClass = new ReflectionClass(Graph::class);
-        $add = $reflectionClass->getMethod('addEdge');
-        $add->setAccessible(true);
-        $get = $reflectionClass->getMethod('getEdgesFrom');
-        $get->setAccessible(true);
-
-        $fromNode = new Node(SiteTree::class);
-        $to = new Node(CaresPage::class);
-
-        $edge = new Edge($fromNode, $to, 'Parent', 'has_one');
-
-        $add->invoke($graph, $edge);
-
-        /** @var Edge $edge */
-        $edges = $get->invoke($graph, SiteTree::class);
-
-        $this->assertCount(1, $edges);
-
-        $edge = array_pop($edges);
-
-        $this->assertInstanceOf(Edge::class, $edge);
-        $this->assertEquals(SiteTree::class, $edge->getFromClassName());
-        $this->assertEquals(SiteTree::class, $edge->getFromClassName());
-    }
-
-    public function testAddGetEdgeNull(): void
-    {
-        $graph = Graph::singleton();
-        $graph->flush();
-
-        $reflectionClass = new ReflectionClass(Graph::class);
-        $add = $reflectionClass->getMethod('addEdge');
-        $add->setAccessible(true);
-        $get = $reflectionClass->getMethod('getEdgesFrom');
-        $get->setAccessible(true);
-
-        $fromNode = new Node(SiteTree::class);
-        $to = new Node(CaresPage::class);
-
-        $edge = new Edge($fromNode, $to, 'Parent', 'has_one');
-
-        $add->invoke($graph, $edge);
-
-        /** @var Edge $edge */
-        $edges = $get->invoke($graph, CaresPage::class);
-
-        $this->assertCount(0, $edges);
-    }
-
     public function testFindOrCreateNode(): void
     {
         $graph = Graph::singleton();
-        $graph->flush();
 
+        // Need to use ReflectionClass as the properties and methods we want to test are private
         $reflectionClass = new ReflectionClass(Graph::class);
+
+        // Need to flush these properties so that we can explicitly test these methods
+        $property = $reflectionClass->getProperty('nodes');
+        $property->setAccessible(true);
+        $property->setValue($graph, []);
+
+        // Set accessible for the methods we are testing
         $find = $reflectionClass->getMethod('findOrCreateNode');
         $find->setAccessible(true);
         $get = $reflectionClass->getMethod('getNode');
@@ -261,5 +227,46 @@ class GraphTest extends SapphireTest
 
         $this->assertEquals(GlobalCaresPage::class, array_pop($siteConfigClears));
         $this->assertEquals(GlobalCaresPage::class, array_pop($cachePageClears));
+    }
+
+    public function testCacheSetOnFlush(): void
+    {
+        $graph = Graph::singleton();
+        // Using ReflectionClass so that we can reset and test that these properties are populated as we expect
+        $reflectionClass = new ReflectionClass(Graph::class);
+        $edges = $reflectionClass->getProperty('edges');
+        $edges->setAccessible(true);
+        $cares = $reflectionClass->getProperty('global_cares');
+        $cares->setAccessible(true);
+
+        // Reset property values
+        $edges->setValue($graph, []);
+        $cares->setValue($graph, []);
+        // Clear any cache that would have been created during initial instantiation
+        $cache = Injector::inst()->get(Graph::CACHE_KEY);
+        $cache->clear();
+
+        // Check that we're set up with no cache and no property values
+        $this->assertEmpty($edges->getValue($graph));
+        $this->assertEmpty($cares->getValue($graph));
+        $this->assertFalse($cache->has(Graph::CACHE_KEY_EDGES));
+        $this->assertFalse($cache->has(Graph::CACHE_KEY_GLOBAL_CARES));
+
+        // Trigger a flush, which should rebuild our cache and set the property values again
+        Graph::singleton()::flush();
+
+        // Check that our edges and global_cares properties have been filled during the flush
+        $this->assertNotEmpty($edges->getValue($graph));
+        $this->assertNotEmpty($cares->getValue($graph));
+        // There should now also be cache values
+        $this->assertTrue($cache->has(Graph::CACHE_KEY_EDGES));
+        $this->assertTrue($cache->has(Graph::CACHE_KEY_GLOBAL_CARES));
+    }
+
+    protected function tearDown(): void
+    {
+        Injector::inst()->get(Graph::CACHE_KEY)->clear();
+
+        parent::tearDown();
     }
 }
