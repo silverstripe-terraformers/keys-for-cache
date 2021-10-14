@@ -1,0 +1,8 @@
+---
+Name: kfc-cache
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.KeysForCache:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "KeysForCache"
