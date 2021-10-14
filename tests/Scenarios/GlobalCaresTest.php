@@ -2,8 +2,10 @@
 
 namespace Terraformers\KeysForCache\Tests\Scenarios;
 
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\SiteConfig\SiteConfig;
+use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\GlobalCaresPage;
 
@@ -38,5 +40,12 @@ class GlobalCaresTest extends SapphireTest
         $this->assertNotNull($newKey);
         $this->assertNotEmpty($originalKey);
         $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    protected function tearDown(): void
+    {
+        Injector::inst()->get(Graph::CACHE_KEY)->clear();
+
+        parent::tearDown();
     }
 }

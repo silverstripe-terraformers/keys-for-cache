@@ -2,7 +2,9 @@
 
 namespace Terraformers\KeysForCache\Tests\Scenarios;
 
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
+use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasManyModel;
@@ -195,5 +197,12 @@ class DotNotationCaresTest extends SapphireTest
         $this->assertNotNull($newKey);
         $this->assertNotEmpty($originalKey);
         $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    protected function tearDown(): void
+    {
+        Injector::inst()->get(Graph::CACHE_KEY)->clear();
+
+        parent::tearDown();
     }
 }

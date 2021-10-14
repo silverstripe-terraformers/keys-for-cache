@@ -3,15 +3,22 @@
 namespace Terraformers\KeysForCache\RelationshipGraph;
 
 use Exception;
+use Psr\SimpleCache\CacheInterface;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Config\Config_ForClass;
+use SilverStripe\Core\Flushable;
 use SilverStripe\Core\Injector\Injectable;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataObject;
 
-class Graph
+class Graph implements Flushable
 {
     use Injectable;
+
+    public const CACHE_KEY = CacheInterface::class . '.KeysForCache';
+    public const CACHE_KEY_EDGES = 'Edges';
+    public const CACHE_KEY_GLOBAL_CARES = 'GlobalCares';
 
     private array $nodes = [];
     private array $edges = [];
@@ -19,30 +26,38 @@ class Graph
 
     public function __construct()
     {
+        // Make sure that our Edges and GlobalCares are built and available
         $this->buildEdges();
         $this->buildGlobalCares();
+    }
+
+    public static function flush()
+    {
+        Injector::inst()->get(self::CACHE_KEY)->clear();
+
+        $inst = static::singleton();
+        $inst->buildEdges();
+        $inst->buildGlobalCares();
     }
 
     public function getEdgesFrom(string $from): array
     {
         return array_filter(
-            $this->edges,
+            $this->getEdges(),
             function (Edge $e) use ($from) {
                 return $e->getFromClassName() === $from;
             }
         );
     }
 
+    public function getEdges(): array
+    {
+        return $this->edges;
+    }
+
     public function getGlobalCares(): array
     {
         return $this->global_cares;
-    }
-
-    public function flush(): void
-    {
-        $this->nodes = [];
-        $this->edges = [];
-        $this->global_cares = [];
     }
 
     private function addNode(Node $node): self
@@ -69,13 +84,6 @@ class Graph
         return $node;
     }
 
-    private function addEdge(Edge $edge): self
-    {
-        $this->edges[] = $edge;
-
-        return $this;
-    }
-
     private function getClassAndRelation(string $input): array
     {
         $res = explode('.', $input);
@@ -83,9 +91,9 @@ class Graph
         return [$res[0], $res[1] ?? null];
     }
 
-    private function getRelationshipConfig(?array $keys, Config_ForClass $config): array
+    private function getRelationshipConfig(?array $relationships, Config_ForClass $config): array
     {
-        if (!$keys) {
+        if (!$relationships) {
             return [];
         }
 
@@ -99,8 +107,8 @@ class Graph
 
         return array_filter(
             $relationshipConfigs,
-            function ($relationship) use ($keys) {
-                return in_array($relationship, $keys);
+            function ($relationship) use ($relationships) {
+                return in_array($relationship, $relationships);
             },
             ARRAY_FILTER_USE_KEY
         );
@@ -176,8 +184,18 @@ class Graph
 
     private function buildEdges(): void
     {
+        $cache = Injector::inst()->get(self::CACHE_KEY);
+
+        if ($cache->has(self::CACHE_KEY_EDGES)) {
+            $this->edges = $cache->get(self::CACHE_KEY_EDGES);
+
+            return;
+        }
+
         // Relations only exist from data objects
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
+        // The Edges that we're about to create
+        $edges = [];
 
         foreach ($classes as $className) {
             $config = Config::forClass($className);
@@ -196,7 +214,7 @@ class Graph
                     // There is a chance that there was no valid Edge (for a reason that we do understand, and did not
                     // want to throw an error for)
                     if ($edge) {
-                        $this->addEdge($edge);
+                        $edges[] = $edge;
                     }
 
                     continue;
@@ -206,7 +224,7 @@ class Graph
 
                 $touchNode = $this->findOrCreateNode($touchClassName);
                 $edge = new Edge($node, $touchNode, $relation, $this->getRelationType($className, $relation));
-                $this->addEdge($edge);
+                $edges[] = $edge;
             }
 
             // $cares Edges always need to go $from the class being cared about $to this class
@@ -224,7 +242,7 @@ class Graph
                     // There is a chance that there was no valid Edge (for a reason that we do understand, and did not
                     // want to throw an error for)
                     if ($edge) {
-                        $this->addEdge($edge);
+                        $edges[] = $edge;
                     }
 
                     continue;
@@ -237,12 +255,12 @@ class Graph
                 // A dot notation is available, so we can map this immediately and continue
                 if ($caresRelation) {
                     $careNode = $this->findOrCreateNode($careClassName);
-                    $this->addEdge(new Edge(
+                    $edges[] = new Edge(
                         $careNode,
                         $node,
                         $caresRelation,
                         $this->getRelationType($careClassName, $caresRelation)
-                    ));
+                    );
 
                     continue;
                 }
@@ -273,12 +291,12 @@ class Graph
                     }
 
                     $careNode = $this->findOrCreateNode($careClassName);
-                    $this->addEdge(new Edge(
+                    $edges[] = new Edge(
                         $careNode,
                         $node,
                         $caresRelation,
                         $this->getRelationType($careClassName, $caresRelation)
-                    ));
+                    );
 
                     continue;
                 }
@@ -294,12 +312,12 @@ class Graph
                 // Yes, it was a has_many on the other end of the relationship. We can add this Edge and continue
                 if ($caresRelation) {
                     $careNode = $this->findOrCreateNode($careClassName);
-                    $this->addEdge(new Edge(
+                    $edges[] = new Edge(
                         $careNode,
                         $node,
                         $caresRelation,
                         $this->getRelationType($careClassName, $caresRelation)
-                    ));
+                    );
 
                     continue;
                 }
@@ -322,18 +340,29 @@ class Graph
                 }
 
                 $careNode = $this->findOrCreateNode($careClassName);
-                $this->addEdge(new Edge(
+                $edges[] = new Edge(
                     $careNode,
                     $node,
                     $caresRelation,
                     $this->getRelationType($careClassName, $caresRelation)
-                ));
+                );
             }
         }
+
+        $cache->set(self::CACHE_KEY_EDGES, $edges);
+        $this->edges = $cache->get(self::CACHE_KEY_EDGES);
     }
 
     private function buildGlobalCares(): void
     {
+        $cache = Injector::inst()->get(self::CACHE_KEY);
+
+        if ($cache->has(self::CACHE_KEY_GLOBAL_CARES)) {
+            $this->global_cares = $cache->get(self::CACHE_KEY_GLOBAL_CARES);
+
+            return;
+        }
+
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
 
         $classes = array_map(
@@ -366,7 +395,8 @@ class Graph
             []
         );
 
-        $this->global_cares = $classes;
+        $cache->set(self::CACHE_KEY_GLOBAL_CARES, $classes);
+        $this->global_cares = $cache->get(self::CACHE_KEY_GLOBAL_CARES);
     }
 
     private function getThroughClassAndToField(array $throughData): ?array
