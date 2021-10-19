@@ -1,8 +1,8 @@
 ---
-Name: kfc-blacklist
+Name: kfc-ignorelist
 ---
 Terraformers\KeysForCache\Models\CacheKey:
-  blacklist:
+  ignorelist:
     CacheKey: Terraformers\KeysForCache\Models\CacheKey
     ChangeSet: SilverStripe\Versioned\ChangeSet
     ChangeSetItem: SilverStripe\Versioned\ChangeSetItem
