@@ -1,0 +1,59 @@
+name: PHP Composer
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    container:
+      image: brettt89/silverstripe-web:7.4-apache
+      env:
+        SS_ENVIRONMENT_TYPE: dev
+        SS_DATABASE_SERVER: db
+        SS_DATABASE_NAME: SS_mysite
+        SS_DATABASE_USERNAME: root
+        SS_DATABASE_PASSWORD: ''
+
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install composer
+      run: |
+        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+        php -r "if (hash_file('sha384', 'composer-setup.php') === '756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+        php composer-setup.php --install-dir=/usr/bin/ --filename=composer
+        php -r "unlink('composer-setup.php');"
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v2
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+    - name: Install dependencies
+      run: |
+        composer require silverstripe/installer --no-update --prefer-dist
+        composer install --prefer-dist --no-progress
+    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
+    # Docs: https://getcomposer.org/doc/articles/scripts.md
+
+    - name: List our files
+      run: ls -la
+
+    - name: Run test suite
+      run: vendor/bin/phpunit --verbose
