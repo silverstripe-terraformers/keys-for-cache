@@ -262,4 +262,25 @@ class CacheKeyExtensionTest extends SapphireTest
         $this->assertNull($fields->dataFieldByName('CacheKeys'));
     }
 
+    public function testIgnoreList(): void
+    {
+        // Add our CachePage to the ignorelist
+        $ignoreList = CacheKey::config()->get('ignorelist');
+        $ignoreList['CachePage'] = CachePage::class;
+        CacheKey::config()->set('ignorelist', $ignoreList);
+
+        // Create the Page
+        $page = CachePage::create();
+        $page->write();
+
+        // No CacheKey should have been generated
+        $this->assertCount(
+            0,
+            CacheKey::get()->filter([
+                'RecordClass' => $page->ClassName,
+                'RecordID' => $page->ID,
+            ])
+        );
+    }
+
 }
