@@ -13,11 +13,16 @@ class GlobalCaresTest extends SapphireTest
 {
     protected static $fixture_file = 'GlobalCaresTest.yml'; // phpcs:ignore
 
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var array
+     */
     protected static $extra_dataobjects = [
         GlobalCaresPage::class,
     ];
 
-    public function testGlobalCares() {
+    public function testGlobalCares(): void
+    {
 
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();

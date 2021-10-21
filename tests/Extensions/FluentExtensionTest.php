@@ -12,13 +12,17 @@ use TractorCow\Fluent\State\FluentState;
 class FluentExtensionTest extends SapphireTest
 {
 
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var array
+     */
     protected static $required_extensions = [
         SiteTree::class => [
             FluentExtension::class,
         ],
     ];
 
-    protected static $fixture_file = 'FluentExtensionTest.yml';
+    protected static $fixture_file = 'FluentExtensionTest.yml'; // phpcs:ignore
 
     public function testUpdateCacheKey(): void
     {

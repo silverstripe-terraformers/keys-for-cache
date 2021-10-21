@@ -2,10 +2,91 @@
 <ruleset name="SilverStripe">
     <description>CodeSniffer ruleset for SilverStripe coding conventions.</description>
 
-    <!-- base rules are PSR-12 -->
-    <rule ref="PSR12" >
-        <!-- Current exclusions -->
-        <!--<exclude name="PSR1.Files.SideEffects.FoundWithSymbols" />-->
-        <!--<exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />-->
+	<file>src</file>
+	<file>tests</file>
+
+    <rule ref="PSR2">
+        <!-- Allow non camel cased method names - some base SS method names are PascalCase or snake_case -->
+        <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"/>
+        <!-- This rule conflicts with Slevomat standards requiring an empty line before closing brace -->
+        <exclude name="PSR2.Classes.ClassDeclaration.CloseBraceAfterBody"/>
+    </rule>
+
+    <!-- All "use" statements must be used in the code. -->
+    <rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/ruleset.xml">
+        <!-- Comments after code are fine. It's how we disable rules when we need to -->
+        <exclude name="SlevomatCodingStandard.Commenting.DisallowCommentAfterCode.DisallowedCommentAfterCode"/>
+        <!-- We're not punishing folks for adding annotations (even if the method is self documenting) -->
+        <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.UselessAnnotation"/>
+        <!-- Late Static Binding is used often in SS -->
+        <exclude name="SlevomatCodingStandard.Classes.DisallowLateStaticBindingForConstants"/>
+        <!-- Multiline comments is what we use as a standard in SS -->
+        <exclude name="SlevomatCodingStandard.Commenting.RequireOneLinePropertyDocComment.MultiLinePropertyComment"/>
+        <exclude name="SlevomatCodingStandard.Commenting.RequireOneLineDocComment.MultiLineDocComment"/>
+        <!-- Write conditions like Yoda, we do not -->
+        <exclude name="SlevomatCodingStandard.ControlStructures.RequireYodaComparison.RequiredYodaComparison"/>
+        <!-- There are two rules which conflict. NewWithoutParentheses and UselessParentheses. One must be disabled -->
+        <!-- We allow new Class(); rather than new Class;-->
+        <exclude name="SlevomatCodingStandard.ControlStructures.NewWithoutParentheses"/>
+        <!-- Do not require fully qualified class names -->
+        <exclude name="SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly.ReferenceViaFullyQualifiedName"/>
+        <exclude name="SlevomatCodingStandard.Namespaces.UseOnlyWhitelistedNamespaces.NonFullyQualified"/>
+        <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedClassNameInAnnotation.NonFullyQualifiedClassName"/>
+        <!-- Not something we do in SS -->
+        <exclude name="SlevomatCodingStandard.TypeHints.DeclareStrictTypes"/>
+        <!-- Array type hint syntax is very useful -->
+        <exclude name="SlevomatCodingStandard.TypeHints.DisallowArrayTypeHintSyntax"/>
+        <!-- Using mixed type is a way to get around the fact that we often cannot strictly type our methods if we -->
+        <!-- are extending a base SS method -->
+        <exclude name="SlevomatCodingStandard.TypeHints.DisallowMixedTypeHint"/>
+        <!-- allow private static -->
+        <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedProperty"/>
+        <!-- Don't require traversable type hints -->
+        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingTraversableTypeHintSpecification"/>
+        <!-- Even if you strictly type, there are other reasons to add a DocComment (EG: to add @codeCoverageIgnore -->
+        <exclude name="SlevomatCodingStandard.TypeHints.UselessConstantTypeHintSniff.UselessDocComment"/>
+        <!-- Even if you strictly type, there are other reasons to add a DocComment (EG: to add @codeCoverageIgnore -->
+        <exclude name="SlevomatCodingStandard.Commenting.UselessFunctionDocComment.UselessDocComment"/>
+        <!-- Sometimes need "useless annotation" to add things like @codeCoverageIgnore -->
+        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.UselessAnnotation"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.UselessAnnotation"/>
+        <!-- Whitespace above and below the class doesn't do much -->
+        <exclude name="SlevomatCodingStandard.Classes.EmptyLinesAroundClassBraces.NoEmptyLineAfterOpeningBrace"/>
+        <exclude name="SlevomatCodingStandard.Classes.EmptyLinesAroundClassBraces.NoEmptyLineBeforeClosingBrace"/>
+        <!-- Inline doc comments are fine -->
+        <exclude name="SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion"/>
+        <!-- Do not require literal separator for long int values -->
+        <exclude name="SlevomatCodingStandard.Numbers.RequireNumericLiteralSeparator"/>
+        <!-- Do not require arrow functions (this feature is actually not supported in our version of PHPUnit) -->
+        <exclude name="SlevomatCodingStandard.Functions.RequireArrowFunction.RequiredArrowFunction"/>
+        <!-- Do not require trailing comma in function calls until we're sure we only want PHP 7.4+ support -->
+        <exclude name="SlevomatCodingStandard.Functions.TrailingCommaInCall.MissingTrailingComma"/>
+        <!-- Do not require fully qualified exceptions namespaces like SilverStripe\ORM\ValidationException -->
+        <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedExceptions.NonFullyQualifiedException"/>
+        <!-- Do not require function referenced via a fully qualified name -->
+        <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalFunctions.NonFullyQualified"/>
+        <!-- We don't control the order of declaration based on access level -->
+        <exclude name="SlevomatCodingStandard.Classes.ClassStructure"/>
+        <!-- Allow short ternary operator -->
+        <exclude name="SlevomatCodingStandard.ControlStructures.DisallowShortTernaryOperator.DisallowedShortTernaryOperator"/>
+        <!-- You are not making me go \PHP_EOL -->
+        <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalConstants.NonFullyQualified"/>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">
+        <properties>
+            <property name="searchAnnotations" type="bool" value="true"/>
+            <property name="ignoredAnnotationNames" type="array" value="@config"/>
+        </properties>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
+        <properties>
+            <!-- Set the root namespace for our src dir and phpunit dir. Please change these as required -->
+            <property name="rootNamespaces" type="array" value="src=>Terraformers\KeysForCache,tests=>Terraformers\KeysForCache\Tests"/>
+            <property name="ignoredNamespaces" type="array" value="Slevomat\Services"/>
+        </properties>
     </rule>
 </ruleset>

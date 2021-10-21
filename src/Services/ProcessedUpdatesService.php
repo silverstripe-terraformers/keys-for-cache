@@ -7,6 +7,7 @@ use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDto;
 
 class ProcessedUpdatesService
 {
+
     use Injectable;
 
     private array $processedUpdates = [];

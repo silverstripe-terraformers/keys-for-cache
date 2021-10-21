@@ -24,7 +24,7 @@ class CacheKey extends DataObject
         'KeyHash' => 'Varchar',
     ];
 
-    private static $has_one = [
+    private static array $has_one = [
         'Record' => DataObject::class,
     ];
 

@@ -15,6 +15,10 @@ class DotNotationCaresTest extends SapphireTest
 {
     protected static $fixture_file = 'DotNotationCaresTest.yml'; // phpcs:ignore
 
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var array
+     */
     protected static $extra_dataobjects = [
         DotNotationCaresPage::class,
         DotNotationCaredBelongsToModel::class,

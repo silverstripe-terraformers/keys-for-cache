@@ -2,10 +2,10 @@
 
 namespace Terraformers\KeysForCache\Tests\Services;
 
+use Page;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDto;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
-use Page;
 
 class ProcessedUpdatesServiceTest extends SapphireTest
 {

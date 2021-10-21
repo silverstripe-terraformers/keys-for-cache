@@ -14,6 +14,7 @@ use SilverStripe\ORM\DataObject;
 
 class Graph implements Flushable
 {
+
     use Injectable;
 
     public const CACHE_KEY = CacheInterface::class . '.KeysForCache';
@@ -31,7 +32,7 @@ class Graph implements Flushable
         $this->buildGlobalCares();
     }
 
-    public static function flush()
+    public static function flush() // phpcs:ignore SlevomatCodingStandard.TypeHints
     {
         Injector::inst()->get(self::CACHE_KEY)->clear();
 
@@ -44,7 +45,7 @@ class Graph implements Flushable
     {
         return array_filter(
             $this->getEdges(),
-            function (Edge $e) use ($from) {
+            static function (Edge $e) use ($from) {
                 return $e->getFromClassName() === $from;
             }
         );
@@ -107,8 +108,8 @@ class Graph implements Flushable
 
         return array_filter(
             $relationshipConfigs,
-            function ($relationship) use ($relationships) {
-                return in_array($relationship, $relationships);
+            static function ($relationship) use ($relationships) {
+                return in_array($relationship, $relationships, true);
             },
             ARRAY_FILTER_USE_KEY
         );
@@ -335,7 +336,9 @@ class Graph implements Flushable
                     // relationship, as having either of those would be valid for a has_one
                     throw new Exception(sprintf(
                         'No valid has_many or belongs_to found between %s and %s for has_one relationship %s',
-                        $careClassName, $className, $relation
+                        $careClassName,
+                        $className,
+                        $relation
                     ));
                 }
 
@@ -366,7 +369,7 @@ class Graph implements Flushable
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
 
         $classes = array_map(
-            function ($c) {
+            static function ($c) {
                 return ['className' => $c, 'cares' => Config::forClass($c)->get('global_cares')];
             },
             $classes
@@ -374,14 +377,14 @@ class Graph implements Flushable
 
         $classes = array_filter(
             $classes,
-            function ($c) {
+            static function ($c) {
                 return is_array($c['cares']) && count($c['cares']) > 0;
             }
         );
 
         $classes = array_reduce(
             $classes,
-            function($carry, $item) {
+            static function ($carry, $item) {
                 foreach ($item['cares'] as $care) {
                     if (!array_key_exists($care, $carry)) {
                         $carry[$care] = [];
@@ -434,15 +437,12 @@ class Graph implements Flushable
 
         return [
             $throughClass,
-            $throughToField
+            $throughToField,
         ];
     }
 
-    private function getCaresManyManyThroughEdge(
-        Node $node,
-        string $relation,
-        array $careRelationData
-    ): ?Edge {
+    private function getCaresManyManyThroughEdge(Node $node, string $relation, array $careRelationData): ?Edge
+    {
         // many_many through is a trip. We need to determine what the correct through model is, and then from there
         // we can find out what the ultimate "target" is. Then... we need to draw the line back to our original $node
 
@@ -490,11 +490,8 @@ class Graph implements Flushable
         );
     }
 
-    private function getCaresManyManyEdge(
-        Node $node,
-        string $relation,
-        string $careClassName
-    ): ?Edge {
+    private function getCaresManyManyEdge(Node $node, string $relation, string $careClassName): ?Edge
+    {
         // Now that we know this is not a many_many through, we can start processing more straight forward relationship
         // definitions
         [$careClassName, $caresRelation] = $this->getClassAndRelation($careClassName);
@@ -545,11 +542,8 @@ class Graph implements Flushable
         );
     }
 
-    private function getTouchesManyManyThroughEdge(
-        Node $node,
-        string $relation,
-        array $careRelationData
-    ): ?Edge {
+    private function getTouchesManyManyThroughEdge(Node $node, string $relation, array $careRelationData): ?Edge
+    {
         // many_many through is a trip. We need to determine what the correct through model is, and then from there
         // we can find out what the ultimate "target" is
 

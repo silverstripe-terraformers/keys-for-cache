@@ -45,7 +45,12 @@ class CacheKeyExtension extends DataExtension
 
         $fields->addFieldToTab(
             'Root.Settings',
-            GridField::create('CacheKeys', 'Cache Keys', $this->owner->CacheKeys(), GridFieldConfig_RecordViewer::create())
+            GridField::create(
+                'CacheKeys',
+                'Cache Keys',
+                $this->owner->CacheKeys(),
+                GridFieldConfig_RecordViewer::create()
+            )
         );
     }
 
@@ -75,7 +80,7 @@ class CacheKeyExtension extends DataExtension
         // We will want to publish changes to the CacheKey onAfterWrite if the instance triggering this event is *not*
         // Versioned (the changes should be seen immediately even though the object wasn't Published)
         $publishUpdates = !$this->owner->hasExtension(Versioned::class);
-        $this->triggerEvent();
+        $this->triggerEvent($publishUpdates);
         CacheKey::remove($this->owner);
     }
 
@@ -93,7 +98,7 @@ class CacheKeyExtension extends DataExtension
     {
         $ignoreList = Config::forClass(CacheKey::class)->get('ignorelist');
 
-        if (in_array($this->owner->ClassName, $ignoreList)) {
+        if (in_array($this->owner->ClassName, $ignoreList, true)) {
             return;
         }
 

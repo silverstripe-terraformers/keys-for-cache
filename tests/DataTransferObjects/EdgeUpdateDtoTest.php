@@ -12,7 +12,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 
 class EdgeUpdateDtoTest extends SapphireTest
 {
-    protected $usesDatabase = true;
+    protected $usesDatabase = true; // phpcs:ignore
 
     public function testConstructAndGet(): void
     {

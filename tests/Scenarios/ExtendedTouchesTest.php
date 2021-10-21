@@ -16,12 +16,16 @@ use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedTouchedPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedTouchesPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchedPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage;
-use Terraformers\KeysForCache\Tests\Mocks\Relation\TouchesPageTouchedThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThroughModel;
 
 class ExtendedTouchesTest extends SapphireTest
 {
-    protected static $fixture_file = 'ExtendedTouchesTest.yml';
+    protected static $fixture_file = 'ExtendedTouchesTest.yml'; // phpcs:ignore
 
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var array
+     */
     protected static $extra_dataobjects = [
         ExtendedTouchedPage::class,
         ExtendedTouchesPage::class,

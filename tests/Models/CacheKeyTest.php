@@ -10,7 +10,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 
 class CacheKeyTest extends SapphireTest
 {
-    protected static $fixture_file = 'CacheKeyTest.yml';
+    protected static $fixture_file = 'CacheKeyTest.yml'; // phpcs:ignore
 
     public function testRemove(): void
     {
@@ -109,7 +109,7 @@ class CacheKeyTest extends SapphireTest
         $this->assertCount(1, $keys);
 
         // Within a LIVE reading mode, we shouldn't find any CacheKey
-        Versioned::withVersionedMode(function() use ($page): void {
+        Versioned::withVersionedMode(function () use ($page): void {
             Versioned::set_stage(Versioned::LIVE);
 
             // Fetch any/all keys for this ClassName and ID
@@ -135,7 +135,7 @@ class CacheKeyTest extends SapphireTest
         $this->assertCount(1, $keys);
 
         // Within a LIVE reading mode, we should now find 1
-        Versioned::withVersionedMode(function() use ($page): void {
+        Versioned::withVersionedMode(function () use ($page): void {
             Versioned::set_stage(Versioned::LIVE);
 
             // Fetch any/all keys for this ClassName and ID

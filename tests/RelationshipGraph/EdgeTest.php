@@ -2,9 +2,9 @@
 
 namespace Terraformers\KeysForCache\Tests\RelationshipGraph;
 
+use Page;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\SapphireTest;
-use Page;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
 use Terraformers\KeysForCache\RelationshipGraph\Node;
 

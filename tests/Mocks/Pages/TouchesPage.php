@@ -12,7 +12,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Relation\TouchesPageTouchedThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThroughModel;
 
 /**
  * @property int $TouchedBelongsToModelID

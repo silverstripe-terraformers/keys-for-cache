@@ -1,6 +1,6 @@
 <?php
 
-namespace Terraformers\KeysForCache\Tests\Mocks\Relation;
+namespace Terraformers\KeysForCache\Tests\Mocks\Relations;
 
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;

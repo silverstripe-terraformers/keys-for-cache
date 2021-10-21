@@ -2,8 +2,8 @@
 
 namespace Terraformers\KeysForCache\Tests\Mocks\Pages;
 
-use SilverStripe\Dev\TestOnly;
 use Page;
+use SilverStripe\Dev\TestOnly;
 use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
 
 /**
