@@ -24,8 +24,8 @@ use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\GlobalCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage;
-use Terraformers\KeysForCache\Tests\Mocks\Relation\CaresPageCaredThroughModel;
-use Terraformers\KeysForCache\Tests\Mocks\Relation\TouchesPageTouchedThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThroughModel;
 
 class GraphTest extends SapphireTest
 {
@@ -184,7 +184,7 @@ class GraphTest extends SapphireTest
             ExtendedCaresPage::class,
         ];
         $result = array_map(
-            function(Edge $edge) {
+            static function (Edge $edge) {
                 return $edge->getToClassName();
             },
             $graph->getEdgesFrom(CaredHasOneModel::class)
@@ -200,7 +200,7 @@ class GraphTest extends SapphireTest
             TouchedThroughModel::class,
         ];
         $result = array_map(
-            function (Edge $edge) {
+            static function (Edge $edge) {
                 return $edge->getToClassName();
             },
             $graph->getEdgesFrom(TouchesPage::class)

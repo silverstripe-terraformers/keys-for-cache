@@ -13,12 +13,15 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage;
-use Terraformers\KeysForCache\Tests\Mocks\Relation\CaresPageCaredThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThroughModel;
 
 class ExtendedCaresTest extends SapphireTest
 {
     protected static $fixture_file = 'ExtendedCaresTest.yml'; // phpcs:ignore
 
+    /**
+     * phpcs:ignore
+     */
     protected static $extra_dataobjects = [
         CaresPage::class,
         CaresPageCaredThroughModel::class,

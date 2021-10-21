@@ -13,7 +13,7 @@ class FluentExtensionTest extends SapphireTest
 {
 
     /**
-     * @phpcs:ignore
+     * phpcs:ignore
      */
     protected static $required_extensions = [
         SiteTree::class => [
@@ -21,7 +21,7 @@ class FluentExtensionTest extends SapphireTest
         ],
     ];
 
-    protected static $fixture_file = 'FluentExtensionTest.yml';
+    protected static $fixture_file = 'FluentExtensionTest.yml'; // phpcs:ignore
 
     public function testUpdateCacheKey(): void
     {

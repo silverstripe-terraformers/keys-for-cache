@@ -21,7 +21,8 @@
         <!-- Late Static Binding is used often in SS -->
         <exclude name="SlevomatCodingStandard.Classes.DisallowLateStaticBindingForConstants"/>
         <!-- Multiline comments is what we use as a standard in SS -->
-        <exclude name="SlevomatCodingStandard.Commenting.RequireOneLinePropertyDocComment.MultiLineDocComment"/>
+        <exclude name="SlevomatCodingStandard.Commenting.RequireOneLinePropertyDocComment.MultiLinePropertyComment"/>
+        <exclude name="SlevomatCodingStandard.Commenting.RequireOneLineDocComment.MultiLineDocComment"/>
         <!-- Write conditions like Yoda, we do not -->
         <exclude name="SlevomatCodingStandard.ControlStructures.RequireYodaComparison.RequiredYodaComparison"/>
         <!-- There are two rules which conflict. NewWithoutParentheses and UselessParentheses. One must be disabled -->

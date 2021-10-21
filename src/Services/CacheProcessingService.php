@@ -13,6 +13,7 @@ use Terraformers\KeysForCache\RelationshipGraph\Graph;
 
 abstract class CacheProcessingService
 {
+
     use Injectable;
 
     abstract protected function shouldPublishUpdates(): bool;

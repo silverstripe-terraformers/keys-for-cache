@@ -15,6 +15,9 @@ class DotNotationCaresTest extends SapphireTest
 {
     protected static $fixture_file = 'DotNotationCaresTest.yml'; // phpcs:ignore
 
+    /**
+     * phpcs:ignore
+     */
     protected static $extra_dataobjects = [
         DotNotationCaresPage::class,
         DotNotationCaredBelongsToModel::class,

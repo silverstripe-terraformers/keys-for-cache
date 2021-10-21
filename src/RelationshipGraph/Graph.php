@@ -14,6 +14,7 @@ use SilverStripe\ORM\DataObject;
 
 class Graph implements Flushable
 {
+
     use Injectable;
 
     public const CACHE_KEY = CacheInterface::class . '.KeysForCache';
@@ -44,7 +45,7 @@ class Graph implements Flushable
     {
         return array_filter(
             $this->getEdges(),
-            function (Edge $e) use ($from) {
+            static function (Edge $e) use ($from) {
                 return $e->getFromClassName() === $from;
             }
         );

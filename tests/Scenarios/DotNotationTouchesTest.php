@@ -17,6 +17,9 @@ class DotNotationTouchesTest extends SapphireTest
 {
     protected static $fixture_file = 'DotNotationTouchesTest.yml'; // phpcs:ignore
 
+    /**
+     * phpcs:ignore
+     */
     protected static $extra_dataobjects = [
         DotNotationTouchedPage::class,
         DotNotationTouchesPage::class,

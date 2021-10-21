@@ -8,7 +8,7 @@ use SilverStripe\ORM\ManyManyList;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
-use Terraformers\KeysForCache\Tests\Mocks\Relation\TouchesPageTouchedThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThroughModel;
 
 /**
  * @property string $Title

@@ -13,7 +13,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
-use Terraformers\KeysForCache\Tests\Mocks\Relation\CaresPageCaredThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThroughModel;
 
 /**
  * @property int $CaredBelongsToModelID
