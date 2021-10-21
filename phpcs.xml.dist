@@ -55,4 +55,19 @@
         <!-- You are not making me go \PHP_EOL -->
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalConstants.NonFullyQualified"/>
     </rule>
+
+    <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">
+        <properties>
+            <property name="searchAnnotations" type="bool" value="true"/>
+            <property name="ignoredAnnotationNames" type="array" value="@config"/>
+        </properties>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
+        <properties>
+            <!-- Set the root namespace for our src dir and phpunit dir. Please change these as required -->
+            <property name="rootNamespaces" type="array" value="src=>Terraformers\KeysForCache,tests=>Terraformers\KeysForCache\Tests"/>
+            <property name="ignoredNamespaces" type="array" value="Slevomat\Services"/>
+        </properties>
+    </rule>
 </ruleset>
