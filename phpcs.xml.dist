@@ -27,6 +27,7 @@
         <exclude name="SlevomatCodingStandard.ControlStructures.NewWithoutParentheses"/>
         <!-- Do not require fully qualified class names -->
         <exclude name="SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly.ReferenceViaFullyQualifiedName"/>
+        <exclude name="SlevomatCodingStandard.Namespaces.UseOnlyWhitelistedNamespaces.NonFullyQualified"/>
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedClassNameInAnnotation.NonFullyQualifiedClassName"/>
         <!-- Not something we do in SS -->
         <exclude name="SlevomatCodingStandard.TypeHints.DeclareStrictTypes"/>
