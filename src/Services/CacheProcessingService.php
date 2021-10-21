@@ -28,8 +28,7 @@ abstract class CacheProcessingService
             return;
         }
 
-        $this->updateInstance($instance);
-        $edgesToUpdate = $this->createEdges($instance);
+        $edgesToUpdate = $this->updateInstance($instance);
 
         while (count($edgesToUpdate) > 0) {
             /** @var EdgeUpdateDto $current */
