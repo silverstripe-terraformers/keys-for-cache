@@ -48,7 +48,8 @@ class CacheKeyExtension extends DataExtension
             GridField::create(
                 'CacheKeys',
                 'Cache Keys',
-                $this->owner->CacheKeys(), GridFieldConfig_RecordViewer::create()
+                $this->owner->CacheKeys(),
+                GridFieldConfig_RecordViewer::create()
             )
         );
     }

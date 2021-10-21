@@ -8,7 +8,6 @@ use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\DataTransferObjects\ProcessedUpdateDto;
 use Terraformers\KeysForCache\Services\LiveCacheProcessingService;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
-use Terraformers\KeysForCache\Services\StageCacheProcessingService;
 
 class LiveCacheProcessingServiceTest extends SapphireTest
 {

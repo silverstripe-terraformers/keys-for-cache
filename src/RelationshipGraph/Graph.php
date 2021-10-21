@@ -335,7 +335,9 @@ class Graph implements Flushable
                     // relationship, as having either of those would be valid for a has_one
                     throw new Exception(sprintf(
                         'No valid has_many or belongs_to found between %s and %s for has_one relationship %s',
-                        $careClassName, $className, $relation
+                        $careClassName,
+                        $className,
+                        $relation
                     ));
                 }
 
@@ -374,14 +376,14 @@ class Graph implements Flushable
 
         $classes = array_filter(
             $classes,
-            function ($c) {
+            static function ($c) {
                 return is_array($c['cares']) && count($c['cares']) > 0;
             }
         );
 
         $classes = array_reduce(
             $classes,
-            static function($carry, $item) {
+            static function ($carry, $item) {
                 foreach ($item['cares'] as $care) {
                     if (!array_key_exists($care, $carry)) {
                         $carry[$care] = [];
@@ -434,7 +436,7 @@ class Graph implements Flushable
 
         return [
             $throughClass,
-            $throughToField
+            $throughToField,
         ];
     }
 
@@ -487,11 +489,8 @@ class Graph implements Flushable
         );
     }
 
-    private function getCaresManyManyEdge(
-        Node $node,
-        string $relation,
-        string $careClassName
-    ): ?Edge {
+    private function getCaresManyManyEdge(Node $node, string $relation, string $careClassName): ?Edge
+    {
         // Now that we know this is not a many_many through, we can start processing more straight forward relationship
         // definitions
         [$careClassName, $caresRelation] = $this->getClassAndRelation($careClassName);

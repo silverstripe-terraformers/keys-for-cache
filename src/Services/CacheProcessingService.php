@@ -76,10 +76,7 @@ abstract class CacheProcessingService
             return $this->updateInstance($instance->{$edge->getRelation()}());
         }
 
-        if ($relationType === 'has_many'
-            || $relationType === 'many_many'
-            || $relationType === 'belongs_many_many'
-        ) {
+        if ($relationType === 'has_many' || $relationType === 'many_many' || $relationType === 'belongs_many_many') {
             return $this->updateInstances($instance->{$edge->getRelation()}(), $dto);
         }
 
@@ -130,7 +127,7 @@ abstract class CacheProcessingService
         }
 
         return array_map(
-            function ($e) use ($instance) {
+            static function ($e) use ($instance) {
                 return new EdgeUpdateDto($e, $instance);
             },
             $applicableEdges

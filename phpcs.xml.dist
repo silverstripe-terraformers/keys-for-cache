@@ -14,6 +14,8 @@
 
     <!-- All "use" statements must be used in the code. -->
     <rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/ruleset.xml">
+        <!-- Comments after code are fine. It's how we disable rules when we need to -->
+        <exclude name="SlevomatCodingStandard.Commenting.DisallowCommentAfterCode.DisallowedCommentAfterCode"/>
         <!-- We're not punishing folks for adding annotations (even if the method is self documenting) -->
         <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.UselessAnnotation"/>
         <!-- Late Static Binding is used often in SS -->
@@ -70,12 +72,6 @@
         <exclude name="SlevomatCodingStandard.ControlStructures.DisallowShortTernaryOperator.DisallowedShortTernaryOperator"/>
         <!-- You are not making me go \PHP_EOL -->
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalConstants.NonFullyQualified"/>
-    </rule>
-
-    <rule ref="SlevomatCodingStandard.Namespaces.UseSpacing">
-        <properties>
-            <property name="linesCountBeforeFirstUse" value="0" />
-        </properties>
     </rule>
 
     <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">
