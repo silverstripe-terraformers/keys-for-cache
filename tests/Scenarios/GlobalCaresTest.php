@@ -14,7 +14,7 @@ class GlobalCaresTest extends SapphireTest
     protected static $fixture_file = 'GlobalCaresTest.yml'; // phpcs:ignore
 
     /**
-     * phpcs:ignore
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected static $extra_dataobjects = [
         GlobalCaresPage::class,

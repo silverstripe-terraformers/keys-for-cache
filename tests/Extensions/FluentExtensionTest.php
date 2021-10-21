@@ -13,7 +13,7 @@ class FluentExtensionTest extends SapphireTest
 {
 
     /**
-     * phpcs:ignore
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected static $required_extensions = [
         SiteTree::class => [

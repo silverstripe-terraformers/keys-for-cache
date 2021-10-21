@@ -20,10 +20,10 @@ use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThroughMod
 
 class ExtendedTouchesTest extends SapphireTest
 {
-    protected static $fixture_file = 'ExtendedTouchesTest.yml';
+    protected static $fixture_file = 'ExtendedTouchesTest.yml'; // phpcs:ignore
 
     /**
-     * phpcs:ignore
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected static $extra_dataobjects = [
         ExtendedTouchedPage::class,

@@ -16,7 +16,7 @@ class DotNotationCaresTest extends SapphireTest
     protected static $fixture_file = 'DotNotationCaresTest.yml'; // phpcs:ignore
 
     /**
-     * phpcs:ignore
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected static $extra_dataobjects = [
         DotNotationCaresPage::class,

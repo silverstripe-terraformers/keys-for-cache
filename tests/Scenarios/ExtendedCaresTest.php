@@ -20,7 +20,7 @@ class ExtendedCaresTest extends SapphireTest
     protected static $fixture_file = 'ExtendedCaresTest.yml'; // phpcs:ignore
 
     /**
-     * phpcs:ignore
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected static $extra_dataobjects = [
         CaresPage::class,

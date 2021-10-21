@@ -18,7 +18,7 @@ class DotNotationTouchesTest extends SapphireTest
     protected static $fixture_file = 'DotNotationTouchesTest.yml'; // phpcs:ignore
 
     /**
-     * phpcs:ignore
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      */
     protected static $extra_dataobjects = [
         DotNotationTouchedPage::class,
