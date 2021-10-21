@@ -109,6 +109,6 @@ class CacheKey extends DataObject
 
         $dataObject->invokeWithExtensions('updateGenerateKeyHash', $uniqueKey);
 
-        return implode('-', [$uniqueKey, microtime()]);
+        return implode('-', [$uniqueKey, microtime(true)]);
     }
 }
