@@ -161,14 +161,14 @@ abstract class CacheProcessingService
         $globalCares = $this->getGraph()->getGlobalCares();
         $possibleClassNames = ClassInfo::ancestry($className);
         $cares = array_map(
-            function ($c) use ($globalCares) {
+            static function ($c) use ($globalCares) {
                 return $globalCares[$c] ?? null;
             },
             $possibleClassNames,
         );
         $cares = array_filter(
             $cares,
-            function ($c) {
+            static function ($c) {
                 return !is_null($c);
             }
         );

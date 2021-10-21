@@ -31,7 +31,7 @@ class Graph implements Flushable
         $this->buildGlobalCares();
     }
 
-    public static function flush()
+    public static function flush() // phpcs:ignore SlevomatCodingStandard.TypeHints
     {
         Injector::inst()->get(self::CACHE_KEY)->clear();
 
@@ -107,8 +107,8 @@ class Graph implements Flushable
 
         return array_filter(
             $relationshipConfigs,
-            function ($relationship) use ($relationships) {
-                return in_array($relationship, $relationships);
+            static function ($relationship) use ($relationships) {
+                return in_array($relationship, $relationships, true);
             },
             ARRAY_FILTER_USE_KEY
         );
@@ -366,7 +366,7 @@ class Graph implements Flushable
         $classes = ClassInfo::getValidSubClasses(DataObject::class);
 
         $classes = array_map(
-            function ($c) {
+            static function ($c) {
                 return ['className' => $c, 'cares' => Config::forClass($c)->get('global_cares')];
             },
             $classes
@@ -381,7 +381,7 @@ class Graph implements Flushable
 
         $classes = array_reduce(
             $classes,
-            function($carry, $item) {
+            static function($carry, $item) {
                 foreach ($item['cares'] as $care) {
                     if (!array_key_exists($care, $carry)) {
                         $carry[$care] = [];
@@ -438,11 +438,8 @@ class Graph implements Flushable
         ];
     }
 
-    private function getCaresManyManyThroughEdge(
-        Node $node,
-        string $relation,
-        array $careRelationData
-    ): ?Edge {
+    private function getCaresManyManyThroughEdge(Node $node, string $relation, array $careRelationData): ?Edge
+    {
         // many_many through is a trip. We need to determine what the correct through model is, and then from there
         // we can find out what the ultimate "target" is. Then... we need to draw the line back to our original $node
 
@@ -545,11 +542,8 @@ class Graph implements Flushable
         );
     }
 
-    private function getTouchesManyManyThroughEdge(
-        Node $node,
-        string $relation,
-        array $careRelationData
-    ): ?Edge {
+    private function getTouchesManyManyThroughEdge(Node $node, string $relation, array $careRelationData): ?Edge
+    {
         // many_many through is a trip. We need to determine what the correct through model is, and then from there
         // we can find out what the ultimate "target" is
 

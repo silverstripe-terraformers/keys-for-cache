@@ -26,4 +26,3 @@ class EdgeUpdateDto
         return $this->instance;
     }
 }
-

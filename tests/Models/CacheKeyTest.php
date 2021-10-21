@@ -10,7 +10,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 
 class CacheKeyTest extends SapphireTest
 {
-    protected static $fixture_file = 'CacheKeyTest.yml';
+    protected static $fixture_file = 'CacheKeyTest.yml'; // phpcs:ignore
 
     public function testRemove(): void
     {

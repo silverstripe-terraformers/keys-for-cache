@@ -18,7 +18,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Relation\TouchesPageTouchedThroughMode
 
 class TouchesTest extends SapphireTest
 {
-    protected static $fixture_file = 'TouchesTest.yml';
+    protected static $fixture_file = 'TouchesTest.yml'; // phpcs:ignore
 
     protected static $extra_dataobjects = [
         TouchedPage::class,

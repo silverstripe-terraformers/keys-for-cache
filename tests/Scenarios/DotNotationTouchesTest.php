@@ -15,7 +15,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Pages\DotNotationTouchesPage;
 
 class DotNotationTouchesTest extends SapphireTest
 {
-    protected static $fixture_file = 'DotNotationTouchesTest.yml';
+    protected static $fixture_file = 'DotNotationTouchesTest.yml'; // phpcs:ignore
 
     protected static $extra_dataobjects = [
         DotNotationTouchedPage::class,

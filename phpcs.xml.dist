@@ -19,7 +19,7 @@
         <!-- Late Static Binding is used often in SS -->
         <exclude name="SlevomatCodingStandard.Classes.DisallowLateStaticBindingForConstants"/>
         <!-- Multiline comments is what we use as a standard in SS -->
-        <exclude name="SlevomatCodingStandard.Commenting.RequireOneLinePropertyDocComment"/>
+        <exclude name="SlevomatCodingStandard.Commenting.RequireOneLinePropertyDocComment.MultiLineDocComment"/>
         <!-- Write conditions like Yoda, we do not -->
         <exclude name="SlevomatCodingStandard.ControlStructures.RequireYodaComparison.RequiredYodaComparison"/>
         <!-- There are two rules which conflict. NewWithoutParentheses and UselessParentheses. One must be disabled -->
@@ -52,13 +52,14 @@
         <!-- Whitespace above and below the class doesn't do much -->
         <exclude name="SlevomatCodingStandard.Classes.EmptyLinesAroundClassBraces.NoEmptyLineAfterOpeningBrace"/>
         <exclude name="SlevomatCodingStandard.Classes.EmptyLinesAroundClassBraces.NoEmptyLineBeforeClosingBrace"/>
-        <exclude name="SlevomatCodingStandard.Namespaces.UseSpacing.IncorrectLinesCountBeforeFirstUse"/>
         <!-- Inline doc comments are fine -->
         <exclude name="SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion"/>
         <!-- Do not require literal separator for long int values -->
         <exclude name="SlevomatCodingStandard.Numbers.RequireNumericLiteralSeparator"/>
         <!-- Do not require arrow functions (this feature is actually not supported in our version of PHPUnit) -->
         <exclude name="SlevomatCodingStandard.Functions.RequireArrowFunction.RequiredArrowFunction"/>
+        <!-- Do not require trailing comma in function calls until we're sure we only want PHP 7.4+ support -->
+        <exclude name="SlevomatCodingStandard.Functions.TrailingCommaInCall.MissingTrailingComma"/>
         <!-- Do not require fully qualified exceptions namespaces like SilverStripe\ORM\ValidationException -->
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedExceptions.NonFullyQualifiedException"/>
         <!-- Do not require function referenced via a fully qualified name -->
@@ -69,6 +70,12 @@
         <exclude name="SlevomatCodingStandard.ControlStructures.DisallowShortTernaryOperator.DisallowedShortTernaryOperator"/>
         <!-- You are not making me go \PHP_EOL -->
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalConstants.NonFullyQualified"/>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Namespaces.UseSpacing">
+        <properties>
+            <property name="linesCountBeforeFirstUse" value="0" />
+        </properties>
     </rule>
 
     <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">

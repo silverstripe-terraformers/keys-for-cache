@@ -12,6 +12,9 @@ use TractorCow\Fluent\State\FluentState;
 class FluentExtensionTest extends SapphireTest
 {
 
+    /**
+     * @phpcs:ignore
+     */
     protected static $required_extensions = [
         SiteTree::class => [
             FluentExtension::class,
