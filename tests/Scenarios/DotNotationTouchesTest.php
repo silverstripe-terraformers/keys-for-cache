@@ -19,6 +19,7 @@ class DotNotationTouchesTest extends SapphireTest
 
     /**
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var array
      */
     protected static $extra_dataobjects = [
         DotNotationTouchedPage::class,

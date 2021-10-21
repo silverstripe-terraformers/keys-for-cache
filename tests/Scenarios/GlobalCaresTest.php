@@ -15,6 +15,7 @@ class GlobalCaresTest extends SapphireTest
 
     /**
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var array
      */
     protected static $extra_dataobjects = [
         GlobalCaresPage::class,
