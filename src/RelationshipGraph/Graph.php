@@ -25,6 +25,9 @@ class Graph implements Flushable
     private array $edges = [];
     private array $global_cares = [];
 
+    /**
+     * Graph constructor.
+     */
     public function __construct()
     {
         // Make sure that our Edges and GlobalCares are built and available
@@ -183,6 +186,13 @@ class Graph implements Flushable
         return null;
     }
 
+    /**
+     * Go through all DataObject classes for their relationship(e.g. has_one, has_many, etc) configs
+     * and 'cares' and 'touches' configs to build a complete collection of Edges.
+     *
+     * This complete colletion of Edges stores all the information we need for looking up
+     * all other related DataObject records of a given DataObject record
+     */
     private function buildEdges(): void
     {
         $cache = Injector::inst()->get(self::CACHE_KEY);
@@ -356,6 +366,23 @@ class Graph implements Flushable
         $this->edges = $cache->get(self::CACHE_KEY_EDGES);
     }
 
+    /**
+     * Go through all DataObject classes for 'global_cares' configs to build a complete colletion of global_cares,
+     * which we can use to look up for DataObject classes, of which all CacheKey records need to be invalidated
+     * when any record of its `global_cares` DataObject is updated.
+     *
+     * Example:
+     * If we only have SiteConfig 'global_cares' SiteTree and Locale in our project, we will get the result like this:
+     *
+     * <code>
+     * $this->global_cares = [
+     *   [SiteTree::class => SiteConfig::class],
+     *   [Locale::class => SiteConfig::class],
+     * ]
+     * </code>
+     *
+     * Any SiteTree/Locale record is updated, all CacheKey records of SiteConfig will be invalidated.
+     */
     private function buildGlobalCares(): void
     {
         $cache = Injector::inst()->get(self::CACHE_KEY);
@@ -402,6 +429,11 @@ class Graph implements Flushable
         $this->global_cares = $cache->get(self::CACHE_KEY_GLOBAL_CARES);
     }
 
+    /**
+     * @param array $throughData
+     * @return array|null
+     * @throws Exception
+     */
     private function getThroughClassAndToField(array $throughData): ?array
     {
         $throughClass = $throughData['through'] ?? null;

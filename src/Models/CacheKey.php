@@ -33,8 +33,11 @@ class CacheKey extends DataObject
     ];
 
     /**
-     * Update the CacheKey if it is invalidated,
-     * Create a CacheKey if it is empty
+     * Update the CacheKey record for a given instance if a CacheKey record exists,
+     * Create a CacheKey record for a given instance if it doesn't have a CacheKey record yet
+     *
+     * @param DataObject $dataObject
+     * @return CacheKey|null
      */
     public static function updateOrCreateKey(DataObject $dataObject): ?CacheKey
     {
@@ -51,9 +54,11 @@ class CacheKey extends DataObject
     }
 
     /**
+     * Find the CacheKey record for a given instance if it has one
+     * Or create an CacheKey record for it if it doesn't have one
+     *
      * @param DataObject|CacheKeyExtension $dataObject
      * @return CacheKey|null
-     * @throws ValidationException
      */
     public static function findOrCreate(DataObject $dataObject): ?CacheKey
     {
@@ -87,6 +92,8 @@ class CacheKey extends DataObject
     }
 
     /**
+     * Remove Cache Key record(s) of a given instance
+     *
      * @param DataObject|CacheKeyExtension $dataObject
      */
     public static function remove(DataObject $dataObject): void
@@ -99,6 +106,12 @@ class CacheKey extends DataObject
         }
     }
 
+    /**
+     * Generate KeyHash for an instance
+     *
+     * @param DataObject $dataObject the instance that we generate KeyHash for
+     * @return string KeyHash value
+     */
     protected static function generateKeyHash(DataObject $dataObject): string
     {
         // getUniqueKey() has only been around since 4.7, but ideally this is what we would like to use as the base for

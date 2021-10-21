@@ -18,6 +18,12 @@ abstract class CacheProcessingService
 
     abstract protected function shouldPublishUpdates(): bool;
 
+    /**
+     * Process the change of the given instance to
+     * update its CacheKey record and CacheKey records of all other related DataObjects
+     *
+     * @param DataObject $instance
+     */
     public function processChange(DataObject $instance): void
     {
         $className = $instance->getClassName();
@@ -44,6 +50,17 @@ abstract class CacheProcessingService
         $this->processGlobalCares($className);
     }
 
+    /**
+     * Process the directly affected instances of the given instance:
+     * 1. Update CacheKey records of these directly affected instances
+     * 2. Return an array of @see EdgeUpdateDto for these affected instances,
+     * so that we can continue to update the next level of (indrectly) affected instances
+     *
+     * This process goes on until there is no more related instances
+     *
+     * @param EdgeUpdateDto $dto
+     * @return array
+     */
     private function updateEdge(EdgeUpdateDto $dto): array
     {
         $edge = $dto->getEdge();
@@ -102,6 +119,14 @@ abstract class CacheProcessingService
         return $results;
     }
 
+    /**
+     * Update or create CacheKey record for the given instance
+     * and return an array of @see EdgeUpdateDto which can be further processed to
+     * get the instances that are directly affected by the change of this current instance
+     *
+     * @param DataObject $instance
+     * @return array
+     */
     private function updateInstance(DataObject $instance): array
     {
         // Find or create the CacheKey for this instance
@@ -154,6 +179,11 @@ abstract class CacheProcessingService
         return $processedUpdate->isPublished();
     }
 
+    /**
+     * Invalidate all CacheKey records of DataObject(s) that 'global_cares' the given DataObject
+     *
+     * @param string $className ClassName of the DataObject that is 'global cared'
+     */
     private function processGlobalCares(string $className): void
     {
         $globalCares = $this->getGraph()->getGlobalCares();
