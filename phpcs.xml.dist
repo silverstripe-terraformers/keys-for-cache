@@ -25,10 +25,22 @@
         <!-- There are two rules which conflict. NewWithoutParentheses and UselessParentheses. One must be disabled -->
         <!-- We allow new Class(); rather than new Class;-->
         <exclude name="SlevomatCodingStandard.ControlStructures.NewWithoutParentheses"/>
-        <!-- Do not require fully qualified class names in annotation -->
+        <!-- Do not require fully qualified class names -->
+        <exclude name="SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly.ReferenceViaFullyQualifiedName"/>
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedClassNameInAnnotation.NonFullyQualifiedClassName"/>
+        <!-- Not something we do in SS -->
+        <exclude name="SlevomatCodingStandard.TypeHints.DeclareStrictTypes"/>
+        <!-- Array type hint syntax is very useful -->
+        <exclude name="SlevomatCodingStandard.TypeHints.DisallowArrayTypeHintSyntax"/>
+        <!-- Using mixed type is a way to get around the fact that we often cannot strictly type our methods if we -->
+        <!-- are extending a base SS method -->
+        <exclude name="SlevomatCodingStandard.TypeHints.DisallowMixedTypeHint"/>
         <!-- allow private static -->
         <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedProperty"/>
+        <!-- Don't require traversable type hints -->
+        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingTraversableTypeHintSpecification"/>
         <!-- Even if you strictly type, there are other reasons to add a DocComment (EG: to add @codeCoverageIgnore -->
         <exclude name="SlevomatCodingStandard.TypeHints.UselessConstantTypeHintSniff.UselessDocComment"/>
         <!-- Even if you strictly type, there are other reasons to add a DocComment (EG: to add @codeCoverageIgnore -->
@@ -50,6 +62,8 @@
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedExceptions.NonFullyQualifiedException"/>
         <!-- Do not require function referenced via a fully qualified name -->
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalFunctions.NonFullyQualified"/>
+        <!-- We don't control the order of declaration based on access level -->
+        <exclude name="SlevomatCodingStandard.Classes.ClassStructure"/>
         <!-- Allow short ternary operator -->
         <exclude name="SlevomatCodingStandard.ControlStructures.DisallowShortTernaryOperator.DisallowedShortTernaryOperator"/>
         <!-- You are not making me go \PHP_EOL -->
