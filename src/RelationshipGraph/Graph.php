@@ -11,6 +11,7 @@ use SilverStripe\Core\Flushable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataObject;
+use Terraformers\KeysForCache\Models\CacheKey;
 
 class Graph implements Flushable
 {
@@ -183,6 +184,27 @@ class Graph implements Flushable
         return null;
     }
 
+    /**
+     * All DataObject classes except those in ignore list
+     *
+     * @return array
+     */
+    private function getValidClasses(): array
+    {
+        // Relations only exist from data objects
+        $classes = ClassInfo::getValidSubClasses(DataObject::class);
+
+        // Don't build edges for classes in the ignorelist
+        $ignoreList = Config::forClass(CacheKey::class)->get('ignorelist');
+
+        return array_filter(
+            $classes,
+            static function ($class) use ($ignoreList) {
+                return !in_array($class, $ignoreList, true);
+            },
+        );
+    }
+
     private function buildEdges(): void
     {
         $cache = Injector::inst()->get(self::CACHE_KEY);
@@ -193,8 +215,8 @@ class Graph implements Flushable
             return;
         }
 
-        // Relations only exist from data objects
-        $classes = ClassInfo::getValidSubClasses(DataObject::class);
+        $classes = $this->getValidClasses();
+
         // The Edges that we're about to create
         $edges = [];
 
