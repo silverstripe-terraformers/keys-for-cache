@@ -6,6 +6,7 @@ use ReflectionClass;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\SiteConfig\SiteConfig;
+use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\RelationshipGraph\Node;
@@ -261,6 +262,21 @@ class GraphTest extends SapphireTest
         // There should now also be cache values
         $this->assertTrue($cache->has(Graph::CACHE_KEY_EDGES));
         $this->assertTrue($cache->has(Graph::CACHE_KEY_GLOBAL_CARES));
+    }
+
+    public function testGetValidClasses(): void
+    {
+        $graph = Graph::singleton();
+        $reflectionClass = new ReflectionClass(Graph::class);
+        $getValidClasses = $reflectionClass->getMethod('getValidClasses');
+        $getValidClasses->setAccessible(true);
+
+        $validClasses = $getValidClasses->invoke($graph);
+        $ignoreList = CacheKey::config()->get('ignorelist');
+        $intersect = array_intersect($validClasses, $ignoreList);
+
+        // validClasses shouldn't contain any value from ignore list
+        $this->assertCount(0, $intersect);
     }
 
     protected function tearDown(): void
