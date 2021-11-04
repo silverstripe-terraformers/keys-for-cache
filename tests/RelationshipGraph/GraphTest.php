@@ -5,7 +5,6 @@ namespace Terraformers\KeysForCache\Tests\RelationshipGraph;
 use ReflectionClass;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\SiteConfig\SiteConfig;
 use Terraformers\KeysForCache\Models\CacheKey;
