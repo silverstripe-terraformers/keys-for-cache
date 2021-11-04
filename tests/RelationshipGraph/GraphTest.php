@@ -3,6 +3,7 @@
 namespace Terraformers\KeysForCache\Tests\RelationshipGraph;
 
 use ReflectionClass;
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\SiteConfig\SiteConfig;
@@ -237,31 +238,118 @@ class GraphTest extends SapphireTest
         $reflectionClass = new ReflectionClass(Graph::class);
         $edges = $reflectionClass->getProperty('edges');
         $edges->setAccessible(true);
-        $cares = $reflectionClass->getProperty('global_cares');
-        $cares->setAccessible(true);
+        $globalCares = $reflectionClass->getProperty('global_cares');
+        $globalCares->setAccessible(true);
 
         // Reset property values
         $edges->setValue($graph, []);
-        $cares->setValue($graph, []);
+        $globalCares->setValue($graph, []);
         // Clear any cache that would have been created during initial instantiation
         $cache = Injector::inst()->get(Graph::CACHE_KEY);
         $cache->clear();
 
         // Check that we're set up with no cache and no property values
         $this->assertEmpty($edges->getValue($graph));
-        $this->assertEmpty($cares->getValue($graph));
+        $this->assertEmpty($globalCares->getValue($graph));
         $this->assertFalse($cache->has(Graph::CACHE_KEY_EDGES));
         $this->assertFalse($cache->has(Graph::CACHE_KEY_GLOBAL_CARES));
 
         // Trigger a flush, which should rebuild our cache and set the property values again
-        Graph::singleton()::flush();
+        $graph::flush();
 
         // Check that our edges and global_cares properties have been filled during the flush
         $this->assertNotEmpty($edges->getValue($graph));
-        $this->assertNotEmpty($cares->getValue($graph));
+        $this->assertNotEmpty($globalCares->getValue($graph));
         // There should now also be cache values
         $this->assertTrue($cache->has(Graph::CACHE_KEY_EDGES));
         $this->assertTrue($cache->has(Graph::CACHE_KEY_GLOBAL_CARES));
+    }
+
+    public function testBuildFromCache(): void
+    {
+        // Instantiating the singleton will build
+        $graph = Graph::singleton();
+        // Using ReflectionClass so that we can reset and test that these properties are populated as we expect
+        $reflectionClass = new ReflectionClass(Graph::class);
+        $edges = $reflectionClass->getProperty('edges');
+        $edges->setAccessible(true);
+        $globalCares = $reflectionClass->getProperty('global_cares');
+        $globalCares->setAccessible(true);
+        $buildEdges = $reflectionClass->getMethod('buildEdges');
+        $buildEdges->setAccessible(true);
+        $buildGlobalCares = $reflectionClass->getMethod('buildGlobalCares');
+        $buildGlobalCares->setAccessible(true);
+
+        $edgesCount = count($edges->getValue($graph));
+        $globalCaresCount = count($globalCares->getValue($graph));
+
+        // Reset property values
+        $edges->setValue($graph, []);
+        $globalCares->setValue($graph, []);
+        // Fetch our cache
+        $cache = Injector::inst()->get(Graph::CACHE_KEY);
+
+        // Check that we're set up with a cache but with no property values
+        $this->assertEmpty($edges->getValue($graph));
+        $this->assertEmpty($globalCares->getValue($graph));
+        $this->assertTrue($cache->has(Graph::CACHE_KEY_EDGES));
+        $this->assertTrue($cache->has(Graph::CACHE_KEY_GLOBAL_CARES));
+
+        // Let's now change some of our configuration from what is in the cache. The next time we trigger a build
+        // (without a flush) we should still have our expected Graph (because our cache won't have updated)
+        // Below we have updated cares/touches to only have one relationship, and we have added a global_cares
+        CaresPage::config()
+            ->set(
+                'cares',
+                [
+                    'CaredHasOneModel',
+                ]
+            )
+            ->set(
+                'global_cares',
+                [
+                    SiteTree::class,
+                ]
+            );
+
+        $buildEdges->invoke($graph);
+        $buildGlobalCares->invoke($graph);
+
+        // Check that our global cares are still the same as our cache
+        $this->assertCount($globalCaresCount, $globalCares->getValue($graph));
+        // There should be no global_cares on SiteTree at the moment
+        $this->assertArrayNotHasKey(SiteTree::class, $globalCares->getValue($graph));
+
+        // Check that our edges are still the same as our cache
+        $this->assertCount($edgesCount, $edges->getValue($graph));
+        // CaredBelongsToModel was removed in our config change, but we expect it to be present from our cache rebuild
+        // There should be two Edges for this class
+        $this->assertCount(2, $graph->getEdgesFrom(CaredBelongsToModel::class));
+
+        // Now lets flush our cache and rebuild, we should end up with a different graph
+        $graph::flush();
+
+        // Check that our global cares have changed
+        $this->assertNotCount($globalCaresCount, $globalCares->getValue($graph));
+        $values = $globalCares->getValue($graph);
+        // CaresPage now has a global_cares for SiteTree, so it should now be present
+        $this->assertArrayHasKey(SiteTree::class, $values);
+        $this->assertEquals(
+            [
+                CaresPage::class,
+                ExtendedCaresPage::class,
+            ],
+            $values[SiteTree::class],
+            '',
+            0.0,
+            10,
+            true
+        );
+
+        // Check that our Edges have changed
+        $this->assertNotCount($edgesCount, $edges->getValue($graph));
+        // CaredBelongsToModel should no longer be represented
+        $this->assertCount(0, $graph->getEdgesFrom(CaredBelongsToModel::class));
     }
 
     public function testGetValidClasses(): void
