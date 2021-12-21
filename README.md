@@ -14,7 +14,6 @@ The overall aim of this module is twofold:
 2) Increase the performance of our applications by reducing the number of, and the complexity of the cache keys that we
    calculate at the time of an end user's request.
 
-* [API warning](#api-warning)
 * [Installation](#installation)
 * [Why cache keys are difficult](#why-cache-keys-are-difficult)
 * [How we aim to solve these difficulties](#how-we-aim-to-solve-these-difficulties)
@@ -30,11 +29,6 @@ The overall aim of this module is twofold:
 * [License](#license)
 * [Maintainers](#maintainers)
 * [Development and contribution](#development-and-contribution)
-
-## API warning:
-
-This module is still in the early days of its life and therefore could have its API changed/updated. That said, the
-public API is very small, so we will do our best to make no changes to it.
 
 ## Installation
 
