@@ -11,6 +11,7 @@ use SilverStripe\Core\Flushable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\View\ViewableData;
 use Terraformers\KeysForCache\Models\CacheKey;
 
 class Graph implements Flushable
@@ -44,10 +45,18 @@ class Graph implements Flushable
 
     public function getEdgesFrom(string $from): array
     {
+        $ancestry = ClassInfo::ancestry($from);
+        // Base classes that show up in every ancestry array
+        $disallowList = [
+            DataObject::class,
+            ViewableData::class,
+        ];
+
         return array_filter(
             $this->getEdges(),
-            static function (Edge $e) use ($from) {
-                return $e->getFromClassName() === $from;
+            static function (Edge $e) use ($ancestry, $disallowList) {
+                return in_array($e->getFromClassName(), $ancestry, true)
+                    && !in_array($e->getFromClassName(), $disallowList, true);
             }
         );
     }

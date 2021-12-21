@@ -9,6 +9,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\Queries\SQLDelete;
 use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDto;
 use Terraformers\KeysForCache\Models\CacheKey;
+use Terraformers\KeysForCache\RelationshipGraph\Edge;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 
 abstract class CacheProcessingService
@@ -127,7 +128,7 @@ abstract class CacheProcessingService
         }
 
         return array_map(
-            static function ($e) use ($instance) {
+            static function (Edge $e) use ($instance) {
                 return new EdgeUpdateDto($e, $instance);
             },
             $applicableEdges
