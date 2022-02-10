@@ -111,7 +111,7 @@ abstract class CacheProcessingService
         if ($cacheKey) {
             // Check to see if we need to publish this CacheKey
             if ($this->shouldPublishUpdates()) {
-                $cacheKey->publishRecursive();
+                $cacheKey->publishSingle();
                 $processedUpdate->setPublished();
             }
         }

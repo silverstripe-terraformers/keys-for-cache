@@ -14,6 +14,7 @@ use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDto;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\Services\LiveCacheProcessingService;
 use Terraformers\KeysForCache\Services\StageCacheProcessingService;
+use Terraformers\KeysForCache\State\CacheKeyCrudState;
 
 /**
  * @property DataObject|$this $owner
@@ -56,6 +57,18 @@ class CacheKeyExtension extends DataExtension
 
     public function getCacheKey(): ?string
     {
+        // If we're browsing in CMS Preview, then we don't ever want to load with or save Cache Keys
+        if (!CacheKeyCrudState::canRead()) {
+            return implode(
+                '-',
+                [
+                    $this->owner->ClassName,
+                    $this->owner->ID,
+                    microtime(),
+                ]
+            );
+        }
+
         $key = new CacheKeyDto($this->findCacheKeyHash());
 
         $this->owner->invokeWithExtensions('updateCacheKey', $key);
@@ -124,12 +137,18 @@ class CacheKeyExtension extends DataExtension
         // Update or create (in this case, it will be create)
         $cacheKey = CacheKey::findOrCreate($this->owner);
 
-        if (!$cacheKey->isPublished()) {
-            // If the owner is not Versioned, or if it has been published, then we want to make sure we publish our
-            // CacheKey at the same time
-            if (!$this->owner->hasExtension(Versioned::class) || $this->owner->isPublished()) {
-                $cacheKey->publishRecursive();
-            }
+        if ($cacheKey->isPublished()) {
+            return $cacheKey->KeyHash;
+        }
+
+        if (!CacheKeyCrudState::canPublish()) {
+            return $cacheKey->KeyHash;
+        }
+
+        // If the owner is not Versioned, or if it has been published, then we want to make sure we publish our
+        // CacheKey at the same time
+        if (!$this->owner->hasExtension(Versioned::class) || $this->owner->isPublished()) {
+            $cacheKey->publishSingle();
         }
 
         return $cacheKey->KeyHash;
