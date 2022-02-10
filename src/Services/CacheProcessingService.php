@@ -109,9 +109,11 @@ abstract class CacheProcessingService
         $processedUpdate = $this->getUpdatesService()->findOrCreateProcessedUpdate($instance->ClassName, $instance->ID);
 
         if ($cacheKey) {
+            $cacheKey->write();
+
             // Check to see if we need to publish this CacheKey
             if ($this->shouldPublishUpdates()) {
-                $cacheKey->publishSingle();
+                $cacheKey->publishRecursive();
                 $processedUpdate->setPublished();
             }
         }

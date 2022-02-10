@@ -62,7 +62,7 @@ class CacheKeyTest extends SapphireTest
         $key = CacheKey::findOrCreate($page);
 
         // Check that the CacheKey exists, and that the KeyHash has not been updated
-        $this->assertNotNull($originKey);
+        $this->assertNotNull($key);
         $this->assertEquals($keyHash, $key->KeyHash);
     }
 
@@ -167,7 +167,7 @@ class CacheKeyTest extends SapphireTest
         $key = CacheKey::updateOrCreateKey($page);
 
         // Check that the CacheKey exists, and that the KeyHash has been updated
-        $this->assertNotNull($originKey);
+        $this->assertNotNull($key);
         $this->assertNotEquals($keyHash, $key->KeyHash);
     }
 
