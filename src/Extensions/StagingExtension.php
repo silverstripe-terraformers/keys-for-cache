@@ -16,6 +16,9 @@ class StagingExtension extends SiteTreeExtension
     {
         if ($controller->getRequest()->getVar('CMSPreview')) {
             StagingState::disableRead();
+            StagingState::disablePublish();
+
+            return;
         }
 
         if ($controller->getRequest()->getVar('stage') !== Versioned::DRAFT) {
