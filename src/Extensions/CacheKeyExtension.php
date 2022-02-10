@@ -14,7 +14,7 @@ use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDto;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\Services\LiveCacheProcessingService;
 use Terraformers\KeysForCache\Services\StageCacheProcessingService;
-use Terraformers\KeysForCache\State\CacheKeyCrudState;
+use Terraformers\KeysForCache\State\StagingState;
 
 /**
  * @property DataObject|$this $owner
@@ -58,7 +58,7 @@ class CacheKeyExtension extends DataExtension
     public function getCacheKey(): ?string
     {
         // If we're browsing in CMS Preview, then we don't ever want to load with or save Cache Keys
-        if (!CacheKeyCrudState::canRead()) {
+        if (!StagingState::canRead()) {
             return implode(
                 '-',
                 [
@@ -141,7 +141,7 @@ class CacheKeyExtension extends DataExtension
             return $cacheKey->KeyHash;
         }
 
-        if (!CacheKeyCrudState::canPublish()) {
+        if (!StagingState::canPublish()) {
             return $cacheKey->KeyHash;
         }
 

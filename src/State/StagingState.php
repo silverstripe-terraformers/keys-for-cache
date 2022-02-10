@@ -4,7 +4,7 @@ namespace Terraformers\KeysForCache\State;
 
 use SilverStripe\Core\Injector\Injectable;
 
-class CacheKeyCrudState
+class StagingState
 {
 
     use Injectable;

@@ -7,4 +7,4 @@ SilverStripe\ORM\DataObject:
 
 SilverStripe\CMS\Model\SiteTree:
   extensions:
-    CacheKeyCrudExtension: Terraformers\KeysForCache\Extensions\CacheKeyCrudExtension
+    StagingExtension: Terraformers\KeysForCache\Extensions\StagingExtension
