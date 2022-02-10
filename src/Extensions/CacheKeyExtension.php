@@ -129,7 +129,7 @@ class CacheKeyExtension extends DataExtension
 
         // In this context (that being, in a time where we are not actively generating Cache Keys, and are instead just
         // trying to find them) we will not perform a write() when/if the StagingState indicates that we should not
-        if (!StagingState::canWrite()) {
+        if (!StagingState::singleton()->canWrite()) {
             return $cacheKey->KeyHash;
         }
 
@@ -141,7 +141,7 @@ class CacheKeyExtension extends DataExtension
         }
 
         // In this context we will not perform a publish() when/if the StagingState indicates that we should not
-        if (!StagingState::canPublish()) {
+        if (!StagingState::singleton()->canPublish()) {
             return $cacheKey->KeyHash;
         }
 

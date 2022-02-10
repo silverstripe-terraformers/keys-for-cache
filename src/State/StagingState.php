@@ -9,38 +9,38 @@ class StagingState
 
     use Injectable;
 
-    public bool $enableWrite = true;
+    protected bool $writeEnabled = true;
 
-    public bool $enablePublish = true;
+    protected bool $publishEnabled = true;
 
-    public static function enableWrite(): void
+    public function enableWrite(): void
     {
-        static::singleton()->enableWrite = true;
+        $this->writeEnabled = true;
     }
 
-    public static function disableWrite(): void
+    public function disableWrite(): void
     {
-        static::singleton()->enableWrite = false;
+        $this->writeEnabled = false;
     }
 
-    public static function canWrite(): bool
+    public function canWrite(): bool
     {
-        return static::singleton()->enableWrite;
+        return $this->writeEnabled;
     }
 
-    public static function enablePublish(): void
+    public function enablePublish(): void
     {
-        static::singleton()->enablePublish = true;
+        $this->publishEnabled = true;
     }
 
-    public static function disablePublish(): void
+    public function disablePublish(): void
     {
-        static::singleton()->enablePublish = false;
+        $this->publishEnabled = false;
     }
 
-    public static function canPublish(): bool
+    public function canPublish(): bool
     {
-        return static::singleton()->enablePublish;
+        return $this->publishEnabled;
     }
 
 }

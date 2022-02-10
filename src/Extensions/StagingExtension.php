@@ -16,15 +16,15 @@ class StagingExtension extends SiteTreeExtension
     {
         // If we are currently browsing in a CMSPreview, then we do not want to write or publish any CacheKeys
         if ($controller->getRequest()->getVar('CMSPreview')) {
-            StagingState::disableWrite();
-            StagingState::disablePublish();
+            StagingState::singleton()->disableWrite();
+            StagingState::singleton()->disablePublish();
 
             return;
         }
 
         // If we are browsing in stage=Stage, then we do not want to publish any CacheKeys
         if ($controller->getRequest()->getVar('stage') === Versioned::DRAFT) { // phpcs:ignore
-            StagingState::disablePublish();
+            StagingState::singleton()->disablePublish();
         }
     }
 }

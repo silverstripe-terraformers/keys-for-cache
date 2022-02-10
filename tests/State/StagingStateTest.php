@@ -62,8 +62,8 @@ class StagingStateTest extends SapphireTest
      */
     public function testCannotWrite(): void
     {
-        StagingState::disableWrite();
-        StagingState::disablePublish();
+        StagingState::singleton()->disableWrite();
+        StagingState::singleton()->disablePublish();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
 
@@ -141,7 +141,7 @@ class StagingStateTest extends SapphireTest
      */
     public function testCannotPublish(): void
     {
-        StagingState::disablePublish();
+        StagingState::singleton()->disablePublish();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $page->publishRecursive();
@@ -179,7 +179,7 @@ class StagingStateTest extends SapphireTest
     {
         parent::setUp();
 
-        StagingState::enableWrite();
-        StagingState::enablePublish();
+        StagingState::singleton()->enableWrite();
+        StagingState::singleton()->enablePublish();
     }
 }
