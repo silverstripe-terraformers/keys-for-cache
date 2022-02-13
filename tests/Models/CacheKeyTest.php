@@ -200,4 +200,9 @@ class CacheKeyTest extends SapphireTest
         $this->assertNotNull($key);
         $this->assertNotEquals($keyHash, $key->KeyHash);
     }
+
+    public function testCacheKeyPublishRecursiveDefault(): void
+    {
+        $this->assertFalse(CacheKey::config()->get('publish_recursive'));
+    }
 }

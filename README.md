@@ -272,6 +272,12 @@ See: [Fluent support](docs/en/fluent.md)
 This will increase the queries to the database when `DataObjects` are updated. We are still pretty early into our
 performance tests, but so far it has not created an unreasonable amount of additional load time to author actions.
 
+**That said:**
+
+* You should still be aware of what `cares` and `touches` configuration you enabled.
+* If you start to notice performance issues with (say) Publishing a page, then you might need to reconsider the scope
+  of relationships that you `cares` or `touches` as part of your Page and related DataObjects (EG: Blocks).
+
 ### Queued jobs
 
 If you want to prevent content authors from getting slightly slower responses when editing in the CMS, you can queue a

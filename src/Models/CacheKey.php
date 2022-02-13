@@ -32,6 +32,8 @@ class CacheKey extends DataObject
         Versioned::class,
     ];
 
+    private static bool $publish_recursive = false;
+
     /**
      * Update the CacheKey if it is invalidated,
      * Create a CacheKey if it is empty

@@ -108,16 +108,26 @@ abstract class CacheProcessingService
         $cacheKey = CacheKey::updateOrCreateKey($instance);
         $processedUpdate = $this->getUpdatesService()->findOrCreateProcessedUpdate($instance->ClassName, $instance->ID);
 
-        if ($cacheKey) {
-            $cacheKey->write();
-
-            // Check to see if we need to publish this CacheKey
-            if ($this->shouldPublishUpdates()) {
-                $cacheKey->publishRecursive();
-                $processedUpdate->setPublished();
-            }
+        // If there is no CacheKey record representing this DataObject, then we can just create Edges here and return
+        if (!$cacheKey) {
+            return $this->createEdges($instance);
         }
 
+        // Make sure that our CacheKey record is saved
+        $cacheKey->write();
+
+        // Check to see if we need to publish this CacheKey
+        if ($this->shouldPublishUpdates()) {
+            if (CacheKey::config()->get('publish_recursive')) {
+                $cacheKey->publishRecursive();
+            } else {
+                $cacheKey->publishSingle();
+            }
+
+            $processedUpdate->setPublished();
+        }
+
+        // Create and return the Edges for this DataObject
         return $this->createEdges($instance);
     }
 
