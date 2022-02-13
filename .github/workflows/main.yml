@@ -15,5 +15,5 @@ jobs:
           phplinting: true
         - php: 7.4
           phpunit: true
-        - php: 8
+        - php: 8.0
           phpunit: true
