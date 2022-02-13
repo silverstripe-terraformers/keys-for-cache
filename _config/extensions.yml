@@ -4,3 +4,7 @@ Name: kfc-extensions
 SilverStripe\ORM\DataObject:
   extensions:
     CacheKeyExtension: Terraformers\KeysForCache\Extensions\CacheKeyExtension
+
+SilverStripe\CMS\Model\SiteTree:
+  extensions:
+    StagingExtension: Terraformers\KeysForCache\Extensions\StagingExtension

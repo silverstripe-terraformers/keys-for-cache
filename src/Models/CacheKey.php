@@ -45,7 +45,6 @@ class CacheKey extends DataObject
         }
 
         $cacheKey->KeyHash = static::generateKeyHash($dataObject);
-        $cacheKey->write();
 
         return $cacheKey;
     }
@@ -80,7 +79,6 @@ class CacheKey extends DataObject
             $cacheKey->RecordClass = $dataObject->ClassName;
             $cacheKey->RecordID = $dataObject->ID;
             $cacheKey->KeyHash = static::generateKeyHash($dataObject);
-            $cacheKey->write();
         }
 
         return $cacheKey;

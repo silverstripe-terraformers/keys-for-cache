@@ -14,6 +14,7 @@ use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDto;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\Services\LiveCacheProcessingService;
 use Terraformers\KeysForCache\Services\StageCacheProcessingService;
+use Terraformers\KeysForCache\State\StagingState;
 
 /**
  * @property DataObject|$this $owner
@@ -111,25 +112,43 @@ class CacheKeyExtension extends DataExtension
 
     protected function findCacheKeyHash(): ?string
     {
+        // If this DataObject is not in the Database, then it cannot have a CacheKey
         if (!$this->owner->isInDB()) {
             return null;
         }
 
         $hasCacheKey = $this->owner->config()->get('has_cache_key');
 
+        // You have requested that this DataObject class does not use cache keys
         if (!$hasCacheKey) {
             return null;
         }
 
-        // Update or create (in this case, it will be create)
+        // Find an existing CacheKey, or create a new one for this DataObject
         $cacheKey = CacheKey::findOrCreate($this->owner);
 
-        if (!$cacheKey->isPublished()) {
-            // If the owner is not Versioned, or if it has been published, then we want to make sure we publish our
-            // CacheKey at the same time
-            if (!$this->owner->hasExtension(Versioned::class) || $this->owner->isPublished()) {
-                $cacheKey->publishRecursive();
-            }
+        // In this context (that being, in a time where we are not actively generating Cache Keys, and are instead just
+        // trying to find them) we will not perform a write() when/if the StagingState indicates that we should not
+        if (!StagingState::singleton()->canWrite()) {
+            return $cacheKey->KeyHash;
+        }
+
+        $cacheKey->write();
+
+        // The Cache Key is already published, so there is nothing left for us to do except return the KeyHash
+        if ($cacheKey->isPublished()) {
+            return $cacheKey->KeyHash;
+        }
+
+        // In this context we will not perform a publish() when/if the StagingState indicates that we should not
+        if (!StagingState::singleton()->canPublish()) {
+            return $cacheKey->KeyHash;
+        }
+
+        // If the owner is not Versioned (essentially meaning that it is *always* published), or if the owner is
+        // currently published, then we want to make sure we publish our CacheKey as well
+        if (!$this->owner->hasExtension(Versioned::class) || $this->owner->isPublished()) {
+            $cacheKey->publishRecursive();
         }
 
         return $cacheKey->KeyHash;
