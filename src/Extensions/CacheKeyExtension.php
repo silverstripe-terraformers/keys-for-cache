@@ -148,7 +148,11 @@ class CacheKeyExtension extends DataExtension
         // If the owner is not Versioned (essentially meaning that it is *always* published), or if the owner is
         // currently published, then we want to make sure we publish our CacheKey as well
         if (!$this->owner->hasExtension(Versioned::class) || $this->owner->isPublished()) {
-            $cacheKey->publishRecursive();
+            if (CacheKey::config()->get('publish_recursive')) {
+                $cacheKey->publishRecursive();
+            } else {
+                $cacheKey->publishSingle();
+            }
         }
 
         return $cacheKey->KeyHash;
