@@ -8,7 +8,7 @@ jobs:
   ci:
     uses: silverstripe/github-actions-ci-cd/.github/workflows/ci.yml@0.1.14
     with:
-      default_jobs:
+      default_jobs: |
         - php: 7.4
           phpcoverage: true
         - php: 7.4
