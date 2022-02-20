@@ -69,6 +69,8 @@
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalFunctions.NonFullyQualified"/>
         <!-- We don't control the order of declaration based on access level -->
         <exclude name="SlevomatCodingStandard.Classes.ClassStructure"/>
+        <!-- Allow our exceptions to have the word "Exception" in them -->
+        <exclude name="SlevomatCodingStandard.Classes.SuperfluousExceptionNaming.SuperfluousSuffix"/>
         <!-- Allow short ternary operator -->
         <exclude name="SlevomatCodingStandard.ControlStructures.DisallowShortTernaryOperator.DisallowedShortTernaryOperator"/>
         <!-- You are not making me go \PHP_EOL -->
