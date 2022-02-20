@@ -229,6 +229,9 @@ class Graph implements Flushable
         // The Edges that we're about to create
         $edges = [];
 
+        // Track any relationship errors that we find
+        $errors = [];
+
         foreach ($classes as $className) {
             $config = Config::forClass($className);
             $touches = $this->getRelationshipConfig($config->get('touches'), $config);
@@ -313,13 +316,15 @@ class Graph implements Flushable
                     );
 
                     if (!$caresRelation) {
-                        throw new Exception(sprintf(
+                        $errors[] = sprintf(
                             'No valid has_one found between %s and %s for %s relationship %s',
                             $careClassName,
                             $className,
                             $has_many ? 'has_many' : 'belongs_to',
                             $relation
-                        ));
+                        );
+
+                        continue;
                     }
 
                     $careNode = $this->findOrCreateNode($careClassName);
@@ -365,12 +370,14 @@ class Graph implements Flushable
                 if (!$caresRelation) {
                     // The error we throw indicates that we're either missing a has_many or a belongs_to for this
                     // relationship, as having either of those would be valid for a has_one
-                    throw new Exception(sprintf(
+                    $errors[] = sprintf(
                         'No valid has_many or belongs_to found between %s and %s for has_one relationship %s',
                         $careClassName,
                         $className,
                         $relation
-                    ));
+                    );
+
+                    continue;
                 }
 
                 $careNode = $this->findOrCreateNode($careClassName);
@@ -381,6 +388,10 @@ class Graph implements Flushable
                     $this->getRelationType($careClassName, $caresRelation)
                 );
             }
+        }
+
+        if (count($errors) > 0) {
+            throw new GraphBuildException($errors);
         }
 
         $cache->set(self::CACHE_KEY_EDGES, $edges);
