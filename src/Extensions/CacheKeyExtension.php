@@ -133,7 +133,10 @@ class CacheKeyExtension extends DataExtension
             return $cacheKey->KeyHash;
         }
 
-        $cacheKey->write();
+        // Check that our CacheKey has been saved to the Database
+        if (!$cacheKey->isInDB()) {
+            $cacheKey->write();
+        }
 
         // The Cache Key is already published, so there is nothing left for us to do except return the KeyHash
         if ($cacheKey->isPublished()) {
