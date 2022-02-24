@@ -77,7 +77,9 @@ class GridFieldOrderableRowsExtension extends Extension
 
         // The problem is that $sortedIDs is a list of the _related_ item IDs, which causes trouble
         // with ManyManyThrough, where we need the ID of the _join_ item in order to set the value.
-        $itemToSortReference = ($list instanceof ManyManyThroughList) ? 'getJoin' : 'Me';
+        $itemToSortReference = $list instanceof ManyManyThroughList
+            ? 'getJoin'
+            : 'Me';
         $currentSortList = $list->map('ID', $itemToSortReference)->toArray();
 
         // Our List has already been processed and saved at this point, so we cannot access anything like the changed()
