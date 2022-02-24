@@ -23,9 +23,10 @@ The overall aim of this module is twofold:
     * [Touches](#touches)
     * [Global cares](#global-cares)
     * [Usage and Examples](docs/en/examples.md)
-* [Fluent support](#fluent-support)
 * [Performance impact/considerations](#performance-impactconsiderations)
     * [Queued jobs](#queued-jobs)
+* [Fluent support](#fluent-support)
+* [GridField Orderable support](#gridfield-orderable-support)
 * [License](#license)
 * [Maintainers](#maintainers)
 * [Development and contribution](#development-and-contribution)
@@ -263,10 +264,6 @@ updated. This is a mechanism of global updates to ensure we don't run into perfo
 
 See: [Usage and Examples](docs/en/examples.md)
 
-## Fluent support
-
-See: [Fluent support](docs/en/fluent.md)
-
 ## Performance impact/considerations
 
 This will increase the queries to the database when `DataObjects` are updated. We are still pretty early into our
@@ -283,6 +280,14 @@ performance tests, but so far it has not created an unreasonable amount of addit
 If you want to prevent content authors from getting slightly slower responses when editing in the CMS, you can queue a
 job to generate the cache updates by injecting over `CacheKeyExtension` and updating `triggerEvent` to create a job then
 call `CacheRelationService::singleton()->processChange($this->DataObject)` in the job.
+
+## Fluent support
+
+See: [Fluent support](docs/en/fluent.md)
+
+## GridField Orderable support
+
+See: [GridField Orderable support](docs/en/gridfield-orderable.md)
 
 ## License
 
