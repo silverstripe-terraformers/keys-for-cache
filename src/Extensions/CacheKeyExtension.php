@@ -95,7 +95,7 @@ class CacheKeyExtension extends DataExtension
         $this->triggerEvent(true);
     }
 
-    protected function triggerEvent(bool $publishUpdates = false): void
+    public function triggerEvent(bool $publishUpdates = false): void
     {
         $ignoreList = Config::forClass(CacheKey::class)->get('ignorelist');
 
