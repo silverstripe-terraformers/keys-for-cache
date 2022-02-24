@@ -103,7 +103,7 @@ class GridFieldOrderableRowsExtension extends Extension
             }
 
             // We know that we need to publish these events, as this is a non-Versioned DataObject
-            $record->triggerEvent(true);
+            $record->triggerCacheEvent(true);
         }
     }
 
