@@ -73,7 +73,7 @@ class CacheKeyExtension extends DataExtension
         // We will want to publish changes to the CacheKey onAfterWrite if the instance triggering this event is *not*
         // Versioned (the changes should be seen immediately even though the object wasn't Published)
         $publishUpdates = !$this->owner->hasExtension(Versioned::class);
-        $this->triggerCacheEvent($publishUpdates);
+        $this->owner->triggerCacheEvent($publishUpdates);
     }
 
     public function onAfterDelete(): void
@@ -81,18 +81,18 @@ class CacheKeyExtension extends DataExtension
         // We will want to publish changes to the CacheKey onAfterWrite if the instance triggering this event is *not*
         // Versioned (the changes should be seen immediately even though the object wasn't Published)
         $publishUpdates = !$this->owner->hasExtension(Versioned::class);
-        $this->triggerCacheEvent($publishUpdates);
+        $this->owner->triggerCacheEvent($publishUpdates);
         CacheKey::remove($this->owner);
     }
 
     public function onAfterPublish(): void
     {
-        $this->triggerCacheEvent(true);
+        $this->owner->triggerCacheEvent(true);
     }
 
     public function onAfterUnpublish(): void
     {
-        $this->triggerCacheEvent(true);
+        $this->owner->triggerCacheEvent(true);
     }
 
     public function triggerCacheEvent(bool $publishUpdates = false): void
