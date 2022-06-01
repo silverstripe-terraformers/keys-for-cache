@@ -171,10 +171,10 @@ class GraphTest extends SapphireTest
             ],
         ];
 
-        $this->assertEquals($expectPageOneTouch, $pageOneTouch, '', 0.0, 10, true);
-        $this->assertEquals([], $pageOneCares, '', 0.0, 10, true);
-        $this->assertEquals([], $pageTwoTouch, '', 0.0, 10, true);
-        $this->assertEquals($expectPageTwoCares, $pageTwoCares, '', 0.0, 10, true);
+        $this->assertEqualsCanonicalizing($expectPageOneTouch, $pageOneTouch);
+        $this->assertEqualsCanonicalizing([], $pageOneCares);
+        $this->assertEqualsCanonicalizing([], $pageTwoTouch);
+        $this->assertEqualsCanonicalizing($expectPageTwoCares, $pageTwoCares);
     }
 
     public function testGetEdgesFrom(): void
@@ -192,7 +192,7 @@ class GraphTest extends SapphireTest
             $graph->getEdgesFrom(CaredHasOneModel::class)
         );
 
-        $this->assertEquals($expected, $result, '', 0.0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $result);
 
         $expected = [
             TouchedBelongsToModel::class,
@@ -208,7 +208,7 @@ class GraphTest extends SapphireTest
             $graph->getEdgesFrom(TouchesPage::class)
         );
 
-        $this->assertEquals($expected, $result, '', 0.0, 10, true);
+        $this->assertEqualsCanonicalizing($expected, $result);
     }
 
     public function testGetGlobalCares(): void

@@ -9,12 +9,11 @@
     ],
     "license": "BSD-3-Clause",
     "require": {
-        "php": ">=7.4",
+        "php": "^7.4 || ^8.0",
         "silverstripe/framework": "^4.6"
     },
     "require-dev": {
-        "sminnee/phpunit": "^5.7",
-        "sminnee/phpunit-mock-objects": "^3.4",
+        "phpunit/phpunit": "^9.5",
         "tractorcow/silverstripe-fluent": ">=4.0.0",
         "slevomat/coding-standard": "~6.0"
     },

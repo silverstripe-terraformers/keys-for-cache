@@ -32,7 +32,7 @@ class FluentExtensionTest extends SapphireTest
             $locale = $this->objFromFixture(Locale::class, 'nz');
             $page = $this->objFromFixture(CachePage::class, 'page1');
 
-            $this->assertContains($locale->Locale, $page->getCacheKey());
+            $this->assertStringContainsString($locale->Locale, $page->getCacheKey());
         });
     }
 
@@ -44,7 +44,7 @@ class FluentExtensionTest extends SapphireTest
             $locale = $this->objFromFixture(Locale::class, 'nz');
             $page = $this->objFromFixture(CachePage::class, 'page1');
 
-            $this->assertNotContains($locale->Locale, $page->getCacheKey());
+            $this->assertStringNotContainsString($locale->Locale, $page->getCacheKey());
         });
     }
 
