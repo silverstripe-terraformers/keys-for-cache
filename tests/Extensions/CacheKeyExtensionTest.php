@@ -16,6 +16,14 @@ class CacheKeyExtensionTest extends SapphireTest
 
     protected static $fixture_file = 'CacheKeyExtensionTest.yml'; // phpcs:ignore
 
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
+     * @var array
+     */
+    protected static $extra_dataobjects = [
+        CachePage::class,
+    ];
+
     public function testWriteGeneratesCacheKey(): void
     {
         // Page config is $has_cache_key = true, so when we write this record it should generate a CacheKey
@@ -231,7 +239,7 @@ class CacheKeyExtensionTest extends SapphireTest
 
     public function testUpdateCMSFields(): void
     {
-        Page::config()->set('enable-cache-keys-field', true);
+        Page::config()->set('enable_cache_keys_field', true);
 
         $page = CachePage::create();
         $page->write();
@@ -242,7 +250,7 @@ class CacheKeyExtensionTest extends SapphireTest
 
     public function testUpdateCMSFieldsNoDisplay(): void
     {
-        Page::config()->set('enable-cache-keys-field', false);
+        Page::config()->set('enable_cache_keys_field', false);
 
         $page = CachePage::create();
         $page->write();
@@ -253,7 +261,7 @@ class CacheKeyExtensionTest extends SapphireTest
 
     public function testUpdateCMSFieldsNoKeyConfig(): void
     {
-        Page::config()->set('enable-cache-keys-field', true);
+        Page::config()->set('enable_cache_keys_field', true);
 
         $page = NoCachePage::create();
         $page->write();

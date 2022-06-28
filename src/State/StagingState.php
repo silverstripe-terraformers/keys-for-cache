@@ -9,9 +9,9 @@ class StagingState
 
     use Injectable;
 
-    protected bool $writeEnabled = true;
+    private bool $writeEnabled = true;
 
-    protected bool $publishEnabled = true;
+    private bool $publishEnabled = true;
 
     public function enableWrite(): void
     {
