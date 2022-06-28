@@ -152,7 +152,7 @@ class Graph implements Flushable
             [$relationClassName, $relationField] = $this->getClassAndRelation($relationString);
 
             // Using is_a() here so that we find relationships to descendent classes as well
-            if (!is_a(Injectable::singleton($destinationClassName), $relationClassName)) {
+            if (!is_a(Injector::inst()->get($destinationClassName), $relationClassName)) {
                 continue;
             }
 
