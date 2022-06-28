@@ -36,7 +36,7 @@ class CacheKeyExtension extends DataExtension
             'CacheKeys',
         ]);
 
-        if (!$this->owner->config()->get('enable-cache-keys-field')) {
+        if (!$this->owner->config()->get('enable_cache_keys_field')) {
             return;
         }
 
@@ -151,6 +151,8 @@ class CacheKeyExtension extends DataExtension
         // If the owner is not Versioned (essentially meaning that it is *always* published), or if the owner is
         // currently published, then we want to make sure we publish our CacheKey as well
         if (!$this->owner->hasExtension(Versioned::class) || $this->owner->isPublished()) {
+            // Default behaviour is that publish_recursive is disabled. There is only value in using publishRecursive()
+            // if you decide that your CacheKey model needs to $own something
             if (CacheKey::config()->get('publish_recursive')) {
                 $cacheKey->publishRecursive();
             } else {
