@@ -1,11 +1,22 @@
 # Usage and Examples
 
+* [A bit about the `cached` wrapper](#a-bit-about-the-cached-wrapper)
 * [Thinking about what you want to cache](#thinking-about-what-you-want-to-cache)
     * [One key to rule them all](#one-key-to-rule-them-all)
     * [Recommended approach](#recommended-approach)
 * [Caching your Blocks/Elements](#caching-your-blockselements)
 * [Headers, Footers, and other "global" content areas](#headers-footers-and-other-global-content-areas)
 * [Full usage example](#full-usage-example)
+
+## A bit about the `cached` wrapper
+
+The `<% cached ... %>` supports an `if` condition (as of framework 4.7). This can be really useful to use when you have
+a `DataObject` or area where you sometimes need it to be uncached.
+
+EG: `<% cached $CacheKey if $MyCondition %>`
+
+You could even use: `<% cached $CacheKey if $CacheKey %>`, and then any time you don't want a particular `DataObject` to
+be cached, you could implement the `updateCacheKey(CacheKeyDto $keyDto)` method and set the key to `null`.
 
 ## Thinking about what you want to cache
 
@@ -51,7 +62,7 @@ Save in: `/themes/[name]/templates/DNADesign/Elemental/Models/ElementalArea.ss`:
 ```silverstripe
 <% if $ElementControllers %>
     <% loop $ElementControllers %>
-        <% cached $Me.CacheKey %>
+        <% cached $Me.CacheKey if $Me.CacheKey %>
             $Me
         <% end_cached %>
     <% end_loop %>
@@ -88,6 +99,8 @@ it.
     </div>
 <% end_cached %>
 ```
+
+And then the Blocks that you **don't** want to cache could simply not add the `cached` wrapper.
 
 ## Headers, Footers, and other "global" content areas
 
