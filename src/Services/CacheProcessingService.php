@@ -6,7 +6,7 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\Queries\SQLDelete;
+use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDto;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
@@ -185,13 +185,17 @@ abstract class CacheProcessingService
         $cares = array_merge(...array_values($cares));
         $cares = array_unique($cares);
 
-        $cacheKeyTable = CacheKey::config()->get('table_name');
-
         foreach ($cares as $careClass) {
-            SQLDelete::create(
-                $cacheKeyTable,
-                ['RecordClass' => $careClass]
-            )->execute();
+            /** @var DataList|CacheKey[] $cacheKeys */
+            $cacheKeys = Versioned::withVersionedMode(static function () use ($careClass): DataList {
+                Versioned::set_stage(Versioned::DRAFT);
+
+                return CacheKey::get()->filter('RecordClass', $careClass);
+            });
+
+            foreach ($cacheKeys as $cacheKey) {
+                $cacheKey->doArchive();
+            }
         }
     }
 
