@@ -18,6 +18,14 @@ Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel:
   model1:
     Title: Through Model 1
 
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOneModel:
+  model1:
+    Title: Polymorphic Has One Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel:
+  model1:
+    Title: Polymorphic Has Many Model 1
+
 Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage:
   page1:
     Title: Page 1
@@ -29,3 +37,6 @@ Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage:
       - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel.model1
     CaredThroughModels:
       - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel.model1
+    PolymorphicHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOneModel.model1
+    PolymorphicCaredHasManyModels:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel.model1

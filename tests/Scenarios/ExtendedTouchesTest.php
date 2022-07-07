@@ -6,6 +6,10 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
+use Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicTouchedHasManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicTouchedHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
@@ -29,6 +33,10 @@ class ExtendedTouchesTest extends SapphireTest
     protected static $extra_dataobjects = [
         ExtendedTouchedPage::class,
         ExtendedTouchesPage::class,
+        ExtendedPolymorphicTouchedHasManyModel::class,
+        ExtendedPolymorphicTouchedHasOneModel::class,
+        PolymorphicTouchedHasManyModel::class,
+        PolymorphicTouchedHasOneModel::class,
         TouchedPage::class,
         TouchesPage::class,
         TouchesPageTouchedThroughModel::class,
@@ -96,6 +104,62 @@ class ExtendedTouchesTest extends SapphireTest
         $this->assertNotEquals($originalKey, $newKey);
     }
 
+    public function testPolymorphicTouchesHasOne(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
+        $model = $this->objFromFixture(PolymorphicTouchedHasOneModel::class, 'model1');
+
+        // Check that we're set up correctly
+        $this->assertEquals(PolymorphicTouchedHasOneModel::class, $model->ClassName);
+        $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
+
+        $originalKey = $model->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        // Begin changes
+        $page->forceChange();
+        $page->write();
+
+        $newKey = $model->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($originalKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    public function testExtendedPolymorphicTouchesHasOne(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page2');
+        $model = $this->objFromFixture(ExtendedPolymorphicTouchedHasOneModel::class, 'model1');
+
+        // Check that we're set up correctly
+        $this->assertEquals(ExtendedPolymorphicTouchedHasOneModel::class, $model->ClassName);
+        $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
+
+        $originalKey = $model->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        // Begin changes
+        $page->forceChange();
+        $page->write();
+
+        $newKey = $model->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($originalKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
     public function testTouchesHasMany(): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -103,6 +167,52 @@ class ExtendedTouchesTest extends SapphireTest
 
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
         $model = $this->objFromFixture(TouchedHasManyModel::class, 'model1');
+
+        $originalKey = $model->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        $page->forceChange();
+        $page->write();
+
+        $newKey = $model->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($originalKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    public function testPolymorphicTouchesHasMany(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
+        $model = $this->objFromFixture(PolymorphicTouchedHasManyModel::class, 'model1');
+
+        $originalKey = $model->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        $page->forceChange();
+        $page->write();
+
+        $newKey = $model->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($originalKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    public function testExtendedPolymorphicTouchesHasMany(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page2');
+        $model = $this->objFromFixture(ExtendedPolymorphicTouchedHasManyModel::class, 'model1');
 
         $originalKey = $model->getCacheKey();
 

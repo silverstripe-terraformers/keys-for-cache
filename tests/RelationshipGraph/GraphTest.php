@@ -6,6 +6,7 @@ use ReflectionClass;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\SiteConfig\SiteConfig;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
@@ -15,6 +16,8 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
@@ -149,6 +152,8 @@ class GraphTest extends SapphireTest
         $pageTwoCares = $method->invoke($graph, $pageTwo->get('cares'), $pageTwo);
 
         $expectPageOneTouch = [
+            'PolymorphicHasOne' => DataObject::class,
+            'PolymorphicTouchedHasManyModels' => PolymorphicTouchedHasManyModel::class . '.PolymorphicHasOne',
             'TouchedBelongsToModel' => TouchedBelongsToModel::class,
             'TouchedHasOneModel' => TouchedHasOneModel::class,
             'TouchedHasManyModels' => TouchedHasManyModel::class,
@@ -169,6 +174,8 @@ class GraphTest extends SapphireTest
                 'from' => 'Parent',
                 'to' => 'CaredThroughModel',
             ],
+            'PolymorphicHasOne' => DataObject::class,
+            'PolymorphicCaredHasManyModels' => PolymorphicCaredHasManyModel::class . '.PolymorphicHasOne',
         ];
 
         $this->assertEqualsCanonicalizing($expectPageOneTouch, $pageOneTouch);
@@ -195,6 +202,8 @@ class GraphTest extends SapphireTest
         $this->assertEqualsCanonicalizing($expected, $result);
 
         $expected = [
+            DataObject::class,
+            PolymorphicTouchedHasManyModel::class,
             TouchedBelongsToModel::class,
             TouchedHasOneModel::class,
             TouchedHasManyModel::class,
@@ -334,16 +343,12 @@ class GraphTest extends SapphireTest
         $values = $globalCares->getValue($graph);
         // CaresPage now has a global_cares for SiteTree, so it should now be present
         $this->assertArrayHasKey(SiteTree::class, $values);
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 CaresPage::class,
                 ExtendedCaresPage::class,
             ],
             $values[SiteTree::class],
-            '',
-            0.0,
-            10,
-            true
         );
 
         // Check that our Edges have changed

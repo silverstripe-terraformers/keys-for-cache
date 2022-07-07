@@ -126,15 +126,17 @@ class Graph implements Flushable
     }
 
     /**
-     * @param array|null $originConfig The config for the class you with to find the relationship on
+     * @param array|null $originConfig The config for the class you wish to find the relationship on
      * @param string $destinationClassName The name of the class you wish the find the relationship for
      * @param string $destinationRelation The name of the relationship at the destination (important for dot notation)
+     * @param bool $strict For polymorphic relationships, we need to be very strict on relationship linkages
      * @return string|null
      */
     private function getRelationForClassName(
         ?array $originConfig,
         string $destinationClassName,
-        string $destinationRelation
+        string $destinationRelation,
+        bool $strict = false
     ): ?string {
         if (!$originConfig) {
             return null;
@@ -156,9 +158,10 @@ class Graph implements Flushable
                 continue;
             }
 
-            // This relation matches the class and there is no dot notation, indicating that it is the only relationship
-            // available. We can return here
-            if (!$relationField) {
+            // This relation matches the class and there is no dot notation, this would indicate that this is the only
+            // relationship available, but we do also need to make sure that this isn't a $strict call, as when we're
+            // checking for Polymorphic relationships, this *needs* to be dot notated
+            if (!$relationField && !$strict) {
                 return $relation;
             }
 
@@ -338,8 +341,42 @@ class Graph implements Flushable
                     continue;
                 }
 
-                // This relationship is a has_one, so it could be a belongs_to <-> has_one, or has_one <-> has_many
-                // We'll first check to see if it is a has_many
+                // This relationship is a has_one, so it could be a belongs_to <-> has_one, or has_one <-> has_many,
+                // it could also be a polymorphic has_one <-> has_many
+
+                // We'll first check to see if it is a polymorphic relationship, as that one's a bit different.
+                // Thankfully, we can just check if the $careClassName is DataObject
+                if ($careClassName === DataObject::class) {
+                    // Yes, it's a polymorphic relationship. This means that we have to go through every config for
+                    // every DataObject to check if it references our model
+                    foreach ($this->getValidClasses() as $polymorphicClassName) {
+                        // Check to see if there is a $strict relationship back to this class
+                        $caresRelation = $this->getRelationForClassName(
+                            Config::forClass($polymorphicClassName)->get('has_many') ?? [],
+                            $className,
+                            $relation,
+                            true
+                        );
+
+                        // No relationship for this class
+                        if (!$caresRelation) {
+                            continue;
+                        }
+
+                        // There is a relationship, so let's build an Edge for it
+                        $careNode = $this->findOrCreateNode($polymorphicClassName);
+                        $edges[] = new Edge(
+                            $careNode,
+                            $node,
+                            $caresRelation,
+                            $this->getRelationType($polymorphicClassName, $caresRelation)
+                        );
+                    }
+
+                    continue;
+                }
+
+                // Now that Polymorphic is out of the way, we can check for standard has_ones
                 $caresRelation = $this->getRelationForClassName(
                     Config::forClass($careClassName)->get('has_many') ?? [],
                     $className,

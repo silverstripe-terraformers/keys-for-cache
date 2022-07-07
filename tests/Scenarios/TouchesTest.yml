@@ -1,3 +1,11 @@
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOneModel:
+  model1:
+    Title: Polymorphic Has One Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel:
+  model1:
+    Title: Polymorphic Has Many Model 1
+
 Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel:
   model1:
     Title: Belongs To Model 1
@@ -25,6 +33,9 @@ Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsToModel:
 Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage:
   page1:
     Title: Page 1
+    PolymorphicHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOneModel.model1
+    PolymorphicTouchedHasManyModels:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel.model1
     TouchedBelongsToModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel.model1
     TouchedHasOneModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel.model1
     TouchedHasManyModels:

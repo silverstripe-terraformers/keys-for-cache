@@ -26,6 +26,22 @@ Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedCaredHasOneModel:
   model1:
     Title: Extended Has One Model 1
 
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOneModel:
+  model1:
+    Title: Polymorphic Has One Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel:
+  model1:
+    Title: Polymorphic Has Many Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicCaredHasOneModel:
+  model1:
+    Title: Extended Polymorphic Has One Model 1
+
+Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicCaredHasManyModel:
+  model1:
+    Title: Extended Polymorphic Has Many Model 1
+
 Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage:
   page1:
     Title: Page 1
@@ -33,11 +49,17 @@ Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage:
     CaredHasOneModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel.model1
     CaredHasManyModels:
       - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel.model1
+    PolymorphicHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOneModel.model1
+    PolymorphicCaredHasManyModels:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel.model1
   page2:
     Title: Page 2
     BaseCaredHasOneModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\BaseCaredHasOneModel.model1
     BaseCaredHasManyModels:
       - =>Terraformers\KeysForCache\Tests\Mocks\Models\BaseCaredHasManyModel.model1
+    PolymorphicHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicCaredHasOneModel.model1
+    PolymorphicCaredHasManyModels:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicCaredHasManyModel.model1
   page3:
     Title: Page 3
     BaseCaredHasOneModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedCaredHasOneModel.model1
