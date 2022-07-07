@@ -6,6 +6,8 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
@@ -29,6 +31,8 @@ class ExtendedTouchesTest extends SapphireTest
     protected static $extra_dataobjects = [
         ExtendedTouchedPage::class,
         ExtendedTouchesPage::class,
+        PolymorphicTouchedHasManyModel::class,
+        PolymorphicTouchedHasOneModel::class,
         TouchedPage::class,
         TouchesPage::class,
         TouchesPageTouchedThroughModel::class,

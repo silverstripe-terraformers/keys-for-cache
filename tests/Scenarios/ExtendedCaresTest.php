@@ -15,6 +15,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedCaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedCaredHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThroughModel;
@@ -40,6 +41,8 @@ class ExtendedCaresTest extends SapphireTest
         ExtendedCaresPage::class,
         ExtendedCaredHasOneModel::class,
         ExtendedCaredHasManyModel::class,
+        PolymorphicCaredHasManyModel::class,
+        PolymorphicCaredHasManyModel::class,
     ];
 
     public function testCaresPureHasOne(): void

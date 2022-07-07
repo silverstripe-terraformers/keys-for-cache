@@ -11,6 +11,8 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOneModel;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThroughModel;
 
@@ -30,6 +32,8 @@ class CaresTest extends SapphireTest
         CaredHasOneModel::class,
         CaredManyManyModel::class,
         CaredThroughModel::class,
+        PolymorphicCaredHasOneModel::class,
+        PolymorphicCaredHasManyModel::class,
     ];
 
     public function testCaresPureHasOne(): void
@@ -116,9 +120,34 @@ class CaresTest extends SapphireTest
         $this->assertNotEquals($originalKey, $newKey);
     }
 
-    /**
-     * This test is currently failing, and is a scenario we expect to support
-     */
+    public function testPolymorphicCaresHasOne(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        $model = $this->objFromFixture(PolymorphicCaredHasOneModel::class, 'model1');
+
+        // Check that we're set up correctly
+        $this->assertEquals(PolymorphicCaredHasOneModel::class, $model->ClassName);
+        $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
+
+        $originalKey = $page->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        // Begin changes
+        $model->forceChange();
+        $model->write();
+
+        $newKey = $page->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($newKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
     public function testCaresHasMany(): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -126,6 +155,29 @@ class CaresTest extends SapphireTest
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredHasManyModel::class, 'model1');
+
+        $originalKey = $page->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        $model->forceChange();
+        $model->write();
+
+        $newKey = $page->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($newKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    public function testPolymorphicCaresHasMany(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        $model = $this->objFromFixture(PolymorphicCaredHasManyModel::class, 'model1');
 
         $originalKey = $page->getCacheKey();
 

@@ -3,6 +3,7 @@ Name: kfc-ignorelist
 ---
 Terraformers\KeysForCache\Models\CacheKey:
   ignorelist:
+    DataObject: SilverStripe\ORM\DataObject
     CacheKey: Terraformers\KeysForCache\Models\CacheKey
     ChangeSet: SilverStripe\Versioned\ChangeSet
     ChangeSetItem: SilverStripe\Versioned\ChangeSetItem
