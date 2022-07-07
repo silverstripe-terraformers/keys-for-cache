@@ -18,6 +18,10 @@ use SilverStripe\Versioned\Versioned;
  * You do not need this Extension for Versioned DataObject. They are supported out of the box because
  * GridFieldOrderableRows already performs a write() through the ORM when sorting Versioned DataObjects.
  *
+ * WARNING: We absolutely plan to remove this extension once GridFieldOrderableRows supports sorting on non-Versioned
+ * DataObjects. If you need it, probably best to copy/paste it to your project, and we empower you to own it from that
+ * point forward.
+ *
  * This Extension is *not* automatically applied because I think you should seriously consider Versioning your
  * DataObject. If you are adding this DataObject to (something like) an Element, which *is* Versioned, then (imo) it is
  * best that all of the related DataObjects (like its "Items") are also Versioned. This gives a consistent author
@@ -116,7 +120,7 @@ class GridFieldOrderableRowsExtension extends Extension
      * @param SS_List $list
      * @return DataQueryManipulator|ManyManyThroughQueryManipulator|SS_List
      */
-    protected function getManyManyInspector(SS_List $list)
+    private function getManyManyInspector(SS_List $list)
     {
         $inspector = $list;
 
@@ -135,7 +139,7 @@ class GridFieldOrderableRowsExtension extends Extension
         return $inspector;
     }
 
-    protected function isManyMany(SS_List $list): bool
+    private function isManyMany(SS_List $list): bool
     {
         return $list instanceof ManyManyList || $list instanceof ManyManyThroughList;
     }

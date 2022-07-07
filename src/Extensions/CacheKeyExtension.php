@@ -110,7 +110,7 @@ class CacheKeyExtension extends DataExtension
         $service->processChange($this->owner);
     }
 
-    protected function findCacheKeyHash(): ?string
+    private function findCacheKeyHash(): ?string
     {
         // If this DataObject is not in the Database, then it cannot have a CacheKey
         if (!$this->owner->isInDB()) {

@@ -46,7 +46,7 @@ class CacheKey extends DataObject
             return null;
         }
 
-        $cacheKey->KeyHash = static::generateKeyHash($dataObject);
+        $cacheKey->KeyHash = self::generateKeyHash($dataObject);
 
         return $cacheKey;
     }
@@ -80,7 +80,7 @@ class CacheKey extends DataObject
             $cacheKey = static::create();
             $cacheKey->RecordClass = $dataObject->ClassName;
             $cacheKey->RecordID = $dataObject->ID;
-            $cacheKey->KeyHash = static::generateKeyHash($dataObject);
+            $cacheKey->KeyHash = self::generateKeyHash($dataObject);
         }
 
         return $cacheKey;
@@ -99,7 +99,7 @@ class CacheKey extends DataObject
         }
     }
 
-    protected static function generateKeyHash(DataObject $dataObject): string
+    private static function generateKeyHash(DataObject $dataObject): string
     {
         // getUniqueKey() has only been around since 4.7, but ideally this is what we would like to use as the base for
         // our KeyHash
