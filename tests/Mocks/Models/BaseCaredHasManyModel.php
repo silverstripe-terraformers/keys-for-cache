@@ -2,11 +2,12 @@
 
 namespace Terraformers\KeysForCache\Tests\Mocks\Models;
 
+use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage;
 
-class BaseCaredHasManyModel extends DataObject
+class BaseCaredHasManyModel extends DataObject implements TestOnly
 {
     private static array $db = [
         'Title' => 'Varchar',
