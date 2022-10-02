@@ -14,6 +14,9 @@ The overall aim of this module is twofold:
 2) Increase the performance of our applications by reducing the number of, and the complexity of the cache keys that we
    calculate at the time of an end user's request.
 
+**What this module is not**: This module is not here to provide a caching method, it is here to provide you with
+**keys** that you can use with your preferred caching method (EG: partial caching).
+
 * [Installation](#installation)
 * [Why cache keys are difficult](#why-cache-keys-are-difficult)
 * [How we aim to solve these difficulties](#how-we-aim-to-solve-these-difficulties)
@@ -77,12 +80,12 @@ we have many cache keys that we need to calculate in order to have an accurate c
 
 ## How we aim to solve these difficulties
 
-In short:
+**In short:**
 We want to move the cost of calculating cache keys to when the changes are made in the CMS, rather than at the time of
 an end user's request. We will do this by having you configure the links between dependencies, and then we'll manage
 updating any relevant cache keys when those dependencies change.
 
-To reiterate:
+**To reiterate:**
 We no longer want to create cache keys that contain tonnes or info based on all of our dependencies. Instead, we want to
 create really simple cache keys which we invalidate when dependencies require them to be.
 
@@ -297,6 +300,7 @@ See [License](license.md)
 
 * Adrian Humphreys <adrhumphreys@gmail.com>
 * Chris Penny <chris.penny@gmail.com>
+* Adrian Jimson <adrian.jimson@silverstripe.com>
 
 ## Development and contribution
 
