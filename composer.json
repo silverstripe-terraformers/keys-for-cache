@@ -8,6 +8,16 @@
         "keys"
     ],
     "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Adrian Humphreys",
+            "email": "adrhumphreys@gmail.com"
+        },
+        {
+            "name": "Christopher David Penny",
+            "email": "chris.penny@gmail.com"
+        }
+    ],
     "require": {
         "php": "^7.4 || ^8.0",
         "silverstripe/framework": "^4.6"
