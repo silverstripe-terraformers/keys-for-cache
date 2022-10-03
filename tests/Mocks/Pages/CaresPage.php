@@ -12,6 +12,7 @@ use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersionedModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel;
@@ -20,9 +21,11 @@ use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThroughModel;
 /**
  * @property int $CaredBelongsToModelID
  * @property int $CaredHasOneModelID
+ * @property int $CaredHasOneNonVersionedModelID
  * @property int $PolymorphicHasOneID
  * @method CaredBelongsToModel CaredBelongsToModel()
  * @method CaredHasOneModel CaredHasOneModel()
+ * @method CaredHasOneNonVersionedModel CaredHasOneNonVersionedModel()
  * @method DataObject PolymorphicHasOne()
  * @method HasManyList|CaredHasManyModel[] CaredHasManyModels()
  * @method HasManyList|CaresPageCaredThroughModel[] CaresPageCaredThroughModels()
@@ -35,6 +38,7 @@ class CaresPage extends Page implements TestOnly
     private static array $has_one = [
         'CaredBelongsToModel' => CaredBelongsToModel::class,
         'CaredHasOneModel' => CaredHasOneModel::class,
+        'CaredHasOneNonVersionedModel' => CaredHasOneNonVersionedModel::class,
         'PolymorphicHasOne' => DataObject::class,
     ];
 
@@ -56,6 +60,7 @@ class CaresPage extends Page implements TestOnly
     private static array $cares = [
         'CaredBelongsToModel',
         'CaredHasOneModel',
+        'CaredHasOneNonVersionedModel',
         'CaredHasManyModels',
         'CaredManyManyModels',
         'CaredThroughModels',

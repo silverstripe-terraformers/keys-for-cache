@@ -58,10 +58,6 @@ abstract class CacheProcessingService
                 return [];
             }
 
-            if ($this->alreadyProcessed($edge->getToClassName(), $instance->getField($edge->getRelation().'ID'))) {
-                return [];
-            }
-
             $relatedInstance = $instance->getField($edge->getRelation());
 
             if (!$relatedInstance) {
@@ -78,21 +74,17 @@ abstract class CacheProcessingService
         }
 
         if ($relationType === 'has_many' || $relationType === 'many_many' || $relationType === 'belongs_many_many') {
-            return $this->updateInstances($instance->{$edge->getRelation()}(), $dto);
+            return $this->updateInstances($instance->{$edge->getRelation()}());
         }
 
         return [];
     }
 
-    private function updateInstances(DataList $instances, EdgeUpdateDto $dto): array
+    private function updateInstances(DataList $instances): array
     {
         $results = [];
 
         foreach ($instances as $relatedInstance) {
-            if ($this->alreadyProcessed($dto->getEdge()->getToClassName(), $relatedInstance->ID)) {
-                continue;
-            }
-
             $results = array_merge(
                 $results,
                 $this->updateInstance($relatedInstance)
@@ -104,6 +96,10 @@ abstract class CacheProcessingService
 
     private function updateInstance(DataObject $instance): array
     {
+        if ($this->alreadyProcessed($instance->ClassName, $instance->ID)) {
+            return [];
+        }
+
         // Find or create the CacheKey for this instance
         $cacheKey = CacheKey::updateOrCreateKey($instance);
         $processedUpdate = $this->getUpdatesService()->findOrCreateProcessedUpdate($instance->ClassName, $instance->ID);
