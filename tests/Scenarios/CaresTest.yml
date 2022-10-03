@@ -6,6 +6,10 @@ Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel:
   model1:
     Title: Has One Model 1
 
+Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersionedModel:
+  model1:
+    Title: Has One Non Versioned Model 1
+
 Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel:
   model1:
     Title: Has Many Model 1
@@ -31,6 +35,7 @@ Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage:
     Title: Page 1
     CaredBelongsToModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel.model1
     CaredHasOneModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel.model1
+    CaredHasOneNonVersionedModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersionedModel.model1
     CaredHasManyModels:
       - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel.model1
     CaredManyManyModels:

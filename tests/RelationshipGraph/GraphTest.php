@@ -15,6 +15,7 @@ use Terraformers\KeysForCache\RelationshipGraph\Node;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersionedModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel;
 use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel;
@@ -167,6 +168,7 @@ class GraphTest extends SapphireTest
         $expectPageTwoCares = [
             'CaredBelongsToModel' => CaredBelongsToModel::class,
             'CaredHasOneModel' => CaredHasOneModel::class,
+            'CaredHasOneNonVersionedModel' => CaredHasOneNonVersionedModel::class,
             'CaredHasManyModels' => CaredHasManyModel::class,
             'CaredManyManyModels' => CaredManyManyModel::class,
             'CaredThroughModels' => [

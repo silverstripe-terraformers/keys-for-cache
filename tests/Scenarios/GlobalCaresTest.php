@@ -23,12 +23,11 @@ class GlobalCaresTest extends SapphireTest
 
     public function testGlobalCares(): void
     {
+        $siteConfig = SiteConfig::current_site_config();
+        $page = $this->objFromFixture(GlobalCaresPage::class, 'page1');
 
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
-
-        $siteConfig = SiteConfig::current_site_config();
-        $page = $this->objFromFixture(GlobalCaresPage::class, 'page1');
 
         // Check we're set up correctly
         $originalKey = $page->getCacheKey();
