@@ -74,6 +74,11 @@ abstract class CacheProcessingService
         }
 
         if ($relationType === 'has_many' || $relationType === 'many_many' || $relationType === 'belongs_many_many') {
+            // It's possible that the relationship is an UnsavedRelationList, if so, we can't process this yet
+            if (!$instance->{$edge->getRelation()} instanceof DataList) {
+                return [];
+            }
+
             return $this->updateInstances($instance->{$edge->getRelation()}());
         }
 
