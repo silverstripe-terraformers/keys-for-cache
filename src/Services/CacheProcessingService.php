@@ -6,6 +6,7 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\SS_List;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\DataTransferObjects\EdgeUpdateDto;
 use Terraformers\KeysForCache\Models\CacheKey;
@@ -80,7 +81,7 @@ abstract class CacheProcessingService
         return [];
     }
 
-    private function updateInstances(DataList $instances): array
+    private function updateInstances(SS_List $instances): array
     {
         $results = [];
 
@@ -96,6 +97,10 @@ abstract class CacheProcessingService
 
     private function updateInstance(DataObject $instance): array
     {
+        if (!$instance->isInDB()) {
+            return [];
+        }
+
         if ($this->alreadyProcessed($instance->ClassName, $instance->ID)) {
             return [];
         }
