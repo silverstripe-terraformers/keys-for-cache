@@ -70,7 +70,7 @@ Save in: `/themes/[name]/templates/DNADesign/Elemental/Models/ElementalArea.ss`:
 ```
 
 Because `$CacheKey` is provided through an extension, if you had some particular Blocks/Elements that you specifically
-do **not** want to cache, then you could implement the method yourself in that class, and simply return `null`.
+do **not** want to cache, then you could implement the method yourself in that class, and have it `return null`.
 
 ```php
 <?php
@@ -100,15 +100,15 @@ it.
 <% end_cached %>
 ```
 
-And then the Blocks that you **don't** want to cache could simply not add the `cached` wrapper.
+And for the Blocks that you **don't** want to cache, you would not add the `<% cached ... %>` wrapper.
 
 ## Headers, Footers, and other "global" content areas
 
 We quite often have global footers on our sites - that being, the same footer for every page. For areas like this,
 rather than having a `global_cares` for each of your pages, it might make more sense to keep a separate cache key.
 
-You might decide to just provide that cache key in (probably) the same way that you already do. Just because you use
-this module, doesn't mean you can't still use your existing mechanisms as well. EG:
+You might decide to provide that cache key in the same way that you already do. Using this module doesn't mean you can't
+still use your existing mechanisms as well. EG:
 
 ```php
 class PageController extends ContentController

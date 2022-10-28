@@ -20,7 +20,7 @@ When you create a `has_one`, then the relationship in the other direction can ei
 
 ### `has_one` <-> `has_many`
 
-This is simple enough, and is probably something you've seen many times before. Potentially you haven't needed to
+This is straightforward enough, and is probably something you've seen many times before. Potentially you haven't needed to
 implement it quite as vigurously before though.
 
 A common example of "missing configuration" is the `Link` module, which states that a `Link` `has_one` `SiteTree`:
@@ -207,7 +207,7 @@ class PageTaxonomyTerm extends DataObject
 }
 ```
 
-And of course, because `PageTaxonomyTerm` `cares` about the `TaxonomyTerm`, then we also need to define the relationship
+Therefore, because `PageTaxonomyTerm` `cares` about the `TaxonomyTerm`, then we also need to define the relationship
 from `TaxonomyTerm` to `PageTaxonomyTerm`.
 
 ```php

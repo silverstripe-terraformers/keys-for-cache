@@ -36,7 +36,7 @@ SilverStripe\View\SSViewer:
 `SSViewer` already has configuration available called `global_key`. The default value is:
 `$CurrentReadingMode, $CurrentUser.ID`
 
-Fluent provides us with a template variable `$CurrentLocale`, so we can simply add this to the `global_key`.
+Fluent provides us with a template variable `$CurrentLocale`, so we can add this variable to the `global_key`.
 
 ### Use extension (less ideal, but still fine)
 
