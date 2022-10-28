@@ -50,7 +50,7 @@ Consider the following:
 * When a change is made to the block itself, to one of its Items, or to any of the Images assigned to its Items, the
   cache key should be invalidated.
 
-A cache key a single Carousel block might look something like:
+A cache key for a single Carousel block might look something like:
 
 ```php
 $parts = [
