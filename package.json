@@ -1,0 +1,16 @@
+{
+  "name": "keys-for-cache",
+  "version": "1.0.3",
+  "repository": "https://github.com/silverstripe-terraformers/keys-for-cache.git",
+  "author": "Silverstripe Terraformers",
+  "license": "BSD-3-Clause",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "alex": "^11.0.0"
+  },
+  "scripts": {
+    "lint-language": "cd ./ && alex"
+  }
+}

@@ -53,7 +53,7 @@ Consider the following:
 * When a change is made to the block itself, to one of its Items, or to any of the Images assigned to its Items, the
   cache key should be invalidated.
 
-A cache key just for one Carousel block might look something like:
+A cache key for a single Carousel block might look something like:
 
 ```php
 $parts = [
@@ -65,8 +65,8 @@ $parts = [
 ];
 ```
 
-This initial cache key is simply enough, but it is missing one critical piece, which is that we are not currently
-invalidating the cache key if one of the Images assigned to an Item changes.
+This initial cache key includes some basic values, but it is missing one critical piece, which is that we are not
+currently invalidating the cache key if one of the Images assigned to an Item changes.
 
 * One option would be for us to now loop through each Item and find the `ID` and `LastEdited` date of each assigned
   Image, but doing this is very costly when it comes to our "cost to calculate".
@@ -87,7 +87,7 @@ updating any relevant cache keys when those dependencies change.
 
 **To reiterate:**
 We no longer want to create cache keys that contain tonnes or info based on all of our dependencies. Instead, we want to
-create really simple cache keys which we invalidate when dependencies require them to be.
+create lean cache keys which we invalidate when dependencies require them to be.
 
 ## Setup and configuration
 
