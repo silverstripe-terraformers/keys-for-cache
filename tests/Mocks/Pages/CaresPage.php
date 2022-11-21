@@ -9,63 +9,64 @@ use SilverStripe\ORM\HasManyList;
 use SilverStripe\ORM\ManyManyList;
 use SilverStripe\ORM\ManyManyThroughList;
 use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersionedModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsTo;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOne;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersioned;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\CaredThrough;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThrough;
 
 /**
- * @property int $CaredBelongsToModelID
- * @property int $CaredHasOneModelID
- * @property int $CaredHasOneNonVersionedModelID
+ * @property int $CaredBelongsToID
+ * @property int $CaredHasOneID
+ * @property int $CaredHasOneNonVersionedID
  * @property int $PolymorphicHasOneID
- * @method CaredBelongsToModel CaredBelongsToModel()
- * @method CaredHasOneModel CaredHasOneModel()
- * @method CaredHasOneNonVersionedModel CaredHasOneNonVersionedModel()
+ * @method CaredBelongsTo CaredBelongsTo()
+ * @method CaredHasOne CaredHasOne()
+ * @method CaredHasOneNonVersioned CaredHasOneNonVersioned()
  * @method DataObject PolymorphicHasOne()
- * @method HasManyList|CaredHasManyModel[] CaredHasManyModels()
- * @method HasManyList|CaresPageCaredThroughModel[] CaresPageCaredThroughModels()
- * @method ManyManyList|CaredManyManyModel[] CaredManyManyModels()
- * @method ManyManyThroughList|CaredThroughModel[] CaredThroughModels()
+ * @method HasManyList|CaredHasMany[] CaredHasMany()
+ * @method HasManyList|CaresPageCaredThrough[] CaresPageCaredThrough()
+ * @method ManyManyList|CaredManyMany[] CaredManyMany()
+ * @method ManyManyThroughList|CaredThrough[] CaredThrough()
+ * @method HasManyList|PolymorphicCaredHasMany[] PolymorphicCaredHasMany()
  * @mixin CacheKeyExtension
  */
 class CaresPage extends Page implements TestOnly
 {
     private static array $has_one = [
-        'CaredBelongsToModel' => CaredBelongsToModel::class,
-        'CaredHasOneModel' => CaredHasOneModel::class,
-        'CaredHasOneNonVersionedModel' => CaredHasOneNonVersionedModel::class,
+        'CaredBelongsTo' => CaredBelongsTo::class,
+        'CaredHasOne' => CaredHasOne::class,
+        'CaredHasOneNonVersioned' => CaredHasOneNonVersioned::class,
         'PolymorphicHasOne' => DataObject::class,
     ];
 
     private static array $has_many = [
-        'CaredHasManyModels' => CaredHasManyModel::class,
-        'CaresPageCaredThroughModels' => CaresPageCaredThroughModel::class,
-        'PolymorphicCaredHasManyModels' => PolymorphicCaredHasManyModel::class . '.PolymorphicHasOne',
+        'CaredHasMany' => CaredHasMany::class,
+        'CaresPageCaredThrough' => CaresPageCaredThrough::class,
+        'PolymorphicCaredHasMany' => PolymorphicCaredHasMany::class . '.PolymorphicHasOne',
     ];
 
     private static array $many_many = [
-        'CaredManyManyModels' => CaredManyManyModel::class,
-        'CaredThroughModels' => [
-            'through' => CaresPageCaredThroughModel::class,
+        'CaredManyMany' => CaredManyMany::class,
+        'CaredThrough' => [
+            'through' => CaresPageCaredThrough::class,
             'from' => 'Parent',
-            'to' => 'CaredThroughModel',
+            'to' => 'CaredThrough',
         ],
     ];
 
     private static array $cares = [
-        'CaredBelongsToModel',
-        'CaredHasOneModel',
-        'CaredHasOneNonVersionedModel',
-        'CaredHasManyModels',
-        'CaredManyManyModels',
-        'CaredThroughModels',
+        'CaredBelongsTo',
+        'CaredHasOne',
+        'CaredHasOneNonVersioned',
+        'CaredHasMany',
+        'CaredManyMany',
+        'CaredThrough',
         'PolymorphicHasOne',
-        'PolymorphicCaredHasManyModels',
+        'PolymorphicCaredHasMany',
     ];
 
     private static string $table_name = 'CaresPage';

@@ -1,47 +1,47 @@
-Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsTo:
   model1:
     Title: Belongs To Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOne:
   model1:
     Title: Has One Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersionedModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersioned:
   model1:
     Title: Has One Non Versioned Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasMany:
   model1:
     Title: Has Many Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyMany:
   model1:
     Title: Many Many Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel:
+Terraformers\KeysForCache\Tests\Mocks\Relations\CaredThrough:
   model1:
     Title: Through Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOneModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOne:
   model1:
     Title: Polymorphic Has One Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasMany:
   model1:
     Title: Polymorphic Has Many Model 1
 
 Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage:
   page1:
     Title: Page 1
-    CaredBelongsToModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel.model1
-    CaredHasOneModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel.model1
-    CaredHasOneNonVersionedModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersionedModel.model1
-    CaredHasManyModels:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel.model1
-    CaredManyManyModels:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel.model1
-    CaredThroughModels:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel.model1
-    PolymorphicHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOneModel.model1
-    PolymorphicCaredHasManyModels:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel.model1
+    CaredBelongsTo: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsTo.model1
+    CaredHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOne.model1
+    CaredHasOneNonVersioned: =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersioned.model1
+    CaredHasMany:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasMany.model1
+    CaredManyMany:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyMany.model1
+    CaredThrough:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Relations\CaredThrough.model1
+    PolymorphicHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOne.model1
+    PolymorphicCaredHasMany:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasMany.model1

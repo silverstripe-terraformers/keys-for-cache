@@ -6,21 +6,21 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
-use Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicTouchedHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicTouchedHasOneModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOneModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedThroughModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsToModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicTouchedHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicTouchedHasOne;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOne;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsTo;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOne;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsTo;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedTouchedPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedTouchesPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchedPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage;
-use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchedThrough;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThrough;
 
 class ExtendedTouchesTest extends SapphireTest
 {
@@ -33,19 +33,19 @@ class ExtendedTouchesTest extends SapphireTest
     protected static $extra_dataobjects = [
         ExtendedTouchedPage::class,
         ExtendedTouchesPage::class,
-        ExtendedPolymorphicTouchedHasManyModel::class,
-        ExtendedPolymorphicTouchedHasOneModel::class,
-        PolymorphicTouchedHasManyModel::class,
-        PolymorphicTouchedHasOneModel::class,
+        ExtendedPolymorphicTouchedHasMany::class,
+        ExtendedPolymorphicTouchedHasOne::class,
+        PolymorphicTouchedHasMany::class,
+        PolymorphicTouchedHasOne::class,
         TouchedPage::class,
         TouchesPage::class,
-        TouchesPageTouchedThroughModel::class,
-        TouchedBelongsToModel::class,
-        TouchedHasManyModel::class,
-        TouchedHasOneModel::class,
-        TouchedManyManyModel::class,
-        TouchedThroughModel::class,
-        TouchesBelongsToModel::class,
+        TouchesPageTouchedThrough::class,
+        TouchedBelongsTo::class,
+        TouchedHasMany::class,
+        TouchedHasOne::class,
+        TouchedManyMany::class,
+        TouchedThrough::class,
+        TouchesBelongsTo::class,
     ];
 
     public function testTouchesHasOne(): void
@@ -54,11 +54,11 @@ class ExtendedTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
-        $model = $this->objFromFixture(TouchedHasOneModel::class, 'model1');
+        $model = $this->objFromFixture(TouchedHasOne::class, 'model1');
 
         // Check that we're set up correctly
-        $this->assertEquals(TouchedHasOneModel::class, $model->ClassName);
-        $this->assertEquals($page->TouchedHasOneModelID, $model->ID);
+        $this->assertEquals(TouchedHasOne::class, $model->ClassName);
+        $this->assertEquals($page->TouchedHasOneID, $model->ID);
 
         $originalKey = $model->getCacheKey();
 
@@ -82,11 +82,11 @@ class ExtendedTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
-        $model = $this->objFromFixture(TouchedBelongsToModel::class, 'model1');
+        $model = $this->objFromFixture(TouchedBelongsTo::class, 'model1');
 
         // Check that we're set up correctly
-        $this->assertEquals(TouchedBelongsToModel::class, $model->ClassName);
-        $this->assertEquals($page->TouchedBelongsToModelID, $model->ID);
+        $this->assertEquals(TouchedBelongsTo::class, $model->ClassName);
+        $this->assertEquals($page->TouchedBelongsToID, $model->ID);
 
         $originalKey = $model->getCacheKey();
 
@@ -110,10 +110,10 @@ class ExtendedTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
-        $model = $this->objFromFixture(PolymorphicTouchedHasOneModel::class, 'model1');
+        $model = $this->objFromFixture(PolymorphicTouchedHasOne::class, 'model1');
 
         // Check that we're set up correctly
-        $this->assertEquals(PolymorphicTouchedHasOneModel::class, $model->ClassName);
+        $this->assertEquals(PolymorphicTouchedHasOne::class, $model->ClassName);
         $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
 
         $originalKey = $model->getCacheKey();
@@ -138,10 +138,10 @@ class ExtendedTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page2');
-        $model = $this->objFromFixture(ExtendedPolymorphicTouchedHasOneModel::class, 'model1');
+        $model = $this->objFromFixture(ExtendedPolymorphicTouchedHasOne::class, 'model1');
 
         // Check that we're set up correctly
-        $this->assertEquals(ExtendedPolymorphicTouchedHasOneModel::class, $model->ClassName);
+        $this->assertEquals(ExtendedPolymorphicTouchedHasOne::class, $model->ClassName);
         $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
 
         $originalKey = $model->getCacheKey();
@@ -166,7 +166,7 @@ class ExtendedTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
-        $model = $this->objFromFixture(TouchedHasManyModel::class, 'model1');
+        $model = $this->objFromFixture(TouchedHasMany::class, 'model1');
 
         $originalKey = $model->getCacheKey();
 
@@ -189,7 +189,7 @@ class ExtendedTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
-        $model = $this->objFromFixture(PolymorphicTouchedHasManyModel::class, 'model1');
+        $model = $this->objFromFixture(PolymorphicTouchedHasMany::class, 'model1');
 
         $originalKey = $model->getCacheKey();
 
@@ -212,7 +212,7 @@ class ExtendedTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page2');
-        $model = $this->objFromFixture(ExtendedPolymorphicTouchedHasManyModel::class, 'model1');
+        $model = $this->objFromFixture(ExtendedPolymorphicTouchedHasMany::class, 'model1');
 
         $originalKey = $model->getCacheKey();
 
@@ -235,7 +235,7 @@ class ExtendedTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(ExtendedTouchedPage::class, 'page1');
-        $model = $this->objFromFixture(TouchesBelongsToModel::class, 'model1');
+        $model = $this->objFromFixture(TouchesBelongsTo::class, 'model1');
 
         $originalKey = $page->getCacheKey();
 

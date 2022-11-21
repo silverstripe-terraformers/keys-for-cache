@@ -1,22 +1,22 @@
-Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedBelongsToModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedBelongsTo:
   model1:
     Title: Belongs To Model 1
   model2:
     Title: Belongs To Model 2
 
-Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOneModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOne:
   model1:
     Title: Has One Model 1
   model2:
     Title: Has One Model 2
 
-Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasManyModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasMany:
   model1:
     Title: Has Many Model 1
   model2:
     Title: Has Many Model 2
 
-Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchesBelongsToModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchesBelongsTo:
   model1:
     Title: Has Many Model 1
   model2:
@@ -25,17 +25,17 @@ Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchesBelongsToModel:
 Terraformers\KeysForCache\Tests\Mocks\Pages\DotNotationTouchesPage:
   page1:
     Title: Page 1
-    TouchedBelongsToModelFirst: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOneModel.model1
-    TouchedBelongsToModelSecond: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOneModel.model2
-    TouchedHasOneModelFirst: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOneModel.model1
-    TouchedHasOneModelSecond: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOneModel.model2
-    TouchedHasManyModelsFirst:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasManyModel.model1
-    TouchedHasManyModelsSecond:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasManyModel.model2
+    TouchedBelongsToFirst: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOne.model1
+    TouchedBelongsToSecond: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOne.model2
+    TouchedHasOneFirst: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOne.model1
+    TouchedHasOneSecond: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOne.model2
+    TouchedHasManyFirst:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasMany.model1
+    TouchedHasManySecond:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasMany.model2
 
 Terraformers\KeysForCache\Tests\Mocks\Pages\DotNotationTouchedPage:
   page1:
     Title: Page 1
-    TouchesBelongsToModelFirst: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchesBelongsToModel.model1
-    TouchesBelongsToModelSecond: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchesBelongsToModel.model2
+    TouchesBelongsToFirst: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchesBelongsTo.model1
+    TouchesBelongsToSecond: =>Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchesBelongsTo.model2

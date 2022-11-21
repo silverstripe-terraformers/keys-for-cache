@@ -6,16 +6,16 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersionedModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredThroughModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsTo;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOne;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersioned;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOne;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
-use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\CaredThrough;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThrough;
 
 class CaresTest extends SapphireTest
 {
@@ -27,15 +27,15 @@ class CaresTest extends SapphireTest
      */
     protected static $extra_dataobjects = [
         CaresPage::class,
-        CaresPageCaredThroughModel::class,
-        CaredBelongsToModel::class,
-        CaredHasManyModel::class,
-        CaredHasOneModel::class,
-        CaredHasOneNonVersionedModel::class,
-        CaredManyManyModel::class,
-        CaredThroughModel::class,
-        PolymorphicCaredHasOneModel::class,
-        PolymorphicCaredHasManyModel::class,
+        CaresPageCaredThrough::class,
+        CaredBelongsTo::class,
+        CaredHasMany::class,
+        CaredHasOne::class,
+        CaredHasOneNonVersioned::class,
+        CaredManyMany::class,
+        CaredThrough::class,
+        PolymorphicCaredHasOne::class,
+        PolymorphicCaredHasMany::class,
     ];
 
     public function testCaresPureHasOne(): void
@@ -44,11 +44,11 @@ class CaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-        $model = $this->objFromFixture(CaredBelongsToModel::class, 'model1');
+        $model = $this->objFromFixture(CaredBelongsTo::class, 'model1');
 
         // Check that we're set up correctly
-        $this->assertEquals(CaredBelongsToModel::class, $model->ClassName);
-        $this->assertEquals($page->CaredBelongsToModelID, $model->ID);
+        $this->assertEquals(CaredBelongsTo::class, $model->ClassName);
+        $this->assertEquals($page->CaredBelongsToID, $model->ID);
 
         $originalKey = $page->getCacheKey();
 
@@ -72,11 +72,11 @@ class CaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-        $model = $this->objFromFixture(CaredBelongsToModel::class, 'model1');
+        $model = $this->objFromFixture(CaredBelongsTo::class, 'model1');
 
         // Check that we're set up correctly
-        $this->assertEquals(CaredBelongsToModel::class, $model->ClassName);
-        $this->assertEquals($page->CaredBelongsToModelID, $model->ID);
+        $this->assertEquals(CaredBelongsTo::class, $model->ClassName);
+        $this->assertEquals($page->CaredBelongsToID, $model->ID);
 
         $originalKey = $page->getCacheKey();
 
@@ -100,11 +100,11 @@ class CaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-        $model = $this->objFromFixture(CaredHasOneModel::class, 'model1');
+        $model = $this->objFromFixture(CaredHasOne::class, 'model1');
 
         // Check that we're set up correctly
-        $this->assertEquals(CaredHasOneModel::class, $model->ClassName);
-        $this->assertEquals($page->CaredHasOneModelID, $model->ID);
+        $this->assertEquals(CaredHasOne::class, $model->ClassName);
+        $this->assertEquals($page->CaredHasOneID, $model->ID);
 
         $originalKey = $page->getCacheKey();
 
@@ -128,11 +128,11 @@ class CaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-        $model = $this->objFromFixture(CaredHasOneNonVersionedModel::class, 'model1');
+        $model = $this->objFromFixture(CaredHasOneNonVersioned::class, 'model1');
 
         // Check that we're set up correctly
-        $this->assertEquals(CaredHasOneNonVersionedModel::class, $model->ClassName);
-        $this->assertEquals($page->CaredHasOneNonVersionedModelID, $model->ID);
+        $this->assertEquals(CaredHasOneNonVersioned::class, $model->ClassName);
+        $this->assertEquals($page->CaredHasOneNonVersionedID, $model->ID);
 
         $originalKey = $page->getCacheKey();
 
@@ -156,10 +156,10 @@ class CaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-        $model = $this->objFromFixture(PolymorphicCaredHasOneModel::class, 'model1');
+        $model = $this->objFromFixture(PolymorphicCaredHasOne::class, 'model1');
 
         // Check that we're set up correctly
-        $this->assertEquals(PolymorphicCaredHasOneModel::class, $model->ClassName);
+        $this->assertEquals(PolymorphicCaredHasOne::class, $model->ClassName);
         $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
 
         $originalKey = $page->getCacheKey();
@@ -184,7 +184,7 @@ class CaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-        $model = $this->objFromFixture(CaredHasManyModel::class, 'model1');
+        $model = $this->objFromFixture(CaredHasMany::class, 'model1');
 
         $originalKey = $page->getCacheKey();
 
@@ -207,7 +207,7 @@ class CaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-        $model = $this->objFromFixture(PolymorphicCaredHasManyModel::class, 'model1');
+        $model = $this->objFromFixture(PolymorphicCaredHasMany::class, 'model1');
 
         $originalKey = $page->getCacheKey();
 
@@ -230,11 +230,11 @@ class CaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-        $model = $this->objFromFixture(CaredManyManyModel::class, 'model1');
+        $model = $this->objFromFixture(CaredManyMany::class, 'model1');
 
         // Check we're set up correctly
-        $this->assertCount(1, $page->CaredManyManyModels());
-        $this->assertEquals($model->ID, $page->CaredManyManyModels()->first()->ID);
+        $this->assertCount(1, $page->CaredManyMany());
+        $this->assertEquals($model->ID, $page->CaredManyMany()->first()->ID);
 
         $originalKey = $page->getCacheKey();
 
@@ -258,7 +258,7 @@ class CaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-        $model = $this->objFromFixture(CaredThroughModel::class, 'model1');
+        $model = $this->objFromFixture(CaredThrough::class, 'model1');
 
         $originalKey = $page->getCacheKey();
 
