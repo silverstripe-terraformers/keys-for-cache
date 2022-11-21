@@ -108,7 +108,7 @@ We quite often have global footers on our sites - that being, the same footer fo
 rather than having a `global_cares` for each of your pages, it might make more sense to keep a separate cache key.
 
 You might decide to provide that cache key in the same way that you already do. Using this module doesn't mean you can't
-still use your existing mechanisms as well. EG:
+also use your existing mechanisms as well. EG:
 
 ```php
 class PageController extends ContentController
