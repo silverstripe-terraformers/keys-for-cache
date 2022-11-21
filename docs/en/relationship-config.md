@@ -20,8 +20,8 @@ When you create a `has_one`, then the relationship in the other direction can ei
 
 ### `has_one` <-> `has_many`
 
-This is straightforward enough, and is probably something you've seen many times before. Potentially you haven't needed to
-implement it quite as vigurously before though.
+You've probably seen this many times before. Potentially you haven't needed to  implement it quite as vigurously before
+though.
 
 A common example of "missing configuration" is the `Link` module, which states that a `Link` `has_one` `SiteTree`:
 
