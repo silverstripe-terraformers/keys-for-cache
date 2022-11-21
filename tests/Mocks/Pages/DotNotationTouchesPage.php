@@ -6,44 +6,44 @@ use Page;
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\HasManyList;
 use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedBelongsToModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedBelongsTo;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOne;
 
 /**
- * @property int $TouchedBelongsToModelFirstID
- * @property int $TouchedBelongsToModelSecondID
- * @property int $TouchedHasOneModelFirstID
- * @property int $TouchedHasOneModelSecondID
- * @method DotNotationTouchedBelongsToModel TouchedBelongsToModelFirst()
- * @method DotNotationTouchedBelongsToModel TouchedBelongsToModelSecond()
- * @method DotNotationTouchedHasOneModel TouchedHasOneModelFirst()
- * @method DotNotationTouchedHasOneModel TouchedHasOneModelSecond()
- * @method HasManyList|DotNotationTouchedHasManyModel[] TouchedHasManyModelsFirst()
- * @method HasManyList|DotNotationTouchedHasManyModel[] TouchedHasManyModelsSecond()
+ * @property int $TouchedBelongsToFirstID
+ * @property int $TouchedBelongsToSecondID
+ * @property int $TouchedHasOneFirstID
+ * @property int $TouchedHasOneSecondID
+ * @method DotNotationTouchedBelongsTo TouchedBelongsToFirst()
+ * @method DotNotationTouchedBelongsTo TouchedBelongsToSecond()
+ * @method DotNotationTouchedHasOne TouchedHasOneFirst()
+ * @method DotNotationTouchedHasOne TouchedHasOneSecond()
+ * @method HasManyList|DotNotationTouchedHasMany[] TouchedHasManyFirst()
+ * @method HasManyList|DotNotationTouchedHasMany[] TouchedHasManySecond()
  * @mixin CacheKeyExtension
  */
 class DotNotationTouchesPage extends Page implements TestOnly
 {
     private static array $has_one = [
-        'TouchedBelongsToModelFirst' => DotNotationTouchedBelongsToModel::class,
-        'TouchedBelongsToModelSecond' => DotNotationTouchedBelongsToModel::class,
-        'TouchedHasOneModelFirst' => DotNotationTouchedHasOneModel::class,
-        'TouchedHasOneModelSecond' => DotNotationTouchedHasOneModel::class,
+        'TouchedBelongsToFirst' => DotNotationTouchedBelongsTo::class,
+        'TouchedBelongsToSecond' => DotNotationTouchedBelongsTo::class,
+        'TouchedHasOneFirst' => DotNotationTouchedHasOne::class,
+        'TouchedHasOneSecond' => DotNotationTouchedHasOne::class,
     ];
 
     private static array $has_many = [
-        'TouchedHasManyModelsFirst' => DotNotationTouchedHasManyModel::class . '.TouchesPageFirst',
-        'TouchedHasManyModelsSecond' => DotNotationTouchedHasManyModel::class . '.TouchesPageSecond',
+        'TouchedHasManyFirst' => DotNotationTouchedHasMany::class . '.TouchesPageFirst',
+        'TouchedHasManySecond' => DotNotationTouchedHasMany::class . '.TouchesPageSecond',
     ];
 
     private static array $touches = [
-        'TouchedBelongsToModelFirst',
-        'TouchedBelongsToModelSecond',
-        'TouchedHasOneModelFirst',
-        'TouchedHasOneModelSecond',
-        'TouchedHasManyModelsFirst',
-        'TouchedHasManyModelsSecond',
+        'TouchedBelongsToFirst',
+        'TouchedBelongsToSecond',
+        'TouchedHasOneFirst',
+        'TouchedHasOneSecond',
+        'TouchedHasManyFirst',
+        'TouchedHasManySecond',
     ];
 
     private static string $table_name = 'DotNotationTouchesPage';

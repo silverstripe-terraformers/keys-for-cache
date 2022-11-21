@@ -12,26 +12,26 @@ use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\RelationshipGraph\Edge;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\RelationshipGraph\Node;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsToModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersionedModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsTo;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOne;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersioned;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsTo;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOne;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyMany;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CachePage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\ExtendedCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\GlobalCaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\NoCachePage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage;
-use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThroughModel;
-use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThrough;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchedThrough;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThrough;
 
 class GraphTest extends SapphireTest
 {
@@ -154,30 +154,30 @@ class GraphTest extends SapphireTest
 
         $expectPageOneTouch = [
             'PolymorphicHasOne' => DataObject::class,
-            'PolymorphicTouchedHasManyModels' => PolymorphicTouchedHasManyModel::class . '.PolymorphicHasOne',
-            'TouchedBelongsToModel' => TouchedBelongsToModel::class,
-            'TouchedHasOneModel' => TouchedHasOneModel::class,
-            'TouchedHasManyModels' => TouchedHasManyModel::class,
-            'TouchedManyManyModels' => TouchedManyManyModel::class,
-            'TouchedThroughModels' => [
-                'through' => TouchesPageTouchedThroughModel::class,
+            'PolymorphicTouchedHasMany' => PolymorphicTouchedHasMany::class . '.PolymorphicHasOne',
+            'TouchedBelongsTo' => TouchedBelongsTo::class,
+            'TouchedHasOne' => TouchedHasOne::class,
+            'TouchedHasMany' => TouchedHasMany::class,
+            'TouchedManyMany' => TouchedManyMany::class,
+            'TouchedThrough' => [
+                'through' => TouchesPageTouchedThrough::class,
                 'from' => 'Parent',
-                'to' => 'TouchedThroughModel',
+                'to' => 'TouchedThrough',
             ],
         ];
         $expectPageTwoCares = [
-            'CaredBelongsToModel' => CaredBelongsToModel::class,
-            'CaredHasOneModel' => CaredHasOneModel::class,
-            'CaredHasOneNonVersionedModel' => CaredHasOneNonVersionedModel::class,
-            'CaredHasManyModels' => CaredHasManyModel::class,
-            'CaredManyManyModels' => CaredManyManyModel::class,
-            'CaredThroughModels' => [
-                'through' => CaresPageCaredThroughModel::class,
+            'CaredBelongsTo' => CaredBelongsTo::class,
+            'CaredHasOne' => CaredHasOne::class,
+            'CaredHasOneNonVersioned' => CaredHasOneNonVersioned::class,
+            'CaredHasMany' => CaredHasMany::class,
+            'CaredManyMany' => CaredManyMany::class,
+            'CaredThrough' => [
+                'through' => CaresPageCaredThrough::class,
                 'from' => 'Parent',
-                'to' => 'CaredThroughModel',
+                'to' => 'CaredThrough',
             ],
             'PolymorphicHasOne' => DataObject::class,
-            'PolymorphicCaredHasManyModels' => PolymorphicCaredHasManyModel::class . '.PolymorphicHasOne',
+            'PolymorphicCaredHasMany' => PolymorphicCaredHasMany::class . '.PolymorphicHasOne',
         ];
 
         $this->assertEqualsCanonicalizing($expectPageOneTouch, $pageOneTouch);
@@ -198,19 +198,19 @@ class GraphTest extends SapphireTest
             static function (Edge $edge) {
                 return $edge->getToClassName();
             },
-            $graph->getEdgesFrom(CaredHasOneModel::class)
+            $graph->getEdgesFrom(CaredHasOne::class)
         );
 
         $this->assertEqualsCanonicalizing($expected, $result);
 
         $expected = [
             DataObject::class,
-            PolymorphicTouchedHasManyModel::class,
-            TouchedBelongsToModel::class,
-            TouchedHasOneModel::class,
-            TouchedHasManyModel::class,
-            TouchedManyManyModel::class,
-            TouchedThroughModel::class,
+            PolymorphicTouchedHasMany::class,
+            TouchedBelongsTo::class,
+            TouchedHasOne::class,
+            TouchedHasMany::class,
+            TouchedManyMany::class,
+            TouchedThrough::class,
         ];
         $result = array_map(
             static function (Edge $edge) {
@@ -335,7 +335,7 @@ class GraphTest extends SapphireTest
         $this->assertCount($edgesCount, $edges->getValue($graph));
         // CaredBelongsToModel was removed in our config change, but we expect it to be present from our cache rebuild
         // There should be two Edges for this class
-        $this->assertCount(2, $graph->getEdgesFrom(CaredBelongsToModel::class));
+        $this->assertCount(2, $graph->getEdgesFrom(CaredBelongsTo::class));
 
         // Now lets flush our cache and rebuild, we should end up with a different graph
         $graph::flush();
@@ -356,7 +356,7 @@ class GraphTest extends SapphireTest
         // Check that our Edges have changed
         $this->assertNotCount($edgesCount, $edges->getValue($graph));
         // CaredBelongsToModel should no longer be represented
-        $this->assertCount(0, $graph->getEdgesFrom(CaredBelongsToModel::class));
+        $this->assertCount(0, $graph->getEdgesFrom(CaredBelongsTo::class));
     }
 
     public function testGetValidClasses(): void

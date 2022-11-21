@@ -1,51 +1,51 @@
-Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOneModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOne:
   model1:
     Title: Polymorphic Has One Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasMany:
   model1:
     Title: Polymorphic Has Many Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsTo:
   model1:
     Title: Belongs To Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOne:
   model1:
     Title: Has One Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasMany:
   model1:
     Title: Has Many Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyManyModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyMany:
   model1:
     Title: Many Many Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\TouchedThroughModel:
+Terraformers\KeysForCache\Tests\Mocks\Relations\TouchedThrough:
   model1:
     Title: Many Many Model 1
 
-Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsToModel:
+Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsTo:
   model1:
     Title: Belongs To Model 1
 
 Terraformers\KeysForCache\Tests\Mocks\Pages\TouchesPage:
   page1:
     Title: Page 1
-    PolymorphicHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOneModel.model1
-    PolymorphicTouchedHasManyModels:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel.model1
-    TouchedBelongsToModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel.model1
-    TouchedHasOneModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel.model1
-    TouchedHasManyModels:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel.model1
-    TouchedManyManyModels:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyManyModel.model1
-    TouchedThroughModels:
-      - =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedThroughModel.model1
+    PolymorphicHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasOne.model1
+    PolymorphicTouchedHasMany:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasMany.model1
+    TouchedBelongsTo: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsTo.model1
+    TouchedHasOne: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOne.model1
+    TouchedHasMany:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasMany.model1
+    TouchedManyMany:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyMany.model1
+    TouchedThrough:
+      - =>Terraformers\KeysForCache\Tests\Mocks\Relations\TouchedThrough.model1
 
 Terraformers\KeysForCache\Tests\Mocks\Pages\TouchedPage:
   page1:
     Title: Page 1
-    TouchesBelongsToModel: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsToModel.model1
+    TouchesBelongsTo: =>Terraformers\KeysForCache\Tests\Mocks\Models\TouchesBelongsTo.model1

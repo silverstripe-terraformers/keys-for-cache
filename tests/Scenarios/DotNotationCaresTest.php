@@ -6,9 +6,9 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredBelongsToModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasOneModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredBelongsTo;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationCaredHasOne;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\DotNotationCaresPage;
 
 class DotNotationCaresTest extends SapphireTest
@@ -21,9 +21,9 @@ class DotNotationCaresTest extends SapphireTest
      */
     protected static $extra_dataobjects = [
         DotNotationCaresPage::class,
-        DotNotationCaredBelongsToModel::class,
-        DotNotationCaredHasManyModel::class,
-        DotNotationCaredHasOneModel::class,
+        DotNotationCaredBelongsTo::class,
+        DotNotationCaredHasMany::class,
+        DotNotationCaredHasOne::class,
     ];
 
     public function testCaresPureHasOne(): void
@@ -32,14 +32,14 @@ class DotNotationCaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(DotNotationCaresPage::class, 'page1');
-        $modelOne = $this->objFromFixture(DotNotationCaredBelongsToModel::class, 'model1');
-        $modelTwo = $this->objFromFixture(DotNotationCaredBelongsToModel::class, 'model2');
+        $modelOne = $this->objFromFixture(DotNotationCaredBelongsTo::class, 'model1');
+        $modelTwo = $this->objFromFixture(DotNotationCaredBelongsTo::class, 'model2');
 
         // Check that we're set up correctly
-        $this->assertEquals(DotNotationCaredBelongsToModel::class, $modelOne->ClassName);
-        $this->assertEquals(DotNotationCaredBelongsToModel::class, $modelTwo->ClassName);
-        $this->assertEquals($page->CaredBelongsToModelFirstID, $modelOne->ID);
-        $this->assertEquals($page->CaredBelongsToModelSecondID, $modelTwo->ID);
+        $this->assertEquals(DotNotationCaredBelongsTo::class, $modelOne->ClassName);
+        $this->assertEquals(DotNotationCaredBelongsTo::class, $modelTwo->ClassName);
+        $this->assertEquals($page->CaredBelongsToFirstID, $modelOne->ID);
+        $this->assertEquals($page->CaredBelongsToSecondID, $modelTwo->ID);
 
         $originalKey = $page->getCacheKey();
 
@@ -79,14 +79,14 @@ class DotNotationCaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(DotNotationCaresPage::class, 'page1');
-        $modelOne = $this->objFromFixture(DotNotationCaredBelongsToModel::class, 'model1');
-        $modelTwo = $this->objFromFixture(DotNotationCaredBelongsToModel::class, 'model2');
+        $modelOne = $this->objFromFixture(DotNotationCaredBelongsTo::class, 'model1');
+        $modelTwo = $this->objFromFixture(DotNotationCaredBelongsTo::class, 'model2');
 
         // Check that we're set up correctly
-        $this->assertEquals(DotNotationCaredBelongsToModel::class, $modelOne->ClassName);
-        $this->assertEquals(DotNotationCaredBelongsToModel::class, $modelTwo->ClassName);
-        $this->assertEquals($page->CaredBelongsToModelFirstID, $modelOne->ID);
-        $this->assertEquals($page->CaredBelongsToModelSecondID, $modelTwo->ID);
+        $this->assertEquals(DotNotationCaredBelongsTo::class, $modelOne->ClassName);
+        $this->assertEquals(DotNotationCaredBelongsTo::class, $modelTwo->ClassName);
+        $this->assertEquals($page->CaredBelongsToFirstID, $modelOne->ID);
+        $this->assertEquals($page->CaredBelongsToSecondID, $modelTwo->ID);
 
         $originalKeyOne = $modelOne->getCacheKey();
         $originalKeyTwo = $modelTwo->getCacheKey();
@@ -117,14 +117,14 @@ class DotNotationCaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(DotNotationCaresPage::class, 'page1');
-        $modelOne = $this->objFromFixture(DotNotationCaredHasOneModel::class, 'model1');
-        $modelTwo = $this->objFromFixture(DotNotationCaredHasOneModel::class, 'model2');
+        $modelOne = $this->objFromFixture(DotNotationCaredHasOne::class, 'model1');
+        $modelTwo = $this->objFromFixture(DotNotationCaredHasOne::class, 'model2');
 
         // Check that we're set up correctly
-        $this->assertEquals(DotNotationCaredHasOneModel::class, $modelOne->ClassName);
-        $this->assertEquals(DotNotationCaredHasOneModel::class, $modelTwo->ClassName);
-        $this->assertEquals($page->CaredHasOneModelFirstID, $modelOne->ID);
-        $this->assertEquals($page->CaredHasOneModelSecondID, $modelTwo->ID);
+        $this->assertEquals(DotNotationCaredHasOne::class, $modelOne->ClassName);
+        $this->assertEquals(DotNotationCaredHasOne::class, $modelTwo->ClassName);
+        $this->assertEquals($page->CaredHasOneFirstID, $modelOne->ID);
+        $this->assertEquals($page->CaredHasOneSecondID, $modelTwo->ID);
 
         $originalKey = $page->getCacheKey();
 
@@ -164,14 +164,14 @@ class DotNotationCaresTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(DotNotationCaresPage::class, 'page1');
-        $modelOne = $this->objFromFixture(DotNotationCaredHasManyModel::class, 'model1');
-        $modelTwo = $this->objFromFixture(DotNotationCaredHasManyModel::class, 'model2');
+        $modelOne = $this->objFromFixture(DotNotationCaredHasMany::class, 'model1');
+        $modelTwo = $this->objFromFixture(DotNotationCaredHasMany::class, 'model2');
 
         // Check that we're set up correctly
-        $this->assertCount(1, $page->CaredHasManyModelsFirst());
-        $this->assertEquals($page->CaredHasManyModelsFirst()->first()->ID, $modelOne->ID);
-        $this->assertCount(1, $page->CaredHasManyModelsSecond());
-        $this->assertEquals($page->CaredHasManyModelsSecond()->first()->ID, $modelTwo->ID);
+        $this->assertCount(1, $page->CaredHasManyFirst());
+        $this->assertEquals($page->CaredHasManyFirst()->first()->ID, $modelOne->ID);
+        $this->assertCount(1, $page->CaredHasManySecond());
+        $this->assertEquals($page->CaredHasManySecond()->first()->ID, $modelTwo->ID);
 
         $originalKey = $page->getCacheKey();
 

@@ -9,56 +9,56 @@ use SilverStripe\ORM\HasManyList;
 use SilverStripe\ORM\ManyManyList;
 use SilverStripe\ORM\ManyManyThroughList;
 use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
-use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsToModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOneModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThroughModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedBelongsTo;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedHasOne;
+use Terraformers\KeysForCache\Tests\Mocks\Models\TouchedManyMany;
+use Terraformers\KeysForCache\Tests\Mocks\Relations\TouchesPageTouchedThrough;
 
 /**
- * @property int $TouchedBelongsToModelID
- * @property int $TouchedHasOneModelID
+ * @property int $TouchedBelongsToID
+ * @property int $TouchedHasOneID
  * @property int $PolymorphicHasOneID
  * @method DataObject PolymorphicHasOne()
- * @method HasManyList|PolymorphicTouchedHasManyModel[] PolymorphicTouchedHasManyModels()
- * @method TouchedBelongsToModel TouchedBelongsToModel()
- * @method TouchedHasOneModel TouchedHasOneModel()
- * @method HasManyList|TouchedHasManyModel[] TouchedHasManyModels()
- * @method ManyManyList|TouchedManyManyModel[] TouchedManyManyModels()
- * @method ManyManyThroughList|TouchedManyManyModel[] TouchedThroughModels()
+ * @method HasManyList|PolymorphicTouchedHasMany[] PolymorphicTouchedHasMany()
+ * @method TouchedBelongsTo TouchedBelongsTo()
+ * @method TouchedHasOne TouchedHasOne()
+ * @method HasManyList|TouchedHasMany[] TouchedHasMany()
+ * @method ManyManyList|TouchedManyMany[] TouchedManyMany()
+ * @method ManyManyThroughList|TouchedManyMany[] TouchedThrough()
  * @mixin CacheKeyExtension
  */
 class TouchesPage extends Page implements TestOnly
 {
     private static array $has_one = [
-        'TouchedBelongsToModel' => TouchedBelongsToModel::class,
-        'TouchedHasOneModel' => TouchedHasOneModel::class,
+        'TouchedBelongsTo' => TouchedBelongsTo::class,
+        'TouchedHasOne' => TouchedHasOne::class,
         'PolymorphicHasOne' => DataObject::class,
     ];
 
     private static array $has_many = [
-        'TouchedHasManyModels' => TouchedHasManyModel::class,
-        'PolymorphicTouchedHasManyModels' => PolymorphicTouchedHasManyModel::class . '.PolymorphicHasOne',
+        'TouchedHasMany' => TouchedHasMany::class,
+        'PolymorphicTouchedHasMany' => PolymorphicTouchedHasMany::class . '.PolymorphicHasOne',
     ];
 
     private static array $many_many = [
-        'TouchedManyManyModels' => TouchedManyManyModel::class,
-        'TouchedThroughModels' => [
-            'through' => TouchesPageTouchedThroughModel::class,
+        'TouchedManyMany' => TouchedManyMany::class,
+        'TouchedThrough' => [
+            'through' => TouchesPageTouchedThrough::class,
             'from' => 'Parent',
-            'to' => 'TouchedThroughModel',
+            'to' => 'TouchedThrough',
         ],
     ];
 
     private static array $touches = [
         'PolymorphicHasOne',
-        'PolymorphicTouchedHasManyModels',
-        'TouchedBelongsToModel',
-        'TouchedHasOneModel',
-        'TouchedHasManyModels',
-        'TouchedManyManyModels',
-        'TouchedThroughModels',
+        'PolymorphicTouchedHasMany',
+        'TouchedBelongsTo',
+        'TouchedHasOne',
+        'TouchedHasMany',
+        'TouchedManyMany',
+        'TouchedThrough',
     ];
 
     private static string $table_name = 'TouchesPage';

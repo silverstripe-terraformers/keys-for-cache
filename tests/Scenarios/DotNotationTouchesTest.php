@@ -6,10 +6,10 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedBelongsToModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasManyModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOneModel;
-use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchesBelongsToModel;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedBelongsTo;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasMany;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedHasOne;
+use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchesBelongsTo;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\DotNotationTouchedPage;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\DotNotationTouchesPage;
 
@@ -24,10 +24,10 @@ class DotNotationTouchesTest extends SapphireTest
     protected static $extra_dataobjects = [
         DotNotationTouchedPage::class,
         DotNotationTouchesPage::class,
-        DotNotationTouchedBelongsToModel::class,
-        DotNotationTouchedHasManyModel::class,
-        DotNotationTouchedHasOneModel::class,
-        DotNotationTouchesBelongsToModel::class,
+        DotNotationTouchedBelongsTo::class,
+        DotNotationTouchedHasMany::class,
+        DotNotationTouchedHasOne::class,
+        DotNotationTouchesBelongsTo::class,
     ];
 
     public function testTouchesHasOne(): void
@@ -36,14 +36,14 @@ class DotNotationTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(DotNotationTouchesPage::class, 'page1');
-        $modelOne = $this->objFromFixture(DotNotationTouchedHasOneModel::class, 'model1');
-        $modelTwo = $this->objFromFixture(DotNotationTouchedHasOneModel::class, 'model2');
+        $modelOne = $this->objFromFixture(DotNotationTouchedHasOne::class, 'model1');
+        $modelTwo = $this->objFromFixture(DotNotationTouchedHasOne::class, 'model2');
 
         // Check that we're set up correctly
-        $this->assertEquals(DotNotationTouchedHasOneModel::class, $modelOne->ClassName);
-        $this->assertEquals(DotNotationTouchedHasOneModel::class, $modelTwo->ClassName);
-        $this->assertEquals($page->TouchedHasOneModelFirstID, $modelOne->ID);
-        $this->assertEquals($page->TouchedHasOneModelSecondID, $modelTwo->ID);
+        $this->assertEquals(DotNotationTouchedHasOne::class, $modelOne->ClassName);
+        $this->assertEquals(DotNotationTouchedHasOne::class, $modelTwo->ClassName);
+        $this->assertEquals($page->TouchedHasOneFirstID, $modelOne->ID);
+        $this->assertEquals($page->TouchedHasOneSecondID, $modelTwo->ID);
 
         $originalKeyOne = $modelOne->getCacheKey();
         $originalKeyTwo = $modelTwo->getCacheKey();
@@ -74,14 +74,14 @@ class DotNotationTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(DotNotationTouchesPage::class, 'page1');
-        $modelOne = $this->objFromFixture(DotNotationTouchedBelongsToModel::class, 'model1');
-        $modelTwo = $this->objFromFixture(DotNotationTouchedBelongsToModel::class, 'model2');
+        $modelOne = $this->objFromFixture(DotNotationTouchedBelongsTo::class, 'model1');
+        $modelTwo = $this->objFromFixture(DotNotationTouchedBelongsTo::class, 'model2');
 
         // Check that we're set up correctly
-        $this->assertEquals(DotNotationTouchedBelongsToModel::class, $modelOne->ClassName);
-        $this->assertEquals(DotNotationTouchedBelongsToModel::class, $modelTwo->ClassName);
-        $this->assertEquals($page->TouchedBelongsToModelFirstID, $modelOne->ID);
-        $this->assertEquals($page->TouchedBelongsToModelSecondID, $modelTwo->ID);
+        $this->assertEquals(DotNotationTouchedBelongsTo::class, $modelOne->ClassName);
+        $this->assertEquals(DotNotationTouchedBelongsTo::class, $modelTwo->ClassName);
+        $this->assertEquals($page->TouchedBelongsToFirstID, $modelOne->ID);
+        $this->assertEquals($page->TouchedBelongsToSecondID, $modelTwo->ID);
 
         $originalKeyOne = $modelOne->getCacheKey();
         $originalKeyTwo = $modelTwo->getCacheKey();
@@ -115,14 +115,14 @@ class DotNotationTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(DotNotationTouchesPage::class, 'page1');
-        $modelOne = $this->objFromFixture(DotNotationTouchedHasManyModel::class, 'model1');
-        $modelTwo = $this->objFromFixture(DotNotationTouchedHasManyModel::class, 'model2');
+        $modelOne = $this->objFromFixture(DotNotationTouchedHasMany::class, 'model1');
+        $modelTwo = $this->objFromFixture(DotNotationTouchedHasMany::class, 'model2');
 
         // Check that we're set up correctly
-        $this->assertCount(1, $page->TouchedHasManyModelsFirst());
-        $this->assertEquals($page->TouchedHasManyModelsFirst()->first()->ID, $modelOne->ID);
-        $this->assertCount(1, $page->TouchedHasManyModelsSecond());
-        $this->assertEquals($page->TouchedHasManyModelsSecond()->first()->ID, $modelTwo->ID);
+        $this->assertCount(1, $page->TouchedHasManyFirst());
+        $this->assertEquals($page->TouchedHasManyFirst()->first()->ID, $modelOne->ID);
+        $this->assertCount(1, $page->TouchedHasManySecond());
+        $this->assertEquals($page->TouchedHasManySecond()->first()->ID, $modelTwo->ID);
 
         $originalKeyOne = $modelOne->getCacheKey();
         $originalKeyTwo = $modelTwo->getCacheKey();
@@ -152,14 +152,14 @@ class DotNotationTouchesTest extends SapphireTest
         ProcessedUpdatesService::singleton()->flush();
 
         $page = $this->objFromFixture(DotNotationTouchedPage::class, 'page1');
-        $modelOne = $this->objFromFixture(DotNotationTouchesBelongsToModel::class, 'model1');
-        $modelTwo = $this->objFromFixture(DotNotationTouchesBelongsToModel::class, 'model2');
+        $modelOne = $this->objFromFixture(DotNotationTouchesBelongsTo::class, 'model1');
+        $modelTwo = $this->objFromFixture(DotNotationTouchesBelongsTo::class, 'model2');
 
         // Check that we're set up correctly
-        $this->assertEquals(DotNotationTouchesBelongsToModel::class, $modelOne->ClassName);
-        $this->assertEquals(DotNotationTouchesBelongsToModel::class, $modelTwo->ClassName);
-        $this->assertEquals($page->TouchesBelongsToModelFirstID, $modelOne->ID);
-        $this->assertEquals($page->TouchesBelongsToModelSecondID, $modelTwo->ID);
+        $this->assertEquals(DotNotationTouchesBelongsTo::class, $modelOne->ClassName);
+        $this->assertEquals(DotNotationTouchesBelongsTo::class, $modelTwo->ClassName);
+        $this->assertEquals($page->TouchesBelongsToFirstID, $modelOne->ID);
+        $this->assertEquals($page->TouchesBelongsToSecondID, $modelTwo->ID);
 
         $originalKey = $page->getCacheKey();
 
