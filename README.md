@@ -75,9 +75,6 @@ currently invalidating the cache key if one of the Images assigned to an Item ch
 
 Neither option is great, but it is something that must be solved.
 
-Assuming we find our solution, we still end up needing one cache key per block; if our page contains many blocks, then
-we have many cache keys that we need to calculate in order to have an accurate cache key for a single page.
-
 ## How we aim to solve these difficulties
 
 **In short:**
@@ -93,8 +90,8 @@ create lean cache keys which we invalidate when dependencies require them to be.
 
 **Preamble:** When we talk about "changes to records", this includes all C.R.U.D. actions.
 
-**Relationship config:** In order for this module to function, we need to understand **both directions** of any
-relationship that you create a `care` for. [More on this here](docs/en/relationship-config.md).
+**Relationship config:** In order for this module to function, we often need to understand more about the relationships
+that you create a `care` for than perhaps Silverstripe ORM does. [More on this here](docs/en/relationship-config.md).
 
 ### Has cache key
 
@@ -152,8 +149,7 @@ class CarouselBlock extends BaseElement
 ```
 
 Take the original example where we also wanted our `CarouselItem` to include changes to Images as part of its cache key.
-We could now also add a `cares` config to our `CarouselItem` (where the `key` is the field relationship name, and the
-value is the `class` that it relates to):
+We could now also add a `cares` config to our `CarouselItem`:
 
 ```yaml
 App\Blocks\CarouselItem:
@@ -176,7 +172,7 @@ class CarouselItem extends DataObject
 }
 ```
 
-Now whenever the linked `Image` is updated, it will also update the `CarouselItem`, and in turn the `CarouselItem`
+Now whenever the linked `Image` is updated, it will also update the `CarouselItem`, and in turn the `CarouselItem` will
 update the linked `Carousel`. Taking this a step further all the way back to `Page`, we could also add the following:
 
 ```yaml
