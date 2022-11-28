@@ -5,7 +5,11 @@
 
 ## Considerations & Warnings
 
-If you are using `symbiote/silverstripe-gridfieldextensions` and the `GridFieldOrderableRows` component:
+If you are using `symbiote/silverstripe-gridfieldextensions` version `3.5.0` or newer, then you have nothing to worry
+about. Full support for all types of `DataObjects` is available.
+
+If you are using a `symbiote/silverstripe-gridfieldextensions` version lower than `3.5.0`, and you're using the
+`GridFieldOrderableRows` component:
 
 * `GridFieldOrderableRows` will have out of the box support for KFC for `Versioned` DataObjects, as it already uses the
   ORM and the `write()` method to save sort orders.
