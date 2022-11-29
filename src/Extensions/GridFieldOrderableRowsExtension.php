@@ -2,7 +2,6 @@
 
 namespace Terraformers\KeysForCache\Extensions;
 
-use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataList;
@@ -75,7 +74,7 @@ class GridFieldOrderableRowsExtension extends Extension
         }
 
         // We can't do anything with the Ordered DataObject if it doesn't have our CacheKeyExtension applied
-        if (!Extensible::has_extension($class, CacheKeyExtension::class)) {
+        if (!DataObject::has_extension($class, CacheKeyExtension::class)) {
             return;
         }
 
