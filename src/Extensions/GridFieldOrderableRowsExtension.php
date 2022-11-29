@@ -2,7 +2,6 @@
 
 namespace Terraformers\KeysForCache\Extensions;
 
-use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataList;
