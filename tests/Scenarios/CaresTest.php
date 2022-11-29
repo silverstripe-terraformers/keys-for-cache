@@ -10,6 +10,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsTo;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasMany;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOne;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersioned;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneVersionedNonStaged;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyMany;
 use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasMany;
 use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasOne;
@@ -32,6 +33,7 @@ class CaresTest extends SapphireTest
         CaredHasMany::class,
         CaredHasOne::class,
         CaredHasOneNonVersioned::class,
+        CaredHasOneVersionedNonStaged::class,
         CaredManyMany::class,
         CaredThrough::class,
         PolymorphicCaredHasOne::class,
@@ -133,6 +135,34 @@ class CaresTest extends SapphireTest
         // Check that we're set up correctly
         $this->assertEquals(CaredHasOneNonVersioned::class, $model->ClassName);
         $this->assertEquals($page->CaredHasOneNonVersionedID, $model->ID);
+
+        $originalKey = $page->getCacheKey();
+
+        $this->assertNotNull($originalKey);
+        $this->assertNotEmpty($originalKey);
+
+        // Begin changes
+        $model->forceChange();
+        $model->write();
+
+        $newKey = $page->getCacheKey();
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($newKey);
+        $this->assertNotEquals($originalKey, $newKey);
+    }
+
+    public function testCaresHasOneVersionedNonStaged(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        $model = $this->objFromFixture(CaredHasOneVersionedNonStaged::class, 'model1');
+
+        // Check that we're set up correctly
+        $this->assertEquals(CaredHasOneVersionedNonStaged::class, $model->ClassName);
+        $this->assertEquals($page->CaredHasOneVersionedNonStagedID, $model->ID);
 
         $originalKey = $page->getCacheKey();
 
