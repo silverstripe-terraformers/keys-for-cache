@@ -4,6 +4,9 @@ namespace Terraformers\KeysForCache\Tests\Scenarios;
 
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Versioned\Versioned;
+use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Terraformers\KeysForCache\Tests\Mocks\Models\ExtendedPolymorphicTouchedHasMany;
@@ -48,208 +51,226 @@ class ExtendedTouchesTest extends SapphireTest
         TouchesBelongsTo::class,
     ];
 
-    public function testTouchesHasOne(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testTouchesHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
-        // Updates are processed as part of scaffold, so we need to flush before we kick off
-        ProcessedUpdatesService::singleton()->flush();
-
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
         $model = $this->objFromFixture(TouchedHasOne::class, 'model1');
+
+        // Make sure our records are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
         // Check that we're set up correctly
         $this->assertEquals(TouchedHasOne::class, $model->ClassName);
         $this->assertEquals($page->TouchedHasOneID, $model->ID);
 
-        $originalKey = $model->getCacheKey();
-
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        // Begin changes
-        $page->forceChange();
-        $page->write();
-
-        $newKey = $model->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testTouchesTrueHasOne(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testTouchesTrueHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
-        // Updates are processed as part of scaffold, so we need to flush before we kick off
-        ProcessedUpdatesService::singleton()->flush();
-
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
         $model = $this->objFromFixture(TouchedBelongsTo::class, 'model1');
+
+        // Make sure our records are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
         // Check that we're set up correctly
         $this->assertEquals(TouchedBelongsTo::class, $model->ClassName);
         $this->assertEquals($page->TouchedBelongsToID, $model->ID);
 
-        $originalKey = $model->getCacheKey();
-
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        // Begin changes
-        $page->forceChange();
-        $page->write();
-
-        $newKey = $model->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testPolymorphicTouchesHasOne(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testPolymorphicTouchesHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
-        // Updates are processed as part of scaffold, so we need to flush before we kick off
-        ProcessedUpdatesService::singleton()->flush();
-
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
         $model = $this->objFromFixture(PolymorphicTouchedHasOne::class, 'model1');
+
+        // Make sure our records are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
         // Check that we're set up correctly
         $this->assertEquals(PolymorphicTouchedHasOne::class, $model->ClassName);
         $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
 
-        $originalKey = $model->getCacheKey();
-
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        // Begin changes
-        $page->forceChange();
-        $page->write();
-
-        $newKey = $model->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testExtendedPolymorphicTouchesHasOne(): void
-    {
-        // Updates are processed as part of scaffold, so we need to flush before we kick off
-        ProcessedUpdatesService::singleton()->flush();
-
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testExtendedPolymorphicTouchesHasOne(
+        string $readingMode,
+        string $saveMethod,
+        bool $expectMatch
+    ): void {
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page2');
         $model = $this->objFromFixture(ExtendedPolymorphicTouchedHasOne::class, 'model1');
+
+        // Make sure our records are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
         // Check that we're set up correctly
         $this->assertEquals(ExtendedPolymorphicTouchedHasOne::class, $model->ClassName);
         $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
 
-        $originalKey = $model->getCacheKey();
-
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        // Begin changes
-        $page->forceChange();
-        $page->write();
-
-        $newKey = $model->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testTouchesHasMany(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testTouchesHasMany(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
-        // Updates are processed as part of scaffold, so we need to flush before we kick off
-        ProcessedUpdatesService::singleton()->flush();
-
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
         $model = $this->objFromFixture(TouchedHasMany::class, 'model1');
 
-        $originalKey = $model->getCacheKey();
+        // Make sure our records are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        $page->forceChange();
-        $page->write();
-
-        $newKey = $model->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testPolymorphicTouchesHasMany(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testPolymorphicTouchesHasMany(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
-        // Updates are processed as part of scaffold, so we need to flush before we kick off
-        ProcessedUpdatesService::singleton()->flush();
-
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
         $model = $this->objFromFixture(PolymorphicTouchedHasMany::class, 'model1');
 
-        $originalKey = $model->getCacheKey();
+        // Make sure our records are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        $page->forceChange();
-        $page->write();
-
-        $newKey = $model->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testExtendedPolymorphicTouchesHasMany(): void
-    {
-        // Updates are processed as part of scaffold, so we need to flush before we kick off
-        ProcessedUpdatesService::singleton()->flush();
-
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testExtendedPolymorphicTouchesHasMany(
+        string $readingMode,
+        string $saveMethod,
+        bool $expectMatch
+    ): void {
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page2');
         $model = $this->objFromFixture(ExtendedPolymorphicTouchedHasMany::class, 'model1');
 
-        $originalKey = $model->getCacheKey();
+        // Make sure our records are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        $page->forceChange();
-        $page->write();
-
-        $newKey = $model->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testTouchesBelongsTo(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testTouchesBelongsTo(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
-        // Updates are processed as part of scaffold, so we need to flush before we kick off
-        ProcessedUpdatesService::singleton()->flush();
-
         $page = $this->objFromFixture(ExtendedTouchedPage::class, 'page1');
         $model = $this->objFromFixture(TouchesBelongsTo::class, 'model1');
 
-        $originalKey = $page->getCacheKey();
+        // Make sure our records are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
+        Versioned::withVersionedMode(function () use ($page, $model, $readingMode, $saveMethod, $expectMatch): void {
+            Versioned::set_stage($readingMode);
 
-        $model->forceChange();
-        $model->write();
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $originalKey = CacheKey::findInStage($page);
 
-        $newKey = $page->getCacheKey();
+            $this->assertNotNull($originalKey);
+            $this->assertNotEmpty($originalKey->KeyHash);
 
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($originalKey);
-        $this->assertNotEquals($originalKey, $newKey);
+            // Flush updates again before we trigger the next change
+            ProcessedUpdatesService::singleton()->flush();
+
+            $model->forceChange();
+            $model->{$saveMethod}();
+
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $newKey = CacheKey::findInStage($page);
+
+            $this->assertNotNull($newKey);
+            $this->assertNotEmpty($newKey->KeyHash);
+
+            if ($expectMatch) {
+                $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
+            } else {
+                $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+            }
+        });
+    }
+
+    protected function assertCacheKeyChanges(
+        ExtendedTouchesPage $page,
+        DataObject $model,
+        string $readingMode,
+        string $saveMethod,
+        bool $expectMatch
+    ): void {
+        Versioned::withVersionedMode(function () use ($page, $model, $readingMode, $saveMethod, $expectMatch): void {
+            Versioned::set_stage($readingMode);
+
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $originalKey = CacheKey::findInStage($model);
+
+            $this->assertNotNull($originalKey);
+            $this->assertNotEmpty($originalKey->KeyHash);
+
+            // Flush updates again before we trigger the next change
+            ProcessedUpdatesService::singleton()->flush();
+
+            $page->forceChange();
+            $page->{$saveMethod}();
+
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $newKey = CacheKey::findInStage($model);
+
+            $this->assertNotNull($newKey);
+            $this->assertNotEmpty($newKey->KeyHash);
+
+            if ($expectMatch) {
+                $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
+            } else {
+                $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+            }
+        });
+    }
+
+    public function readingModesWithSaveMethods(): array
+    {
+        return [
+            // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
+            // we are working in the DRAFT stage, we would expect a different value when we fetch that CacheKey again
+            'performing write() in DRAFT stage' => [Versioned::DRAFT, 'write', false],
+            // If publishRecursive() is performed on a modal, then we expect the same behaviour as above for the DRAFT
+            // stage of our CacheKey
+            'performing publishRecursive() in DRAFT stage' => [Versioned::DRAFT, 'publishRecursive', false],
+            // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
+            // we are working in the LIVE stage, we would expect the LIVE value of this CacheKey to be unchanged
+            'performing write() in LIVE stage' => [Versioned::LIVE, 'write', true],
+            // If publishRecursive() is performed on a modal, then we expect that CacheKey to also be published. As we
+            // are working in the LIVE stage, we would now expect a new CacheKey value when it if fetched again
+            'performing publishRecursive() in LIVE stage' => [Versioned::LIVE, 'publishRecursive', false],
+        ];
     }
 
     protected function tearDown(): void

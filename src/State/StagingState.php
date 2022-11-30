@@ -3,6 +3,7 @@
 namespace Terraformers\KeysForCache\State;
 
 use SilverStripe\Core\Injector\Injectable;
+use SilverStripe\Versioned\Versioned;
 
 class StagingState
 {
@@ -40,7 +41,11 @@ class StagingState
 
     public function canPublish(): bool
     {
-        return $this->publishEnabled;
+        if (!$this->publishEnabled) {
+            return false;
+        }
+
+        return Versioned::get_stage() === Versioned::LIVE;
     }
 
 }

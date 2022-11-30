@@ -4,6 +4,9 @@ namespace Terraformers\KeysForCache\Tests\Scenarios;
 
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Versioned\Versioned;
+use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsTo;
@@ -18,6 +21,10 @@ use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
 use Terraformers\KeysForCache\Tests\Mocks\Relations\CaredThrough;
 use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThrough;
 
+/**
+ * These tests are specifically about checking that our triggers are actions as we expect. We will intentionally
+ * *avoid* using the getCacheKey() method on our Models so that we know we aren't generating any CacheKeys on request
+ */
 class CaresTest extends SapphireTest
 {
     protected static $fixture_file = 'CaresTest.yml'; // phpcs:ignore
@@ -40,7 +47,10 @@ class CaresTest extends SapphireTest
         PolymorphicCaredHasMany::class,
     ];
 
-    public function testCaresPureHasOne(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testCaresPureHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -48,27 +58,21 @@ class CaresTest extends SapphireTest
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredBelongsTo::class, 'model1');
 
+        // Make sure our page and model are published
+        $page->publishRecursive();
+        $model->publishRecursive();
+
         // Check that we're set up correctly
         $this->assertEquals(CaredBelongsTo::class, $model->ClassName);
         $this->assertEquals($page->CaredBelongsToID, $model->ID);
 
-        $originalKey = $page->getCacheKey();
-
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        // Begin changes
-        $model->forceChange();
-        $model->write();
-
-        $newKey = $page->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testCaresBelongsTo(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testCaresBelongsTo(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -76,27 +80,21 @@ class CaresTest extends SapphireTest
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredBelongsTo::class, 'model1');
 
+        // Make sure our page and model are published
+        $page->publishRecursive();
+        $model->publishRecursive();
+
         // Check that we're set up correctly
         $this->assertEquals(CaredBelongsTo::class, $model->ClassName);
         $this->assertEquals($page->CaredBelongsToID, $model->ID);
 
-        $originalKey = $page->getCacheKey();
-
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        // Begin changes
-        $model->forceChange();
-        $model->write();
-
-        $newKey = $page->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testCaresHasOne(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testCaresHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -104,27 +102,21 @@ class CaresTest extends SapphireTest
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredHasOne::class, 'model1');
 
+        // Make sure our page and model are published
+        $page->publishRecursive();
+        $model->publishRecursive();
+
         // Check that we're set up correctly
         $this->assertEquals(CaredHasOne::class, $model->ClassName);
         $this->assertEquals($page->CaredHasOneID, $model->ID);
 
-        $originalKey = $page->getCacheKey();
-
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        // Begin changes
-        $model->forceChange();
-        $model->write();
-
-        $newKey = $page->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testCaresHasOneNonVersioned(): void
+    /**
+     * @dataProvider readingModes
+     */
+    public function testCaresHasOneNonVersioned(string $readingMode): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -132,24 +124,37 @@ class CaresTest extends SapphireTest
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredHasOneNonVersioned::class, 'model1');
 
+        // Make sure our page is published (the model is not Versioned)
+        $page->publishRecursive();
+
         // Check that we're set up correctly
         $this->assertEquals(CaredHasOneNonVersioned::class, $model->ClassName);
         $this->assertEquals($page->CaredHasOneNonVersionedID, $model->ID);
 
-        $originalKey = $page->getCacheKey();
+        Versioned::withVersionedMode(function () use ($page, $model, $readingMode): void {
+            Versioned::set_stage($readingMode);
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $originalKey = CacheKey::findInStage($page);
 
-        // Begin changes
-        $model->forceChange();
-        $model->write();
+            // Check that we're set up with an initial KeyHash
+            $this->assertNotNull($originalKey);
+            $this->assertNotEmpty($originalKey->KeyHash);
 
-        $newKey = $page->getCacheKey();
+            // Flush updates so that new changes generate new CacheKey hashes
+            ProcessedUpdatesService::singleton()->flush();
 
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+            // Begin changes
+            $model->forceChange();
+            $model->write();
+
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $newKey = CacheKey::findInStage($page);
+
+            $this->assertNotNull($newKey);
+            $this->assertNotEmpty($newKey->KeyHash);
+            $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+        });
     }
 
     public function testCaresHasOneVersionedNonStaged(): void
@@ -180,7 +185,10 @@ class CaresTest extends SapphireTest
         $this->assertNotEquals($originalKey, $newKey);
     }
 
-    public function testPolymorphicCaresHasOne(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testPolymorphicCaresHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -188,27 +196,21 @@ class CaresTest extends SapphireTest
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(PolymorphicCaredHasOne::class, 'model1');
 
+        // Make sure our page and model are published
+        $page->publishRecursive();
+        $model->publishRecursive();
+
         // Check that we're set up correctly
         $this->assertEquals(PolymorphicCaredHasOne::class, $model->ClassName);
         $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
 
-        $originalKey = $page->getCacheKey();
-
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        // Begin changes
-        $model->forceChange();
-        $model->write();
-
-        $newKey = $page->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testCaresHasMany(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testCaresHasMany(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -216,22 +218,17 @@ class CaresTest extends SapphireTest
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredHasMany::class, 'model1');
 
-        $originalKey = $page->getCacheKey();
+        // Make sure our page and model are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        $model->forceChange();
-        $model->write();
-
-        $newKey = $page->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testPolymorphicCaresHasMany(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testPolymorphicCaresHasMany(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -239,22 +236,17 @@ class CaresTest extends SapphireTest
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(PolymorphicCaredHasMany::class, 'model1');
 
-        $originalKey = $page->getCacheKey();
+        // Make sure our page and model are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        $model->forceChange();
-        $model->write();
-
-        $newKey = $page->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testManyMany(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testManyMany(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -262,27 +254,21 @@ class CaresTest extends SapphireTest
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredManyMany::class, 'model1');
 
+        // Make sure our page and model are published
+        $page->publishRecursive();
+        $model->publishRecursive();
+
         // Check we're set up correctly
         $this->assertCount(1, $page->CaredManyMany());
         $this->assertEquals($model->ID, $page->CaredManyMany()->first()->ID);
 
-        $originalKey = $page->getCacheKey();
-
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
-
-        // Begin triggering changes
-        $model->forceChange();
-        $model->write();
-
-        $newKey = $page->getCacheKey();
-
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
     }
 
-    public function testManyManyThrough(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testManyManyThrough(string $readingMode, string $saveMethod, bool $expectMatch): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -290,19 +276,76 @@ class CaresTest extends SapphireTest
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredThrough::class, 'model1');
 
-        $originalKey = $page->getCacheKey();
+        // Make sure our page and model are published
+        $page->publishRecursive();
+        $model->publishRecursive();
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
+    }
 
-        $model->forceChange();
-        $model->write();
+    protected function assertCacheKeyChanges(
+        CaresPage $page,
+        DataObject $model,
+        string $readingMode,
+        string $saveMethod,
+        bool $expectMatch
+    ): void {
+        Versioned::withVersionedMode(function () use ($page, $model, $readingMode, $saveMethod, $expectMatch): void {
+            // We perform our save method and read in the same reading mode
+            Versioned::set_stage($readingMode);
 
-        $newKey = $page->getCacheKey();
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $originalKey = CacheKey::findInStage($page);
 
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+            // Check that we're set up with an initial KeyHash
+            $this->assertNotNull($originalKey);
+            $this->assertNotEmpty($originalKey->KeyHash);
+
+            // Flush updates so that new changes generate new CacheKey hashes
+            ProcessedUpdatesService::singleton()->flush();
+
+            $model->forceChange();
+            // @see readingModes() - write() or publishRecursive() depending on the test
+            $model->{$saveMethod}();
+
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $newKey = CacheKey::findInStage($page);
+
+            $this->assertNotNull($newKey);
+            $this->assertNotEmpty($newKey->KeyHash);
+
+            if ($expectMatch) {
+                $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
+            } else {
+                $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+            }
+        });
+    }
+
+    public function readingModesWithSaveMethods(): array
+    {
+        return [
+            // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
+            // we are working in the DRAFT stage, we would expect a different value when we fetch that CacheKey again
+            'performing write() in DRAFT stage' => [Versioned::DRAFT, 'write', false],
+            // If publishRecursive() is performed on a modal, then we expect the same behaviour as above for the DRAFT
+            // stage of our CacheKey
+            'performing publishRecursive() in DRAFT stage' => [Versioned::DRAFT, 'publishRecursive', false],
+            // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
+            // we are working in the LIVE stage, we would expect the LIVE value of this CacheKey to be unchanged
+            'performing write() in LIVE stage' => [Versioned::LIVE, 'write', true],
+            // If publishRecursive() is performed on a modal, then we expect that CacheKey to also be published. As we
+            // are working in the LIVE stage, we would now expect a new CacheKey value when it if fetched again
+            'performing publishRecursive() in LIVE stage' => [Versioned::LIVE, 'publishRecursive', false],
+        ];
+    }
+
+    public function readingModes(): array
+    {
+        return [
+            [Versioned::DRAFT],
+            [Versioned::LIVE],
+        ];
     }
 
     protected function tearDown(): void

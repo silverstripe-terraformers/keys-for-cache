@@ -51,6 +51,22 @@ class CacheKey extends DataObject
         return $cacheKey;
     }
 
+    public static function findInStage(DataObject $dataObject): ?CacheKey
+    {
+        // You have requested that this DataObject class does not use cache keys
+        $hasCacheKey = $dataObject->config()->get('has_cache_key');
+
+        if (!$hasCacheKey) {
+            return null;
+        }
+
+        // This search will be performed in whatever your current Stage is
+        return static::get()->filter([
+            'RecordClass' => $dataObject->ClassName,
+            'RecordID' => $dataObject->ID,
+        ])->first();
+    }
+
     /**
      * @param DataObject|CacheKeyExtension $dataObject
      * @return CacheKey|null
@@ -58,6 +74,7 @@ class CacheKey extends DataObject
      */
     public static function findOrCreate(DataObject $dataObject): ?CacheKey
     {
+        // You have requested that this DataObject class does not use cache keys
         $hasCacheKey = $dataObject->config()->get('has_cache_key');
 
         if (!$hasCacheKey) {

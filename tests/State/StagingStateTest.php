@@ -3,6 +3,8 @@
 namespace Terraformers\KeysForCache\Tests\State;
 
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ORM\DataList;
+use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\State\StagingState;
 use Terraformers\KeysForCache\Tests\Mocks\Pages\CaresPage;
@@ -19,42 +21,39 @@ class StagingStateTest extends SapphireTest
         CaresPage::class,
     ];
 
-    /**
-     * Testing the default state, whereby we should be able to findOrCreate with the CacheKey being initially written
-     * to the Database
-     */
-    public function testCanWrite(): void
+    public function testReadingMode(): void
     {
-        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        // Default state is both enabled
+        StagingState::singleton()->enableWrite();
+        StagingState::singleton()->enablePublish();
 
-        // Need to remove any existing keys before we get started
-        CacheKey::remove($page);
+        Versioned::withVersionedMode(function (): void {
+            Versioned::set_stage(Versioned::LIVE);
 
-        // Check we're set up correctly
-        $this->assertCount(
-            0,
-            CacheKey::get()->filter([
-                'RecordClass' => $page->ClassName,
-                'RecordID' => $page->ID,
-            ])
-        );
+            // In LIVE reading mode we expect the default to be that we can write and publish
+            $this->assertTrue(StagingState::singleton()->canWrite());
+            $this->assertTrue(StagingState::singleton()->canPublish());
+        });
 
-        // For this we will invoke the getCacheKey() method, as this potentially triggers a write and/or publish on
-        // newly created CacheKey records
-        $keyHash = $page->getCacheKey();
+        Versioned::withVersionedMode(function (): void {
+            Versioned::set_stage(Versioned::DRAFT);
 
-        // We expect KeyHash to have had a value
-        $this->assertNotNull($keyHash);
+            // In DRAFT reading mode we expect the default to be that we can write but not publish
+            $this->assertTrue(StagingState::singleton()->canWrite());
+            $this->assertFalse(StagingState::singleton()->canPublish());
+        });
 
-        // We expect there to be one CacheKey now available on the Page
-        $this->assertCount(1, $page->CacheKeys());
+        Versioned::withVersionedMode(function (): void {
+            Versioned::set_stage(Versioned::LIVE);
 
-        $cacheKey = $page->CacheKeys()->first();
+            // Now specifically setting our State to disable write and publish even in LIVE reading mode
+            StagingState::singleton()->disableWrite();
+            StagingState::singleton()->disablePublish();
 
-        // And we expect this to have written this CacheKey to the Database
-        $this->assertTrue($cacheKey->isInDB());
-        // Our page is not published, so we expect the CacheKey to also not be published
-        $this->assertFalse($cacheKey->isPublished());
+            // In DRAFT reading mode we expect the default to be that we can write but not publish
+            $this->assertFalse(StagingState::singleton()->canWrite());
+            $this->assertFalse(StagingState::singleton()->canPublish());
+        });
     }
 
     /**
@@ -66,43 +65,7 @@ class StagingStateTest extends SapphireTest
         StagingState::singleton()->disablePublish();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
-
-        // Need to remove any existing keys before we get started
-        CacheKey::remove($page);
-
-        // Check we're set up correctly
-        $this->assertCount(
-            0,
-            CacheKey::get()->filter([
-                'RecordClass' => $page->ClassName,
-                'RecordID' => $page->ID,
-            ])
-        );
-
-        // For this we will first invoke the getCacheKey() method, as this potentially triggers a write and/or publish
-        // on newly created CacheKey records
-        $keyHash = $page->getCacheKey();
-
-        // We expect KeyHash to have had a value
-        $this->assertNotNull($keyHash);
-
-        // But we expect there to still be no CacheKeys for this DataObject
-        $this->assertCount(
-            0,
-            CacheKey::get()->filter([
-                'RecordClass' => $page->ClassName,
-                'RecordID' => $page->ID,
-            ])
-        );
-    }
-
-    /**
-     * Testing the default state, whereby we should be able to findOrCreate with the CacheKey being initially written
-     * to the Database, and because our Page is published, the CacheKey should also be published
-     */
-    public function testCanPublish(): void
-    {
-        $page = $this->objFromFixture(CaresPage::class, 'page1');
+        // Publish our Page
         $page->publishRecursive();
 
         // Need to remove any existing keys before we get started
@@ -117,22 +80,27 @@ class StagingStateTest extends SapphireTest
             ])
         );
 
-        // For this we will first invoke the getCacheKey() method, as this potentially triggers a write and/or publish
-        // on newly created CacheKey records
-        $keyHash = $page->getCacheKey();
+        Versioned::withVersionedMode(function () use ($page): void {
+            // Specifically fetching with LIVE reading mode so that this is not a limiting factor for whether we are
+            // able to write CacheKeys
+            Versioned::set_stage(Versioned::LIVE);
 
-        // We expect KeyHash to have had a value
-        $this->assertNotNull($keyHash);
+            // For this we will first invoke the getCacheKey() method, as this potentially triggers write() and/or
+            // publishSingle() on newly created CacheKey records
+            $keyHash = $page->getCacheKey();
 
-        // We expect there to be one CacheKey now available on the Page
-        $this->assertCount(1, $page->CacheKeys());
+            // We expect KeyHash to have had a value
+            $this->assertNotNull($keyHash);
 
-        $cacheKey = $page->CacheKeys()->first();
-
-        // And we expect this to have written this CacheKey to the Database
-        $this->assertTrue($cacheKey->isInDB());
-        // Our page is not published, so we expect the CacheKey to also not be published
-        $this->assertTrue($cacheKey->isPublished());
+            // But we expect there to still be no CacheKeys for this DataObject
+            $this->assertCount(
+                0,
+                CacheKey::get()->filter([
+                    'RecordClass' => $page->ClassName,
+                    'RecordID' => $page->ID,
+                ])
+            );
+        });
     }
 
     /**
@@ -141,6 +109,7 @@ class StagingStateTest extends SapphireTest
      */
     public function testCannotPublish(): void
     {
+        StagingState::singleton()->enableWrite();
         StagingState::singleton()->disablePublish();
 
         $page = $this->objFromFixture(CaresPage::class, 'page1');
@@ -158,28 +127,53 @@ class StagingStateTest extends SapphireTest
             ])
         );
 
-        // For this we will first invoke the getCacheKey() method, as this potentially triggers a write and/or publish
-        // on newly created CacheKey records
-        $keyHash = $page->getCacheKey();
+        Versioned::withVersionedMode(function () use ($page): void {
+            // Specifically fetching with LIVE reading mode so that this is not a limiting factor for whether we are
+            // able to write and publish CacheKeys
+            Versioned::set_stage(Versioned::LIVE);
 
-        // We expect KeyHash to have had a value
-        $this->assertNotNull($keyHash);
+            // For this we will first invoke the getCacheKey() method, as this potentially triggers write() and/or
+            // publishSingle() on newly created CacheKey records
+            // Because publishing is disabled, we would expect to receive a value back here, but we are expecting that
+            // CacheKey to *not* be published
+            $keyHash = $page->getCacheKey();
 
-        // We expect there to be one CacheKey now available on the Page
-        $this->assertCount(1, $page->CacheKeys());
+            // We expect KeyHash to have had a value
+            $this->assertNotNull($keyHash);
+            $this->assertNotEmpty($keyHash);
 
-        $cacheKey = $page->CacheKeys()->first();
+            // Re-fetch CacheKeys for this page
+            /** @var DataList|CacheKey[] $keys */
+            $keys = CacheKey::get()->filter([
+                'RecordClass' => $page->ClassName,
+                'RecordID' => $page->ID,
+            ]);
 
-        // And we expect this CacheKey to be in the Database, but not be published
-        $this->assertTrue($cacheKey->isInDB());
-        $this->assertFalse($cacheKey->isPublished());
-    }
+            // We're currently in a LIVE reading mode, so we'd expect to *not* find this CacheKey (as it was not
+            // published)
+            $this->assertCount(0, $keys);
+        });
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+        Versioned::withVersionedMode(function () use ($page): void {
+            // We'll now switch to a DRAFT reading mode and check that we can find the CacheKey
+            Versioned::set_stage(Versioned::DRAFT);
 
-        StagingState::singleton()->enableWrite();
-        StagingState::singleton()->enablePublish();
+            // Fetch CacheKeys for this page
+            /** @var DataList|CacheKey[] $keys */
+            $keys = CacheKey::get()->filter([
+                'RecordClass' => $page->ClassName,
+                'RecordID' => $page->ID,
+            ]);
+
+            // We expect to find the CacheKey now that we're in a DRAFT reading mode
+            $this->assertCount(1, $keys);
+
+            /** @var CacheKey $cacheKey */
+            $cacheKey = $keys->first();
+
+            // But we expect the CacheKey to *not* be published
+            $this->assertTrue($cacheKey->isInDB());
+            $this->assertFalse($cacheKey->isPublished());
+        });
     }
 }
