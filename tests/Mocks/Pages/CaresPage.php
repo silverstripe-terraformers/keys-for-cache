@@ -13,6 +13,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsTo;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasMany;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOne;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersioned;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneVersionedNonStaged;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyMany;
 use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasMany;
 use Terraformers\KeysForCache\Tests\Mocks\Relations\CaredThrough;
@@ -40,6 +41,7 @@ class CaresPage extends Page implements TestOnly
         'CaredBelongsTo' => CaredBelongsTo::class,
         'CaredHasOne' => CaredHasOne::class,
         'CaredHasOneNonVersioned' => CaredHasOneNonVersioned::class,
+        'CaredHasOneVersionedNonStaged' => CaredHasOneVersionedNonStaged::class,
         'PolymorphicHasOne' => DataObject::class,
     ];
 
@@ -62,6 +64,7 @@ class CaresPage extends Page implements TestOnly
         'CaredBelongsTo',
         'CaredHasOne',
         'CaredHasOneNonVersioned',
+        'CaredHasOneVersionedNonStaged',
         'CaredHasMany',
         'CaredManyMany',
         'CaredThrough',

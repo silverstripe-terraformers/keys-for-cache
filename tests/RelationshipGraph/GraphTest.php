@@ -16,6 +16,7 @@ use Terraformers\KeysForCache\Tests\Mocks\Models\CaredBelongsTo;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasMany;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOne;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneNonVersioned;
+use Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneVersionedNonStaged;
 use Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyMany;
 use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicCaredHasMany;
 use Terraformers\KeysForCache\Tests\Mocks\Models\PolymorphicTouchedHasMany;
@@ -169,6 +170,7 @@ class GraphTest extends SapphireTest
             'CaredBelongsTo' => CaredBelongsTo::class,
             'CaredHasOne' => CaredHasOne::class,
             'CaredHasOneNonVersioned' => CaredHasOneNonVersioned::class,
+            'CaredHasOneVersionedNonStaged' => CaredHasOneVersionedNonStaged::class,
             'CaredHasMany' => CaredHasMany::class,
             'CaredManyMany' => CaredManyMany::class,
             'CaredThrough' => [
