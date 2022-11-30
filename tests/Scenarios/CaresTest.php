@@ -50,7 +50,7 @@ class CaresTest extends SapphireTest
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testCaresPureHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testCaresPureHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -66,13 +66,13 @@ class CaresTest extends SapphireTest
         $this->assertEquals(CaredBelongsTo::class, $model->ClassName);
         $this->assertEquals($page->CaredBelongsToID, $model->ID);
 
-        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testCaresBelongsTo(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testCaresBelongsTo(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -88,13 +88,13 @@ class CaresTest extends SapphireTest
         $this->assertEquals(CaredBelongsTo::class, $model->ClassName);
         $this->assertEquals($page->CaredBelongsToID, $model->ID);
 
-        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testCaresHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testCaresHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -110,7 +110,7 @@ class CaresTest extends SapphireTest
         $this->assertEquals(CaredHasOne::class, $model->ClassName);
         $this->assertEquals($page->CaredHasOneID, $model->ID);
 
-        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
@@ -188,7 +188,7 @@ class CaresTest extends SapphireTest
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testPolymorphicCaresHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testPolymorphicCaresHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -204,13 +204,13 @@ class CaresTest extends SapphireTest
         $this->assertEquals(PolymorphicCaredHasOne::class, $model->ClassName);
         $this->assertEquals($page->PolymorphicHasOneID, $model->ID);
 
-        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testCaresHasMany(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testCaresHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -222,13 +222,13 @@ class CaresTest extends SapphireTest
         $page->publishRecursive();
         $model->publishRecursive();
 
-        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testPolymorphicCaresHasMany(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testPolymorphicCaresHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -240,13 +240,13 @@ class CaresTest extends SapphireTest
         $page->publishRecursive();
         $model->publishRecursive();
 
-        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testManyMany(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testManyMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -262,13 +262,13 @@ class CaresTest extends SapphireTest
         $this->assertCount(1, $page->CaredManyMany());
         $this->assertEquals($model->ID, $page->CaredManyMany()->first()->ID);
 
-        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testManyManyThrough(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testManyManyThrough(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -280,7 +280,7 @@ class CaresTest extends SapphireTest
         $page->publishRecursive();
         $model->publishRecursive();
 
-        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     protected function assertCacheKeyChanges(
@@ -288,38 +288,40 @@ class CaresTest extends SapphireTest
         DataObject $model,
         string $readingMode,
         string $saveMethod,
-        bool $expectMatch
+        bool $expectKeyChange
     ): void {
-        Versioned::withVersionedMode(function () use ($page, $model, $readingMode, $saveMethod, $expectMatch): void {
-            // We perform our save method and read in the same reading mode
-            Versioned::set_stage($readingMode);
+        Versioned::withVersionedMode(
+            function () use ($page, $model, $readingMode, $saveMethod, $expectKeyChange): void {
+                // We perform our save method and read in the same reading mode
+                Versioned::set_stage($readingMode);
 
-            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
-            $originalKey = CacheKey::findInStage($page);
+                // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+                $originalKey = CacheKey::findInStage($page);
 
-            // Check that we're set up with an initial KeyHash
-            $this->assertNotNull($originalKey);
-            $this->assertNotEmpty($originalKey->KeyHash);
+                // Check that we're set up with an initial KeyHash
+                $this->assertNotNull($originalKey);
+                $this->assertNotEmpty($originalKey->KeyHash);
 
-            // Flush updates so that new changes generate new CacheKey hashes
-            ProcessedUpdatesService::singleton()->flush();
+                // Flush updates so that new changes generate new CacheKey hashes
+                ProcessedUpdatesService::singleton()->flush();
 
-            $model->forceChange();
-            // @see readingModes() - write() or publishRecursive() depending on the test
-            $model->{$saveMethod}();
+                $model->forceChange();
+                // @see readingModes() - write() or publishRecursive() depending on the test
+                $model->{$saveMethod}();
 
-            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
-            $newKey = CacheKey::findInStage($page);
+                // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+                $newKey = CacheKey::findInStage($page);
 
-            $this->assertNotNull($newKey);
-            $this->assertNotEmpty($newKey->KeyHash);
+                $this->assertNotNull($newKey);
+                $this->assertNotEmpty($newKey->KeyHash);
 
-            if ($expectMatch) {
-                $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
-            } else {
-                $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+                if ($expectKeyChange) {
+                    $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+                } else {
+                    $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
+                }
             }
-        });
+        );
     }
 
     public function readingModesWithSaveMethods(): array
@@ -327,16 +329,16 @@ class CaresTest extends SapphireTest
         return [
             // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
             // we are working in the DRAFT stage, we would expect a different value when we fetch that CacheKey again
-            'performing write() in DRAFT stage' => [Versioned::DRAFT, 'write', false],
+            'performing write() in DRAFT stage' => [Versioned::DRAFT, 'write', true],
             // If publishRecursive() is performed on a modal, then we expect the same behaviour as above for the DRAFT
             // stage of our CacheKey
-            'performing publishRecursive() in DRAFT stage' => [Versioned::DRAFT, 'publishRecursive', false],
+            'performing publishRecursive() in DRAFT stage' => [Versioned::DRAFT, 'publishRecursive', true],
             // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
             // we are working in the LIVE stage, we would expect the LIVE value of this CacheKey to be unchanged
-            'performing write() in LIVE stage' => [Versioned::LIVE, 'write', true],
+            'performing write() in LIVE stage' => [Versioned::LIVE, 'write', false],
             // If publishRecursive() is performed on a modal, then we expect that CacheKey to also be published. As we
             // are working in the LIVE stage, we would now expect a new CacheKey value when it if fetched again
-            'performing publishRecursive() in LIVE stage' => [Versioned::LIVE, 'publishRecursive', false],
+            'performing publishRecursive() in LIVE stage' => [Versioned::LIVE, 'publishRecursive', true],
         ];
     }
 

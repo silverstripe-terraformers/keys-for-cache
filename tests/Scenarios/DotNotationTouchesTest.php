@@ -36,7 +36,7 @@ class DotNotationTouchesTest extends SapphireTest
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testTouchesHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testTouchesHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -56,13 +56,13 @@ class DotNotationTouchesTest extends SapphireTest
         $this->assertEquals($page->TouchedHasOneFirstID, $modelOne->ID);
         $this->assertEquals($page->TouchedHasOneSecondID, $modelTwo->ID);
 
-        $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testTouchesPureHasOne(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testTouchesPureHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -82,13 +82,13 @@ class DotNotationTouchesTest extends SapphireTest
         $this->assertEquals($page->TouchedBelongsToFirstID, $modelOne->ID);
         $this->assertEquals($page->TouchedBelongsToSecondID, $modelTwo->ID);
 
-        $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testTouchesHasMany(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testTouchesHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -108,13 +108,13 @@ class DotNotationTouchesTest extends SapphireTest
         $this->assertCount(1, $page->TouchedHasManySecond());
         $this->assertEquals($page->TouchedHasManySecond()->first()->ID, $modelTwo->ID);
 
-        $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectMatch);
+        $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
      * @dataProvider readingModesWithSaveMethods
      */
-    public function testTouchesBelongsTo(string $readingMode, string $saveMethod, bool $expectMatch): void
+    public function testTouchesBelongsTo(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -135,7 +135,7 @@ class DotNotationTouchesTest extends SapphireTest
         $this->assertEquals($page->TouchesBelongsToSecondID, $modelTwo->ID);
 
         Versioned::withVersionedMode(
-            function () use ($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectMatch): void {
+            function () use ($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange): void {
                 Versioned::set_stage($readingMode);
 
                 // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
@@ -157,10 +157,10 @@ class DotNotationTouchesTest extends SapphireTest
                 $this->assertNotNull($newKey);
                 $this->assertNotEmpty($newKey->KeyHash);
 
-                if ($expectMatch) {
-                    $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
-                } else {
+                if ($expectKeyChange) {
                     $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+                } else {
+                    $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
                 }
 
                 // Flush updates again before we trigger the next change
@@ -179,10 +179,10 @@ class DotNotationTouchesTest extends SapphireTest
                 $this->assertNotNull($newKey);
                 $this->assertNotEmpty($newKey->KeyHash);
 
-                if ($expectMatch) {
-                    $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
-                } else {
+                if ($expectKeyChange) {
                     $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+                } else {
+                    $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
                 }
             }
         );
@@ -194,10 +194,10 @@ class DotNotationTouchesTest extends SapphireTest
         DataObject $modelTwo,
         string $readingMode,
         string $saveMethod,
-        bool $expectMatch
+        bool $expectKeyChange
     ): void {
         Versioned::withVersionedMode(
-            function () use ($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectMatch): void {
+            function () use ($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange): void {
                 Versioned::set_stage($readingMode);
 
                 // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
@@ -224,12 +224,12 @@ class DotNotationTouchesTest extends SapphireTest
                 $this->assertNotEmpty($newKeyOne->KeyHash);
                 $this->assertNotEmpty($newKeyTwo->KeyHash);
 
-                if ($expectMatch) {
-                    $this->assertEquals($originalKeyOne->KeyHash, $newKeyOne->KeyHash);
-                    $this->assertEquals($originalKeyTwo->KeyHash, $newKeyTwo->KeyHash);
-                } else {
+                if ($expectKeyChange) {
                     $this->assertNotEquals($originalKeyOne->KeyHash, $newKeyOne->KeyHash);
                     $this->assertNotEquals($originalKeyTwo->KeyHash, $newKeyTwo->KeyHash);
+                } else {
+                    $this->assertEquals($originalKeyOne->KeyHash, $newKeyOne->KeyHash);
+                    $this->assertEquals($originalKeyTwo->KeyHash, $newKeyTwo->KeyHash);
                 }
             }
         );
@@ -240,16 +240,16 @@ class DotNotationTouchesTest extends SapphireTest
         return [
             // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
             // we are working in the DRAFT stage, we would expect a different value when we fetch that CacheKey again
-            'performing write() in DRAFT stage' => [Versioned::DRAFT, 'write', false],
+            'performing write() in DRAFT stage' => [Versioned::DRAFT, 'write', true],
             // If publishRecursive() is performed on a modal, then we expect the same behaviour as above for the DRAFT
             // stage of our CacheKey
-            'performing publishRecursive() in DRAFT stage' => [Versioned::DRAFT, 'publishRecursive', false],
+            'performing publishRecursive() in DRAFT stage' => [Versioned::DRAFT, 'publishRecursive', true],
             // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
             // we are working in the LIVE stage, we would expect the LIVE value of this CacheKey to be unchanged
-            'performing write() in LIVE stage' => [Versioned::LIVE, 'write', true],
+            'performing write() in LIVE stage' => [Versioned::LIVE, 'write', false],
             // If publishRecursive() is performed on a modal, then we expect that CacheKey to also be published. As we
             // are working in the LIVE stage, we would now expect a new CacheKey value when it if fetched again
-            'performing publishRecursive() in LIVE stage' => [Versioned::LIVE, 'publishRecursive', false],
+            'performing publishRecursive() in LIVE stage' => [Versioned::LIVE, 'publishRecursive', true],
         ];
     }
 
