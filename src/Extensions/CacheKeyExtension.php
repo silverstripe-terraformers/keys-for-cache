@@ -17,7 +17,7 @@ use Terraformers\KeysForCache\Services\StageCacheProcessingService;
 use Terraformers\KeysForCache\State\StagingState;
 
 /**
- * @property DataObject|$this $owner
+ * @property DataObject|Versioned|$this $owner
  * @method HasManyList|CacheKey CacheKeys()
  */
 class CacheKeyExtension extends DataExtension
@@ -72,16 +72,18 @@ class CacheKeyExtension extends DataExtension
     public function onAfterWrite(): void
     {
         // We will want to publish changes to the CacheKey onAfterWrite if the instance triggering this event is *not*
-        // Versioned (the changes should be seen immediately even though the object wasn't Published)
-        $publishUpdates = !$this->owner->hasExtension(Versioned::class);
+        // a Staged Versioned DataObject (the changes should be seen immediately even though the object wasn't
+        // Published)
+        $publishUpdates = !$this->ownerHasStages();
         $this->owner->triggerCacheEvent($publishUpdates);
     }
 
     public function onAfterDelete(): void
     {
         // We will want to publish changes to the CacheKey onAfterWrite if the instance triggering this event is *not*
-        // Versioned (the changes should be seen immediately even though the object wasn't Published)
-        $publishUpdates = !$this->owner->hasExtension(Versioned::class);
+        // a Staged Versioned DataObject (the changes should be seen immediately even though the object wasn't
+        // Published)
+        $publishUpdates = !$this->ownerHasStages();
         // Note: doArchive will call deleteFromStage() which will in turn trigger this extension hook
         $this->owner->triggerCacheEvent($publishUpdates);
         CacheKey::remove($this->owner);
@@ -193,5 +195,20 @@ class CacheKeyExtension extends DataExtension
         }
 
         return $cacheKey->KeyHash;
+    }
+
+    private function ownerHasStages(): bool
+    {
+        // This DataObject does not have the Versioned extension, so it definitely doesn't have stages (IE: Draft and
+        // Live versions)
+        if (!$this->owner->hasExtension(Versioned::class)) {
+            return false;
+        }
+
+        // The Versioned extensions has two modes. The one that we're (probably) all familiar with, where we have a
+        // Draft and Live version, but there is also a mode that does not have stages, and instead only has _Versions.
+        // If this DataObject does not have stages, then we're going to want to treat this the same as a non-Versioned
+        // DataObject
+        return $this->owner->hasStages();
     }
 }
