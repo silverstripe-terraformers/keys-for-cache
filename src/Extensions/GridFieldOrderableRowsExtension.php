@@ -14,25 +14,27 @@ use SilverStripe\ORM\SS_List;
 use SilverStripe\Versioned\Versioned;
 
 /**
- * You do not need this Extension for Versioned DataObject. They are supported out of the box because
- * GridFieldOrderableRows already performs a write() through the ORM when sorting Versioned DataObjects.
+ * You do not need this Extension if you are using `symbiote/silverstripe-gridfieldextensions` version `3.5.0` or newer.
+ * Full support for Versioned and non-Versioned DataObjects is out of the box.
+ *
+ * You also do not need this Extension for Versioned DataObject. They are supported out of the box because
+ * GridFieldOrderableRows already performs write() through the ORM when sorting Versioned DataObjects.
  *
  * WARNING: We absolutely plan to remove this extension once GridFieldOrderableRows supports sorting on non-Versioned
- * DataObjects. If you need it, probably best to copy/paste it to your project, and we empower you to own it from that
+ * DataObjects. If you need it, probably best to copy/paste this to your project, and we empower you to own it from that
  * point forward.
  *
  * This Extension is *not* automatically applied because I think you should seriously consider Versioning your
  * DataObject. If you are adding this DataObject to (something like) an Element, which *is* Versioned, then (imo) it is
- * best that all of the related DataObjects (like its "Items") are also Versioned. This gives a consistent author
+ * best that all the related DataObjects (like its "Items") are also Versioned. This gives a consistent author
  * experience - where they can have draft/live versions of things. You can then also rely on the existing support from
  * GridFieldOrderableRows.
  *
- * There is an open ticket on the GridFieldExtensions module to try and get GridFieldOrderableRows to use the ORM for
- * both Versioned and non-Versioned DataObjects:
+ * There is a closed ticket on the GridFieldExtensions module that explains the issue (now fixed in v3.5.0):
  * https://github.com/symbiote/silverstripe-gridfieldextensions/issues/335
  *
- * In the meantime though, this Extension provides you a way to support the clearing of CacheKeys on non-Versioned
- * DataObjects when you are using the GridFieldOrderableRows component.
+ * For folks on a version lower than 3.5.0, this Extension provides you a way to support the clearing of CacheKeys on
+ * non-Versioned DataObjects when you are using the GridFieldOrderableRows component.
  *
  * This Extension also doesn't have any test coverage (because of everything we mentioned above). It has only gone
  * through manual testing. Use at your own risk and be prepared to submit tickets if you find any issues or use cases

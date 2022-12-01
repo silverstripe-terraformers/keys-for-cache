@@ -157,32 +157,45 @@ class CaresTest extends SapphireTest
         });
     }
 
-    public function testCaresHasOneVersionedNonStaged(): void
+    /**
+     * @dataProvider readingModes
+     */
+    public function testCaresHasOneVersionedNonStaged(string $readingMode): void
     {
-        // Updates are processed as part of scaffold, so we need to flush before we kick off
-        ProcessedUpdatesService::singleton()->flush();
-
         $page = $this->objFromFixture(CaresPage::class, 'page1');
         $model = $this->objFromFixture(CaredHasOneVersionedNonStaged::class, 'model1');
+
+        // Make sure our page is published (the model is not Versioned)
+        $page->publishRecursive();
 
         // Check that we're set up correctly
         $this->assertEquals(CaredHasOneVersionedNonStaged::class, $model->ClassName);
         $this->assertEquals($page->CaredHasOneVersionedNonStagedID, $model->ID);
 
-        $originalKey = $page->getCacheKey();
+        Versioned::withVersionedMode(function () use ($page, $model, $readingMode): void {
+            // We perform our save method and read in the same reading mode
+            Versioned::set_stage($readingMode);
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $originalKey = CacheKey::findInStage($page);
 
-        // Begin changes
-        $model->forceChange();
-        $model->write();
+            $this->assertNotNull($originalKey);
+            $this->assertNotEmpty($originalKey);
 
-        $newKey = $page->getCacheKey();
+            // Flush updates so that new changes generate new CacheKey hashes
+            ProcessedUpdatesService::singleton()->flush();
 
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+            // Begin changes
+            $model->forceChange();
+            $model->write();
+
+            // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+            $newKey = CacheKey::findInStage($page);
+
+            $this->assertNotNull($newKey);
+            $this->assertNotEmpty($newKey);
+            $this->assertNotEquals($originalKey, $newKey);
+        });
     }
 
     /**
@@ -327,6 +340,14 @@ class CaresTest extends SapphireTest
         );
     }
 
+    public function readingModes(): array
+    {
+        return [
+            [Versioned::DRAFT],
+            [Versioned::LIVE],
+        ];
+    }
+
     public function readingModesWithSaveMethods(): array
     {
         return [
@@ -342,14 +363,6 @@ class CaresTest extends SapphireTest
             // If publishRecursive() is performed on a model, then we expect that CacheKey to also be published. As we
             // are working in the LIVE stage, we would now expect a new CacheKey value when it if fetched again
             'performing publishRecursive() in LIVE stage' => [Versioned::LIVE, 'publishRecursive', true],
-        ];
-    }
-
-    public function readingModes(): array
-    {
-        return [
-            [Versioned::DRAFT],
-            [Versioned::LIVE],
         ];
     }
 
