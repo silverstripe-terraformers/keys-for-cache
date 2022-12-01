@@ -96,6 +96,9 @@ class DotNotationCaresTest extends SapphireTest
 
                 // Begin changes
                 $page->forceChange();
+                // @see readingModesWithSaveMethods() - write() or publishRecursive() depending on the test
+                // We are performing this test across both reading modes, but we expect CacheKeys to respect the action,
+                // rather than the reading mode (that being, write() creates DRAFT, and publish() creates LIVE)
                 $page->{$saveMethod}();
 
                 // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
@@ -107,6 +110,7 @@ class DotNotationCaresTest extends SapphireTest
                 $this->assertNotEmpty($newKeyOne->KeyHash);
                 $this->assertNotEmpty($newKeyTwo->KeyHash);
 
+                // @see readingModesWithSaveMethods() for when (and why) we expect changes to our KeyHash
                 if ($expectKeyChange) {
                     $this->assertNotEquals($originalKeyOne->KeyHash, $newKeyOne->KeyHash);
                     $this->assertNotEquals($originalKeyTwo->KeyHash, $newKeyTwo->KeyHash);
@@ -192,6 +196,9 @@ class DotNotationCaresTest extends SapphireTest
                 ProcessedUpdatesService::singleton()->flush();
 
                 $modelOne->forceChange();
+                // @see readingModesWithSaveMethods() - write() or publishRecursive() depending on the test
+                // We are performing this test across both reading modes, but we expect CacheKeys to respect the action,
+                // rather than the reading mode (that being, write() creates DRAFT, and publish() creates LIVE)
                 $modelOne->{$saveMethod}();
 
                 // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
@@ -200,6 +207,7 @@ class DotNotationCaresTest extends SapphireTest
                 $this->assertNotNull($newKey);
                 $this->assertNotEmpty($originalKey->KeyHash);
 
+                // @see readingModesWithSaveMethods() for when (and why) we expect changes to our KeyHash
                 if ($expectKeyChange) {
                     $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
                 } else {
@@ -213,6 +221,9 @@ class DotNotationCaresTest extends SapphireTest
                 $originalKey = $newKey;
 
                 $modelTwo->forceChange();
+                // @see readingModesWithSaveMethods() - write() or publishRecursive() depending on the test
+                // We are performing this test across both reading modes, but we expect CacheKeys to respect the action,
+                // rather than the reading mode (that being, write() creates DRAFT, and publish() creates LIVE)
                 $modelTwo->{$saveMethod}();
 
                 // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
@@ -221,6 +232,7 @@ class DotNotationCaresTest extends SapphireTest
                 $this->assertNotNull($newKey);
                 $this->assertNotEmpty($originalKey->KeyHash);
 
+                // @see readingModesWithSaveMethods() for when (and why) we expect changes to our KeyHash
                 if ($expectKeyChange) {
                     $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
                 } else {

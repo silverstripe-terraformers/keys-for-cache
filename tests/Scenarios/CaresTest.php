@@ -306,7 +306,9 @@ class CaresTest extends SapphireTest
                 ProcessedUpdatesService::singleton()->flush();
 
                 $model->forceChange();
-                // @see readingModes() - write() or publishRecursive() depending on the test
+                // @see readingModesWithSaveMethods() - write() or publishRecursive() depending on the test
+                // We are performing this test across both reading modes, but we expect CacheKeys to respect the action,
+                // rather than the reading mode (that being, write() creates DRAFT, and publish() creates LIVE)
                 $model->{$saveMethod}();
 
                 // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
@@ -315,6 +317,7 @@ class CaresTest extends SapphireTest
                 $this->assertNotNull($newKey);
                 $this->assertNotEmpty($newKey->KeyHash);
 
+                // @see readingModesWithSaveMethods() for when (and why) we expect changes to our KeyHash
                 if ($expectKeyChange) {
                     $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
                 } else {
