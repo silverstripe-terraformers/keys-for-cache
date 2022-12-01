@@ -35,6 +35,111 @@ class CacheKeyTest extends SapphireTest
         $this->assertCount(0, $keys);
     }
 
+    public function testFindByStageReturnsNull(): void
+    {
+        // First test that a Page with $has_cache_key = false returns null
+        $page = $this->objFromFixture(NoCachePage::class, 'page1');
+        // Page config is $has_cache_key = false, so when we call findInStage() it should return null
+        $key = CacheKey::findInStage($page);
+
+        $this->assertNull($key);
+
+        // Now test that a Page missing its CacheKey returns null
+        $page = $this->objFromFixture(CachePage::class, 'page1');
+        // Remove the CacheKey for this Page
+        CacheKey::remove($page);
+        // Try to find the missing CacheKey (should return null)
+        $key = CacheKey::findInStage($page);
+
+        $this->assertNull($key);
+    }
+
+    public function testFindByStageDraftOnly(): void
+    {
+        // This page is not published by our Fixture, so our CacheKey should already be "draft only"
+        $page = $this->objFromFixture(CachePage::class, 'page1');
+
+        // Our testing state is DRAFT, but wrapping in set_stage() so that it's 100% clear
+        /** @var CacheKey $draftCacheKey */
+        $draftCacheKey = Versioned::withVersionedMode(static function () use ($page): ?string {
+            // Specifically fetching with DRAFT reading mode
+            Versioned::set_stage(Versioned::DRAFT);
+
+            $cacheKey = CacheKey::findInStage($page);
+
+            if (!$cacheKey) {
+                return null;
+            }
+
+            return $cacheKey->KeyHash;
+        });
+
+        $this->assertNotNull($draftCacheKey);
+        $this->assertNotEmpty($draftCacheKey);
+
+        // Now testing in LIVE, where we expect this CacheKey to not be available
+        /** @var CacheKey $liveCacheKey */
+        $liveCacheKey = Versioned::withVersionedMode(static function () use ($page): ?string {
+            // Specifically fetching with DRAFT reading mode
+            Versioned::set_stage(Versioned::LIVE);
+
+            $cacheKey = CacheKey::findInStage($page);
+
+            if (!$cacheKey) {
+                return null;
+            }
+
+            return $cacheKey->KeyHash;
+        });
+
+        $this->assertNull($liveCacheKey);
+    }
+
+    public function testFindByStageLive(): void
+    {
+        $page = $this->objFromFixture(CachePage::class, 'page1');
+        // Publish Page, which should in turn publish the CacheKey
+        $page->publishRecursive();
+
+        // Our testing state is DRAFT, but wrapping in set_stage() so that it's 100% clear
+        /** @var CacheKey $draftCacheKey */
+        $draftCacheKey = Versioned::withVersionedMode(static function () use ($page): ?string {
+            // Specifically fetching with DRAFT reading mode
+            Versioned::set_stage(Versioned::DRAFT);
+
+            $cacheKey = CacheKey::findInStage($page);
+
+            if (!$cacheKey) {
+                return null;
+            }
+
+            return $cacheKey->KeyHash;
+        });
+
+        $this->assertNotNull($draftCacheKey);
+        $this->assertNotEmpty($draftCacheKey);
+
+        // Now testing in LIVE, where we expect this CacheKey to not be available
+        /** @var CacheKey $liveCacheKey */
+        $liveCacheKey = Versioned::withVersionedMode(static function () use ($page): ?string {
+            // Specifically fetching with DRAFT reading mode
+            Versioned::set_stage(Versioned::LIVE);
+
+            $cacheKey = CacheKey::findInStage($page);
+
+            if (!$cacheKey) {
+                return null;
+            }
+
+            return $cacheKey->KeyHash;
+        });
+
+        $this->assertNotNull($liveCacheKey);
+        $this->assertNotEmpty($liveCacheKey);
+        // Both Draft and Live should also match
+        $this->assertSame($draftCacheKey, $liveCacheKey);
+    }
+
     public function testFindOrCreateReturnsNull(): void
     {
         $page = $this->objFromFixture(NoCachePage::class, 'page1');

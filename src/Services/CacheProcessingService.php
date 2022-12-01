@@ -114,8 +114,14 @@ abstract class CacheProcessingService
             return $this->createEdges($instance);
         }
 
-        // Make sure that our CacheKey record is saved
-        $cacheKey->write();
+        // We need to make sure that we are specifically writing this with reading mode set to DRAFT. If we write()
+        // while a user is browsing in a LIVE reading mode, then this CacheKey will be "live" immediately
+        // @see https://github.com/silverstripe/silverstripe-versioned/issues/382
+        Versioned::withVersionedMode(static function () use ($cacheKey): void {
+            Versioned::set_stage(Versioned::DRAFT);
+
+            $cacheKey->write();
+        });
 
         // Check to see if we need to publish this CacheKey
         if ($this->shouldPublishUpdates()) {

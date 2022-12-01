@@ -23,10 +23,12 @@ use Terraformers\KeysForCache\Tests\Mocks\Relations\CaresPageCaredThrough;
  * @property int $CaredBelongsToID
  * @property int $CaredHasOneID
  * @property int $CaredHasOneNonVersionedID
+ * @property int $CaredHasOneVersionedNonStagedID
  * @property int $PolymorphicHasOneID
  * @method CaredBelongsTo CaredBelongsTo()
  * @method CaredHasOne CaredHasOne()
  * @method CaredHasOneNonVersioned CaredHasOneNonVersioned()
+ * @method CaredHasOneVersionedNonStaged CaredHasOneVersionedNonStaged()
  * @method DataObject PolymorphicHasOne()
  * @method HasManyList|CaredHasMany[] CaredHasMany()
  * @method HasManyList|CaresPageCaredThrough[] CaresPageCaredThrough()

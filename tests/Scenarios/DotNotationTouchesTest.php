@@ -4,6 +4,9 @@ namespace Terraformers\KeysForCache\Tests\Scenarios;
 
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Versioned\Versioned;
+use Terraformers\KeysForCache\Models\CacheKey;
 use Terraformers\KeysForCache\RelationshipGraph\Graph;
 use Terraformers\KeysForCache\Services\ProcessedUpdatesService;
 use Terraformers\KeysForCache\Tests\Mocks\Models\DotNotationTouchedBelongsTo;
@@ -30,7 +33,10 @@ class DotNotationTouchesTest extends SapphireTest
         DotNotationTouchesBelongsTo::class,
     ];
 
-    public function testTouchesHasOne(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testTouchesHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -39,36 +45,24 @@ class DotNotationTouchesTest extends SapphireTest
         $modelOne = $this->objFromFixture(DotNotationTouchedHasOne::class, 'model1');
         $modelTwo = $this->objFromFixture(DotNotationTouchedHasOne::class, 'model2');
 
+        // Make sure we publish our records
+        $page->publishRecursive();
+        $modelOne->publishRecursive();
+        $modelTwo->publishRecursive();
+
         // Check that we're set up correctly
         $this->assertEquals(DotNotationTouchedHasOne::class, $modelOne->ClassName);
         $this->assertEquals(DotNotationTouchedHasOne::class, $modelTwo->ClassName);
         $this->assertEquals($page->TouchedHasOneFirstID, $modelOne->ID);
         $this->assertEquals($page->TouchedHasOneSecondID, $modelTwo->ID);
 
-        $originalKeyOne = $modelOne->getCacheKey();
-        $originalKeyTwo = $modelTwo->getCacheKey();
-
-        $this->assertNotNull($originalKeyOne);
-        $this->assertNotNull($originalKeyTwo);
-        $this->assertNotEmpty($originalKeyOne);
-        $this->assertNotEmpty($originalKeyTwo);
-
-        // Begin changes
-        $page->forceChange();
-        $page->write();
-
-        $newKeyOne = $modelOne->getCacheKey();
-        $newKeyTwo = $modelTwo->getCacheKey();
-
-        $this->assertNotNull($newKeyOne);
-        $this->assertNotNull($newKeyTwo);
-        $this->assertNotEmpty($newKeyOne);
-        $this->assertNotEmpty($newKeyTwo);
-        $this->assertNotEquals($originalKeyOne, $newKeyOne);
-        $this->assertNotEquals($originalKeyTwo, $newKeyTwo);
+        $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    public function testTouchesPureHasOne(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testTouchesPureHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -77,39 +71,24 @@ class DotNotationTouchesTest extends SapphireTest
         $modelOne = $this->objFromFixture(DotNotationTouchedBelongsTo::class, 'model1');
         $modelTwo = $this->objFromFixture(DotNotationTouchedBelongsTo::class, 'model2');
 
+        // Make sure we publish our records
+        $page->publishRecursive();
+        $modelOne->publishRecursive();
+        $modelTwo->publishRecursive();
+
         // Check that we're set up correctly
         $this->assertEquals(DotNotationTouchedBelongsTo::class, $modelOne->ClassName);
         $this->assertEquals(DotNotationTouchedBelongsTo::class, $modelTwo->ClassName);
         $this->assertEquals($page->TouchedBelongsToFirstID, $modelOne->ID);
         $this->assertEquals($page->TouchedBelongsToSecondID, $modelTwo->ID);
 
-        $originalKeyOne = $modelOne->getCacheKey();
-        $originalKeyTwo = $modelTwo->getCacheKey();
-
-        $this->assertNotNull($originalKeyOne);
-        $this->assertNotNull($originalKeyTwo);
-        $this->assertNotEmpty($originalKeyOne);
-        $this->assertNotEmpty($originalKeyTwo);
-
-        // Begin changes
-        $page->forceChange();
-        $page->write();
-
-        $newKeyOne = $modelOne->getCacheKey();
-        $newKeyTwo = $modelTwo->getCacheKey();
-
-        $this->assertNotNull($newKeyOne);
-        $this->assertNotNull($newKeyTwo);
-        $this->assertNotEmpty($newKeyOne);
-        $this->assertNotEmpty($newKeyTwo);
-        $this->assertNotEquals($originalKeyOne, $newKeyOne);
-        $this->assertNotEquals($originalKeyTwo, $newKeyTwo);
+        $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
     /**
-     * This test is currently failing, and is a scenario we expect to support
+     * @dataProvider readingModesWithSaveMethods
      */
-    public function testTouchesHasMany(): void
+    public function testTouchesHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -118,35 +97,24 @@ class DotNotationTouchesTest extends SapphireTest
         $modelOne = $this->objFromFixture(DotNotationTouchedHasMany::class, 'model1');
         $modelTwo = $this->objFromFixture(DotNotationTouchedHasMany::class, 'model2');
 
+        // Make sure we publish our records
+        $page->publishRecursive();
+        $modelOne->publishRecursive();
+        $modelTwo->publishRecursive();
+
         // Check that we're set up correctly
         $this->assertCount(1, $page->TouchedHasManyFirst());
         $this->assertEquals($page->TouchedHasManyFirst()->first()->ID, $modelOne->ID);
         $this->assertCount(1, $page->TouchedHasManySecond());
         $this->assertEquals($page->TouchedHasManySecond()->first()->ID, $modelTwo->ID);
 
-        $originalKeyOne = $modelOne->getCacheKey();
-        $originalKeyTwo = $modelTwo->getCacheKey();
-
-        $this->assertNotNull($originalKeyOne);
-        $this->assertNotNull($originalKeyTwo);
-        $this->assertNotEmpty($originalKeyOne);
-        $this->assertNotEmpty($originalKeyTwo);
-
-        $page->forceChange();
-        $page->write();
-
-        $newKeyOne = $modelOne->getCacheKey();
-        $newKeyTwo = $modelTwo->getCacheKey();
-
-        $this->assertNotNull($newKeyOne);
-        $this->assertNotNull($newKeyTwo);
-        $this->assertNotEmpty($newKeyOne);
-        $this->assertNotEmpty($newKeyTwo);
-        $this->assertNotEquals($originalKeyOne, $newKeyOne);
-        $this->assertNotEquals($originalKeyTwo, $newKeyTwo);
+        $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    public function testTouchesBelongsTo(): void
+    /**
+     * @dataProvider readingModesWithSaveMethods
+     */
+    public function testTouchesBelongsTo(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
         ProcessedUpdatesService::singleton()->flush();
@@ -155,42 +123,146 @@ class DotNotationTouchesTest extends SapphireTest
         $modelOne = $this->objFromFixture(DotNotationTouchesBelongsTo::class, 'model1');
         $modelTwo = $this->objFromFixture(DotNotationTouchesBelongsTo::class, 'model2');
 
+        // Make sure we publish our records
+        $page->publishRecursive();
+        $modelOne->publishRecursive();
+        $modelTwo->publishRecursive();
+
         // Check that we're set up correctly
         $this->assertEquals(DotNotationTouchesBelongsTo::class, $modelOne->ClassName);
         $this->assertEquals(DotNotationTouchesBelongsTo::class, $modelTwo->ClassName);
         $this->assertEquals($page->TouchesBelongsToFirstID, $modelOne->ID);
         $this->assertEquals($page->TouchesBelongsToSecondID, $modelTwo->ID);
 
-        $originalKey = $page->getCacheKey();
+        Versioned::withVersionedMode(
+            function () use ($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange): void {
+                Versioned::set_stage($readingMode);
 
-        $this->assertNotNull($originalKey);
-        $this->assertNotEmpty($originalKey);
+                // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+                $originalKey = CacheKey::findInStage($page);
 
-        // Begin changes
-        $modelOne->forceChange();
-        $modelOne->write();
+                $this->assertNotNull($originalKey);
+                $this->assertNotEmpty($originalKey->KeyHash);
 
-        $newKey = $page->getCacheKey();
+                // Flush updates again before we trigger the next change
+                ProcessedUpdatesService::singleton()->flush();
 
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+                // Begin changes
+                $modelOne->forceChange();
+                // @see readingModesWithSaveMethods() - write() or publishRecursive() depending on the test
+                // We are performing this test across both reading modes, but we expect CacheKeys to respect the action,
+                // rather than the reading mode (that being, write() creates DRAFT, and publish() creates LIVE)
+                $modelOne->{$saveMethod}();
 
-        // Flush updates again before we trigger the next change
-        ProcessedUpdatesService::singleton()->flush();
+                // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+                $newKey = CacheKey::findInStage($page);
 
-        // Begin changes
-        $modelTwo->forceChange();
-        $modelTwo->write();
+                $this->assertNotNull($newKey);
+                $this->assertNotEmpty($newKey->KeyHash);
 
-        // Save our key again before we regenerate it
-        $originalKey = $newKey;
+                // @see readingModesWithSaveMethods() for when (and why) we expect changes to our KeyHash
+                if ($expectKeyChange) {
+                    $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+                } else {
+                    $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
+                }
 
-        $newKey = $page->getCacheKey();
+                // Flush updates again before we trigger the next change
+                ProcessedUpdatesService::singleton()->flush();
 
-        $this->assertNotNull($newKey);
-        $this->assertNotEmpty($newKey);
-        $this->assertNotEquals($originalKey, $newKey);
+                // Begin changes
+                $modelTwo->forceChange();
+                // @see readingModesWithSaveMethods() - write() or publishRecursive() depending on the test
+                // We are performing this test across both reading modes, but we expect CacheKeys to respect the action,
+                // rather than the reading mode (that being, write() creates DRAFT, and publish() creates LIVE)
+                $modelTwo->{$saveMethod}();
+
+                // Save our key again before we regenerate it
+                $originalKey = $newKey;
+
+                // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+                $newKey = CacheKey::findInStage($page);
+
+                $this->assertNotNull($newKey);
+                $this->assertNotEmpty($newKey->KeyHash);
+
+                // @see readingModesWithSaveMethods() for when (and why) we expect changes to our KeyHash
+                if ($expectKeyChange) {
+                    $this->assertNotEquals($originalKey->KeyHash, $newKey->KeyHash);
+                } else {
+                    $this->assertEquals($originalKey->KeyHash, $newKey->KeyHash);
+                }
+            }
+        );
+    }
+
+    protected function assertCacheKeyChanges(
+        DotNotationTouchesPage $page,
+        DataObject $modelOne,
+        DataObject $modelTwo,
+        string $readingMode,
+        string $saveMethod,
+        bool $expectKeyChange
+    ): void {
+        Versioned::withVersionedMode(
+            function () use ($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange): void {
+                Versioned::set_stage($readingMode);
+
+                // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+                $originalKeyOne = CacheKey::findInStage($modelOne);
+                $originalKeyTwo = CacheKey::findInStage($modelTwo);
+
+                $this->assertNotNull($originalKeyOne);
+                $this->assertNotNull($originalKeyTwo);
+                $this->assertNotEmpty($originalKeyOne->KeyHash);
+                $this->assertNotEmpty($originalKeyTwo->KeyHash);
+
+                // Flush updates again before we trigger another update
+                ProcessedUpdatesService::singleton()->flush();
+
+                $page->forceChange();
+                // @see readingModesWithSaveMethods() - write() or publishRecursive() depending on the test
+                // We are performing this test across both reading modes, but we expect CacheKeys to respect the action,
+                // rather than the reading mode (that being, write() creates DRAFT, and publish() creates LIVE)
+                $page->{$saveMethod}();
+
+                // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+                $newKeyOne = CacheKey::findInStage($modelOne);
+                $newKeyTwo = CacheKey::findInStage($modelTwo);
+
+                $this->assertNotNull($newKeyOne);
+                $this->assertNotNull($newKeyTwo);
+                $this->assertNotEmpty($newKeyOne->KeyHash);
+                $this->assertNotEmpty($newKeyTwo->KeyHash);
+
+                // @see readingModesWithSaveMethods() for when (and why) we expect changes to our KeyHash
+                if ($expectKeyChange) {
+                    $this->assertNotEquals($originalKeyOne->KeyHash, $newKeyOne->KeyHash);
+                    $this->assertNotEquals($originalKeyTwo->KeyHash, $newKeyTwo->KeyHash);
+                } else {
+                    $this->assertEquals($originalKeyOne->KeyHash, $newKeyOne->KeyHash);
+                    $this->assertEquals($originalKeyTwo->KeyHash, $newKeyTwo->KeyHash);
+                }
+            }
+        );
+    }
+
+    public function readingModesWithSaveMethods(): array
+    {
+        return [
+            // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
+            // we are working in the DRAFT stage, we would expect a different value when we fetch that CacheKey again
+            'performing write() in DRAFT stage' => [Versioned::DRAFT, 'write', true],
+            // If publishRecursive() is performed on a model, then we expect the same behaviour as above for the DRAFT
+            // stage of our CacheKey
+            'performing publishRecursive() in DRAFT stage' => [Versioned::DRAFT, 'publishRecursive', true],
+            // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
+            // we are working in the LIVE stage, we would expect the LIVE value of this CacheKey to be unchanged
+            'performing write() in LIVE stage' => [Versioned::LIVE, 'write', false],
+            // If publishRecursive() is performed on a model, then we expect that CacheKey to also be published. As we
+            // are working in the LIVE stage, we would now expect a new CacheKey value when it if fetched again
+            'performing publishRecursive() in LIVE stage' => [Versioned::LIVE, 'publishRecursive', true],
+        ];
     }
 
     protected function tearDown(): void
