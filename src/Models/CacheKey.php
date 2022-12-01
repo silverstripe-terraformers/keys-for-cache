@@ -53,10 +53,8 @@ class CacheKey extends DataObject
 
     public static function findInStage(DataObject $dataObject): ?CacheKey
     {
-        // You have requested that this DataObject class does not use cache keys
-        $hasCacheKey = $dataObject->config()->get('has_cache_key');
-
-        if (!$hasCacheKey) {
+        // The configuration for this DataObject has specified that it does not use CacheKeys
+        if (!$dataObject->config()->get('has_cache_key')) {
             return null;
         }
 
@@ -74,10 +72,8 @@ class CacheKey extends DataObject
      */
     public static function findOrCreate(DataObject $dataObject): ?CacheKey
     {
-        // You have requested that this DataObject class does not use cache keys
-        $hasCacheKey = $dataObject->config()->get('has_cache_key');
-
-        if (!$hasCacheKey) {
+        // The configuration for this DataObject has specified that it does not use CacheKeys
+        if (!$dataObject->config()->get('has_cache_key')) {
             return null;
         }
 

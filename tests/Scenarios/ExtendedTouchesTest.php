@@ -265,13 +265,13 @@ class ExtendedTouchesTest extends SapphireTest
             // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
             // we are working in the DRAFT stage, we would expect a different value when we fetch that CacheKey again
             'performing write() in DRAFT stage' => [Versioned::DRAFT, 'write', true],
-            // If publishRecursive() is performed on a modal, then we expect the same behaviour as above for the DRAFT
+            // If publishRecursive() is performed on a model, then we expect the same behaviour as above for the DRAFT
             // stage of our CacheKey
             'performing publishRecursive() in DRAFT stage' => [Versioned::DRAFT, 'publishRecursive', true],
             // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
             // we are working in the LIVE stage, we would expect the LIVE value of this CacheKey to be unchanged
             'performing write() in LIVE stage' => [Versioned::LIVE, 'write', false],
-            // If publishRecursive() is performed on a modal, then we expect that CacheKey to also be published. As we
+            // If publishRecursive() is performed on a model, then we expect that CacheKey to also be published. As we
             // are working in the LIVE stage, we would now expect a new CacheKey value when it if fetched again
             'performing publishRecursive() in LIVE stage' => [Versioned::LIVE, 'publishRecursive', true],
         ];

@@ -40,6 +40,7 @@ class CacheKeyExtension extends DataExtension
             return;
         }
 
+        // The configuration for this DataObject has specified that it does not use CacheKeys
         if (!$this->owner->config()->get('has_cache_key')) {
             return;
         }
@@ -127,10 +128,8 @@ class CacheKeyExtension extends DataExtension
             return null;
         }
 
-        // You have requested that this DataObject class does not use cache keys
-        $hasCacheKey = $this->owner->config()->get('has_cache_key');
-
-        if (!$hasCacheKey) {
+        // The configuration for this DataObject has specified that it does not use CacheKeys
+        if (!$this->owner->config()->get('has_cache_key')) {
             return null;
         }
 
