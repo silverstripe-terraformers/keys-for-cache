@@ -28,9 +28,10 @@ The overall aim of this module is twofold:
     * [Usage and Examples](docs/en/examples.md)
 * [Performance impact/considerations](#performance-impactconsiderations)
     * [Queued jobs](#queued-jobs)
-* [Fluent support](#fluent-support)
-* [GridField Orderable support](#gridfield-orderable-support)
-* [License](#license)
+* [Case Studies](docs/en/case-studies.md)
+* [Fluent support](docs/en/fluent.md)
+* [GridField Orderable support](docs/en/gridfield-orderable.md)
+* [License](license.md)
 * [Maintainers](#maintainers)
 * [Development and contribution](#development-and-contribution)
 
@@ -279,6 +280,10 @@ performance tests, but so far it has not created an unreasonable amount of addit
 If you want to prevent content authors from getting slightly slower responses when editing in the CMS, you can queue a
 job to generate the cache updates by injecting over `CacheKeyExtension` and updating `triggerEvent` to create a job then
 call `CacheRelationService::singleton()->processChange($this->DataObject)` in the job.
+
+## Case studies
+
+See: [Case studies](docs/en/case-studies.md)
 
 ## Fluent support
 
