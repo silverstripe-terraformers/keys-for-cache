@@ -30,7 +30,6 @@ The overall aim of this module is twofold:
     * [Queued jobs](#queued-jobs)
 * [Case Studies](docs/en/case-studies.md)
 * [Fluent support](docs/en/fluent.md)
-* [GridField Orderable support](docs/en/gridfield-orderable.md)
 * [License](license.md)
 * [Maintainers](#maintainers)
 * [Development and contribution](#development-and-contribution)
@@ -289,9 +288,6 @@ See: [Case studies](docs/en/case-studies.md)
 
 See: [Fluent support](docs/en/fluent.md)
 
-## GridField Orderable support
-
-See: [GridField Orderable support](docs/en/gridfield-orderable.md)
 
 ## License
 
