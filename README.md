@@ -40,6 +40,13 @@ The overall aim of this module is twofold:
 composer require silverstripe-terraformers/keys-for-cache
 ```
 
+## Requirements
+
+* PHP `^8.1`
+* Silverstripe Framework `^5`
+
+Support for Silverstripe 4 is provided though our `^1` tagged releases.
+
 ## Why cache keys are difficult
 
 The goal of any cache key is to have as low a cost as possible to calculate (as this must happen with every request),

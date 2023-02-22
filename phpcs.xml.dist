@@ -5,6 +5,11 @@
 	<file>src</file>
 	<file>tests</file>
 
+    <!-- Show progress and output sniff names on violation, and add colours -->
+    <arg value="p" />
+    <arg name="colors" />
+    <arg value="s" />
+
     <rule ref="PSR2">
         <!-- Allow non camel cased method names - some base SS method names are PascalCase or snake_case -->
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"/>
@@ -75,6 +80,26 @@
         <exclude name="SlevomatCodingStandard.ControlStructures.DisallowShortTernaryOperator.DisallowedShortTernaryOperator"/>
         <!-- You are not making me go \PHP_EOL -->
         <exclude name="SlevomatCodingStandard.Namespaces.FullyQualifiedGlobalConstants.NonFullyQualified"/>
+        <!-- We can't declare classes as abstract/final because that would remove the ability for devs to extend our -->
+        <!-- classes as they see fit -->
+        <exclude name="SlevomatCodingStandard.Classes.RequireAbstractOrFinal.ClassNeitherAbstractNorFinal"/>
+        <!-- We do not require trailing commas on multiline methods. Both rules disabled, as we'll allow folks to -->
+        <!-- add them if they want them, but we don't enforce either way -->
+        <exclude name="SlevomatCodingStandard.Functions.RequireTrailingCommaInCall.MissingTrailingComma"/>
+        <exclude name="SlevomatCodingStandard.Functions.DisallowTrailingCommaInCall.DisallowedTrailingComma"/>
+        <exclude name="SlevomatCodingStandard.Functions.RequireTrailingCommaInDeclaration.MissingTrailingComma"/>
+        <exclude name="SlevomatCodingStandard.Functions.DisallowTrailingCommaInDeclaration.DisallowedTrailingComma"/>
+        <exclude name="SlevomatCodingStandard.Functions.RequireTrailingCommaInClosureUse.MissingTrailingComma"/>
+        <exclude name="SlevomatCodingStandard.Functions.DisallowTrailingCommaInClosureUse.DisallowedTrailingComma"/>
+        <!-- Length does not determine complexity. We do not care if methods or files are long -->
+        <exclude name="SlevomatCodingStandard.Functions.FunctionLength.FunctionLength"/>
+        <exclude name="SlevomatCodingStandard.Files.FunctionLength.FunctionLength"/>
+        <exclude name="SlevomatCodingStandard.Files.FileLength.FileTooLong"/>
+        <exclude name="SlevomatCodingStandard.Classes.ClassLength.ClassTooLong"/>
+        <!-- We'll decide what is complex -->
+        <exclude name="SlevomatCodingStandard.Complexity.Cognitive.ComplexityTooHigh"/>
+        <!-- We require property promotion -->
+        <exclude name="SlevomatCodingStandard.Classes.DisallowConstructorPropertyPromotion.DisallowedConstructorPropertyPromotion"/>
     </rule>
 
     <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">
