@@ -4,17 +4,12 @@ namespace Terraformers\KeysForCache\RelationshipGraph;
 
 class Edge
 {
-    private Node $from;
-    private Node $to;
-    private string $relation;
-    private string $relationType;
-
-    public function __construct(Node $from, Node $to, string $relation, string $relationType)
-    {
-        $this->from = $from;
-        $this->to = $to;
-        $this->relation = $relation;
-        $this->relationType = $relationType;
+    public function __construct(
+        private readonly Node $from,
+        private readonly Node $to,
+        private readonly string $relation,
+        private readonly string $relationType
+    ) {
     }
 
     public function getFromClassName(): string

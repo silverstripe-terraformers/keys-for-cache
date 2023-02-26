@@ -30,7 +30,6 @@ The overall aim of this module is twofold:
     * [Queued jobs](#queued-jobs)
 * [Case Studies](docs/en/case-studies.md)
 * [Fluent support](docs/en/fluent.md)
-* [GridField Orderable support](docs/en/gridfield-orderable.md)
 * [License](license.md)
 * [Maintainers](#maintainers)
 * [Development and contribution](#development-and-contribution)
@@ -40,6 +39,13 @@ The overall aim of this module is twofold:
 ```
 composer require silverstripe-terraformers/keys-for-cache
 ```
+
+## Requirements
+
+* PHP `^8.1`
+* Silverstripe Framework `^5`
+
+Support for Silverstripe 4 is provided though our `^1` tagged releases.
 
 ## Why cache keys are difficult
 
@@ -289,9 +295,6 @@ See: [Case studies](docs/en/case-studies.md)
 
 See: [Fluent support](docs/en/fluent.md)
 
-## GridField Orderable support
-
-See: [GridField Orderable support](docs/en/gridfield-orderable.md)
 
 ## License
 
