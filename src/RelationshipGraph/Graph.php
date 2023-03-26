@@ -292,12 +292,28 @@ class Graph implements Flushable
 
                 // A dot notation is available, so we can map this immediately and continue
                 if ($caresRelation) {
+                    $relationType = $this->getRelationType($careClassName, $caresRelation);
+
+                    if (!$relationType) {
+                        $errors[] = sprintf(
+                            'Dot notation %s provided for %s::%s, but no corresponding relationship found in %s.'
+                                . ' You might need to add a has_many, has_one, belongs_to, etc in %s',
+                            sprintf('%s.%s', $careClassName, $caresRelation),
+                            $className,
+                            $relation,
+                            $careClassName,
+                            $careClassName
+                        );
+
+                        continue;
+                    }
+
                     $careNode = $this->findOrCreateNode($careClassName);
                     $edges[] = new Edge(
                         $careNode,
                         $node,
                         $caresRelation,
-                        $this->getRelationType($careClassName, $caresRelation)
+                        $relationType
                     );
 
                     continue;
