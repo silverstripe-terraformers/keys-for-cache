@@ -309,12 +309,7 @@ class Graph implements Flushable
                     }
 
                     $careNode = $this->findOrCreateNode($careClassName);
-                    $edges[] = new Edge(
-                        $careNode,
-                        $node,
-                        $caresRelation,
-                        $relationType
-                    );
+                    $edges[] = new Edge($careNode, $node, $caresRelation, $relationType);
 
                     continue;
                 }
