@@ -13,7 +13,7 @@ class CacheKeyDto
         return $this->key;
     }
 
-    public function setKey(string $key): void
+    public function setKey(?string $key): void
     {
         $this->key = $key;
     }
