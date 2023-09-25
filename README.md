@@ -3,19 +3,26 @@
 ![Build Status](https://github.com/silverstripe-terraformers/keys-for-cache/actions/workflows/main.yml/badge.svg)
 [![codecov](https://codecov.io/gh/silverstripe-terraformers/keys-for-cache/branch/master/graph/badge.svg)](https://codecov.io/gh/silverstripe-terraformers/keys-for-cache)
 
-This module helps you create singular cache keys which can be used in your templates as part
-of [Silverstripe's Partial Caching](https://docs.silverstripe.org/en/4/developer_guides/performance/partial_caching/)
+This module helps you create singular cache keys which can be used as part of any cache strategy, but probably most
+commonly with [Silverstripe's Partial Caching](https://docs.silverstripe.org/en/4/developer_guides/performance/partial_caching/)
 feature.
 
-The overall aim of this module is twofold:
+**The overall aim of this module is twofold:**
 
-1) Make it easier for developers to create cache keys for our DataObjects (especially for those that have complex
+1) Make it easier for developers to create cache keys for our `DataObjects` (especially for those that have complex
    dependencies).
 2) Increase the performance of our applications by reducing the number of, and the complexity of the cache keys that we
    calculate at the time of an end user's request.
 
-**What this module is not**: This module is not here to provide a caching method, it is here to provide you with
-**keys** that you can use with your preferred caching method (EG: partial caching).
+**How will we achieve these goals?**\
+We will use and enhance existing config paradigms that Silverstripe developers are already familiar with.
+
+We will move the cost of calculating cache keys to when the changes are made to our `DataObjects`, rather than at the
+time of an end user's request.
+
+**What this module is not**:\
+This module is not here to provide a caching method, it is here to provide you with **keys** that you can use with your
+preferred caching method (EG: partial caching).
 
 * [Installation](#installation)
 * [Why cache keys are difficult](#why-cache-keys-are-difficult)
@@ -49,12 +56,15 @@ Support for Silverstripe 4 is provided though our `^1` tagged releases.
 
 ## Why cache keys are difficult
 
+TL;DR: Cache keys need to be updated any time a related piece of information changes, and we often have structures
+of content (EG: Carousel blocks) that contain many levels of nested `DataObjects`.
+
 The goal of any cache key is to have as low a cost as possible to calculate (as this must happen with every request),
 but also for it to invalidate at the appropriate times (IE: when a piece of relevant content has changed).
 
 Consider the following:
 
-* We have a `Page` Model with the Elemental module applied.
+* We have a `Page` with the Elemental module applied.
 * One of the blocks available is a Carousel block. This block itself contains Carousel Items, and each Item contains an
   Image.
 * When a change is made to the block itself, to one of its Items, or to any of the Images assigned to its Items, the
@@ -63,42 +73,47 @@ Consider the following:
 A cache key for a single Carousel block might look something like:
 
 ```php
-$parts = [
-    static::class,
-    $this->ID,
-    $this->LastEdited,
-    $this->Items()->max('LastEdited'),
-    $this->Items()->count(),
-];
+public function getCacheKey(): string
+{
+    $parts = [
+        // Parts related to the block itself
+        static::class,
+        $this->ID,
+        $this->LastEdited,
+        // Parts related to the Items within the block
+        $this->Items()->max('LastEdited'),
+        $this->Items()->count(),
+        // Parts related to the Images assigned to our Items
+        Image::get()->filter('ID', $this->Items()->column('ImageID'))->max('LastEdited'),
+        Image::get()->filter('ID', $this->Items()->column('ImageID'))->count(),
+    ];
+
+    return implode('-', $parts);
+}
 ```
 
-This initial cache key includes some basic values, but it is missing one critical piece, which is that we are not
-currently invalidating the cache key if one of the Images assigned to an Item changes.
+This can be optimised a bit, but the point is: It requires multiple queries each time it is performed, and it requires a
+decent chunk of cognitive load to understand (and to come up with in the first place).
 
-* One option would be for us to now loop through each Item and find the `ID` and `LastEdited` date of each assigned
-  Image, but doing this is very costly when it comes to our "cost to calculate".
-* Another option would be to add `Image::get()->max('LastEdited')` to our cache key. This has a low cost to calculate,
-  but it will mean that we invalidate the cache key for each Carousel block any time any Image is changed.
+In short, we want to achieve the same outcome as the example above, but with a simple configuration, like this:
 
-Neither option is great, but it is something that must be solved.
+```yaml
+App\Blocks\CarouselBlock:
+    has_cache_key: true
+    cares:
+        - Items
 
-## How we aim to solve these difficulties
-
-**In short:**
-We want to move the cost of calculating cache keys to when the changes are made in the CMS, rather than at the time of
-an end user's request. We will do this by having you configure the links between dependencies, and then we'll manage
-updating any relevant cache keys when those dependencies change.
-
-**To reiterate:**
-We no longer want to create cache keys that contain tonnes or info based on all of our dependencies. Instead, we want to
-create lean cache keys which we invalidate when dependencies require them to be.
+App\Blocks\CarouselItem:
+    cares:
+        - Image
+```
 
 ## Setup and configuration
 
 **Preamble:** When we talk about "changes to records", this includes all C.R.U.D. actions.
 
 **Relationship config:** In order for this module to function, we often need to understand more about the relationships
-that you create a `care` for than perhaps Silverstripe ORM does. [More on this here](docs/en/relationship-config.md).
+that your `DataObjets` have than perhaps Silverstripe ORM does. [More on this here](docs/en/relationship-config.md).
 
 ### Has cache key
 
@@ -116,8 +131,10 @@ DNADesign\Elemental\Models\BaseElement:
 By adding this configuration, you will have access to the `getCacheKey()` method on your `DataObject`, and
 the `$CacheKey` variable in your template when you have that `DataObject` in scope.
 
-Next, you need to define your dependencies (how your `DataObjects` relate to each other). There are three important
-configurations to be aware of:
+Next, in order to make sure that your cache keys invalidate when related `DataObjects` are updated, you need to define
+any dependencies that your model might have.
+
+There are three important configurations to be aware of:
 
 * [Cares](#cares)
 * [Touches](#touches)
@@ -125,7 +142,7 @@ configurations to be aware of:
 
 ### Cares
 
-This configuration determines how `$this` `DataObject` will be affected when other (related) `DataObjects` are
+This configuration determines how `$this` `DataObject` will be affected when **other** (related) `DataObjects` are
 manipulated.
 
 For example: We have requested that all Elements have cache keys. If you have a `CarouselBlock` that contains
@@ -147,6 +164,12 @@ class CarouselBlock extends BaseElement
 {
     private static array $has_many = [
         'Items' => CarouselItem::class,
+    ];
+
+    // $owns is optional, but quite common in this use case. I've added it here simply to illustrate how $cares
+    // follows the same paradigm
+    private static array $owns = [
+        'Items',
     ];
 
     private static array $cares = [
@@ -171,6 +194,12 @@ class CarouselItem extends DataObject
 {
     private static array $has_one = [
         'Image' => Image::class,
+    ];
+
+    // $owns is optional, but quite common in this use case. I've added it here simply to illustrate how $cares
+    // follows the same paradigm
+    private static array $owns = [
+        'Image',
     ];
 
     private static array $cares = [
@@ -272,14 +301,15 @@ See: [Usage and Examples](docs/en/examples.md)
 
 ## Performance impact/considerations
 
-This will increase the queries to the database when `DataObjects` are updated. We are still pretty early into our
-performance tests, but so far it has not created an unreasonable amount of additional load time to author actions.
+This will increase the queries to the database when `DataObjects` are updated, but so far there has been no noticeable
+increase to (eg) the publishing time of pages within the CMS, nor has there been any noticeable increase in processing
+time of cron jobs related to the manipulation of `DataObjects`.
 
 **That said:**
 
 * You should still be aware of what `cares` and `touches` configuration you enabled.
-* If you start to notice performance issues with (say) Publishing a page, then you might need to reconsider the scope
-  of relationships that you `cares` or `touches` as part of your Page and related DataObjects (EG: Blocks).
+* If you start to notice performance issues with (eg) Publishing a page, then you might need to reconsider the scope
+  of relationships that you `cares` or `touches` as part of your page and related `DataObjects` (EG: blocks).
 
 ### Queued jobs
 
@@ -294,7 +324,6 @@ See: [Case studies](docs/en/case-studies.md)
 ## Fluent support
 
 See: [Fluent support](docs/en/fluent.md)
-
 
 ## License
 
