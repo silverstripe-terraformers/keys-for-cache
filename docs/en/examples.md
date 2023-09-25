@@ -4,6 +4,7 @@
 * [Thinking about what you want to cache](#thinking-about-what-you-want-to-cache)
     * [One key to rule them all](#one-key-to-rule-them-all)
     * [Recommended approach](#recommended-approach)
+* [The Carousel block example](#the-carousel-block-example)
 * [Caching your Blocks/Elements](#caching-your-blockselements)
 * [Headers, Footers, and other "global" content areas](#headers-footers-and-other-global-content-areas)
 * [Full usage example](#full-usage-example)
@@ -48,11 +49,63 @@ is that your end users are more likely to hit (at least some of) your caches.
 
 We recommend that you continue to follow a similar approach.
 
+## The Carousel block example
+
+Covered in [Cares](../../README.md#cares) and [Touches](../../README.md#touches) in the main `README.md`, but added here
+for completeness.
+
+```php
+class CarouselBlock extends BaseElement
+{
+    /**
+     * Adding this configuration will give you access to the getCacheKey() method, and $CacheKey within your template
+     * when the block is in scope
+     */
+    private static bool $has_cache_key = true;
+
+    private static array $has_many = [
+        'Items' => CarouselItem::class,
+    ];
+
+    /**
+     * Tell KFC that your CarouselBlock cares about changes that are made to its Items
+     */
+    private static array $cares = [
+        'Items',
+    ];
+}
+```
+
+```php
+class CarouselItem extends DataObject
+{
+    /**
+     * Note that CarouselItem does not have the config $has_cache_key, because we're going to cache at the block level,
+     * rather than at the CarouselItem level
+     */
+
+    private static array $has_one = [
+        'Image' => Image::class,
+    ];
+
+    /**
+     * Tell KFC that your CarouselItem cares about changes that are made to its Image
+     */
+    private static array $cares = [
+        'Image',
+    ];
+}
+```
+
+The result of this configuration is that the cache key for the `CarouselBlock` will be udpated any time a change is made
+to the `CarouselBlock` itself, to one of its `CarouselItems`, or to any `Image` that is assigned to one of the
+`CarouselItems`.
+
+See below for how you might then add partial caching using this cache key.
+
 ## Caching your Blocks/Elements
 
-We have already covered an example of how to make sure that your Element/Block's keys are updated as part of
-our [Cares](../../README.md#cares) and [Touches](../../README.md#touches). We will expand on how you might use these
-keys in your template/s now.
+Covered above. Let's now discuss how you might use these keys in your template/s now.
 
 One approach would be to implement your own version of `ElementalArea.ss`, and you could determine here that all of your
 Blocks/Elements will have a `cached` wrapper.
