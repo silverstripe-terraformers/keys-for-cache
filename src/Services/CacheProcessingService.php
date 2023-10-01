@@ -163,13 +163,13 @@ abstract class CacheProcessingService
             return false;
         }
 
-        // We are in a "Draft" context, so we don't care whether or not the ProcessedUpdateDTO has been published or
-        // not. Its existence means that it has been processed
+        // We are in a "Draft" context, so we don't care whether the ProcessedUpdateDTO has been published or not. Its
+        // existence means that it has been processed
         if (!$this->shouldPublishUpdates()) {
             return true;
         }
 
-        // We are in a "Live" context, so we need to return whether or not this ProcessedUpdateDTO has been published
+        // We are in a "Live" context, so we need to return whether this ProcessedUpdateDTO has been published
         return $processedUpdate->isPublished();
     }
 

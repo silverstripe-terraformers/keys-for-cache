@@ -24,21 +24,15 @@ class ProcessedUpdatesService
 
     public function addProcessedUpdate(ProcessedUpdateDto $processedUpdate): void
     {
-        $this->processedUpdates[] = $processedUpdate;
+        $key = $this->getProcessedUpdateKey($processedUpdate->getClassName(), $processedUpdate->getId());
+        $this->processedUpdates[$key] = $processedUpdate;
     }
 
     public function findProcessedUpdate(string $className, int $id): ?ProcessedUpdateDto
     {
-        foreach ($this->processedUpdates as $processedUpdate) {
-            $classNameMatches = $processedUpdate->getClassName() === $className;
-            $idMatches = $processedUpdate->getId() === $id;
+        $key = $this->getProcessedUpdateKey($className, $id);
 
-            if ($idMatches && $classNameMatches) {
-                return $processedUpdate;
-            }
-        }
-
-        return null;
+        return $this->processedUpdates[$key] ?? null;
     }
 
     public function findOrCreateProcessedUpdate(string $className, int $id): ProcessedUpdateDto
@@ -50,9 +44,14 @@ class ProcessedUpdatesService
         }
 
         $processedUpdate = new ProcessedUpdateDto($className, $id);
-        $this->processedUpdates[] = $processedUpdate;
+        $this->addProcessedUpdate($processedUpdate);
 
         return $processedUpdate;
+    }
+
+    private function getProcessedUpdateKey(string $className, int $id): string
+    {
+        return sprintf('%s-%s', $className, $id);
     }
 
 }
