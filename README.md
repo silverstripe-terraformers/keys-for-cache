@@ -37,6 +37,7 @@ preferred caching method (EG: partial caching).
     * [Queued jobs](#queued-jobs)
 * [Case Studies](docs/en/case-studies.md)
 * [Fluent support](docs/en/fluent.md)
+* [Unit testing](docs/en/unit-testing.md)
 * [License](license.md)
 * [Maintainers](#maintainers)
 * [Development and contribution](#development-and-contribution)
@@ -324,6 +325,10 @@ See: [Case studies](docs/en/case-studies.md)
 ## Fluent support
 
 See: [Fluent support](docs/en/fluent.md)
+
+## Unit testing
+
+See: [Unit testing](docs/en/unit-testing.md)
 
 ## License
 
