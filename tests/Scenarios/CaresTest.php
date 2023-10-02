@@ -296,6 +296,38 @@ class CaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
+    public function testUnsavedRelationList(): void
+    {
+        // Updates are processed as part of scaffold, so we need to flush before we kick off
+        ProcessedUpdatesService::singleton()->flush();
+
+        // A page that is not (yet) saved in the DB
+        $page = CaresPage::create();
+
+        // A model that is saved in the DB
+        $model = $this->objFromFixture(CaredHasMany::class, 'model2');
+        // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+        $originalKey = CacheKey::findInStage($page);
+
+        // Our $page is not yet saved, so there should be no cache key
+        $this->assertNull($originalKey);
+
+        // Flush updates so that new changes generate new CacheKey hashes
+        ProcessedUpdatesService::singleton()->flush();
+
+        // Add $model to a relationship on Page. At this stage CaredHasMany() is an UnsavedRelationList
+        $page->CaredHasMany()->add($model);
+
+        // The UnsavedRelationList should now be converted to a DataList
+        $page->write();
+
+        // Specifically fetching this way to make sure it's us fetching without any generation of KeyHash
+        $newKey = CacheKey::findInStage($page);
+
+        $this->assertNotNull($newKey);
+        $this->assertNotEmpty($newKey->KeyHash);
+    }
+
     protected function assertCacheKeyChanges(
         CaresPage $page,
         DataObject $model,
