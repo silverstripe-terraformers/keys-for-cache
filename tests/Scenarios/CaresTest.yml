@@ -17,6 +17,8 @@ Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasOneVersionedNonStaged:
 Terraformers\KeysForCache\Tests\Mocks\Models\CaredHasMany:
   model1:
     Title: Has Many Model 1
+  model2:
+    Title: Has Many Model 2
 
 Terraformers\KeysForCache\Tests\Mocks\Models\CaredManyMany:
   model1:
