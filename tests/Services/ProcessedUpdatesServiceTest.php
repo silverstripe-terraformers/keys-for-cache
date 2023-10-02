@@ -16,11 +16,11 @@ class ProcessedUpdatesServiceTest extends SapphireTest
         $this->assertCount(0, $service->getProcessedUpdates());
 
         $service->addProcessedUpdate(new ProcessedUpdateDto(Page::class, 99));
-        // There are no checks for duplication between DTOs
+        // Existing DTOs would be overridden if an identical record is added
         $service->addProcessedUpdate(new ProcessedUpdateDto(Page::class, 98));
         $service->addProcessedUpdate(new ProcessedUpdateDto(Page::class, 98));
 
-        $this->assertCount(3, $service->getProcessedUpdates());
+        $this->assertCount(2, $service->getProcessedUpdates());
     }
 
     public function testFindProcessedUpdate(): void

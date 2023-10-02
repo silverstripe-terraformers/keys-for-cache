@@ -22,6 +22,13 @@ abstract class CacheProcessingService
 
     public function processChange(DataObject $instance): void
     {
+        // Can't process a record that hasn't been saved to the Database. This would only happen if a developer
+        // specifically calls processChange() in their code. All module hooks for this method are triggered *after*
+        // write() type events
+        if (!$instance->isInDB()) {
+            return;
+        }
+
         $className = $instance->getClassName();
 
         // This record has already been processed in full. It is possible for multiple write() actions to be performed
@@ -163,13 +170,13 @@ abstract class CacheProcessingService
             return false;
         }
 
-        // We are in a "Draft" context, so we don't care whether or not the ProcessedUpdateDTO has been published or
-        // not. Its existence means that it has been processed
+        // We are in a "Draft" context, so we don't care whether the ProcessedUpdateDTO has been published or not. Its
+        // existence means that it has been processed
         if (!$this->shouldPublishUpdates()) {
             return true;
         }
 
-        // We are in a "Live" context, so we need to return whether or not this ProcessedUpdateDTO has been published
+        // We are in a "Live" context, so we need to return whether this ProcessedUpdateDTO has been published
         return $processedUpdate->isPublished();
     }
 
