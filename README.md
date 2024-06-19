@@ -1,4 +1,4 @@
-# Cache Keys
+# Keys for Cache (KFC)
 
 ![Build Status](https://github.com/silverstripe-terraformers/keys-for-cache/actions/workflows/main.yml/badge.svg)
 [![codecov](https://codecov.io/gh/silverstripe-terraformers/keys-for-cache/branch/master/graph/badge.svg)](https://codecov.io/gh/silverstripe-terraformers/keys-for-cache)
