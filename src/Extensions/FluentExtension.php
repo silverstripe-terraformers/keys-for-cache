@@ -2,11 +2,11 @@
 
 namespace Terraformers\KeysForCache\Extensions;
 
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use Terraformers\KeysForCache\DataTransferObjects\CacheKeyDto;
 use TractorCow\Fluent\State\FluentState;
 
-class FluentExtension extends DataExtension
+class FluentExtension extends Extension
 {
     public function updateCacheKey(CacheKeyDto $cacheKey): void
     {

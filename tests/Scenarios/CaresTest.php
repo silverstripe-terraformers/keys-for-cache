@@ -372,7 +372,7 @@ class CaresTest extends SapphireTest
         );
     }
 
-    public function readingModes(): array
+    public static function readingModes(): array
     {
         return [
             [Versioned::DRAFT],
@@ -380,7 +380,7 @@ class CaresTest extends SapphireTest
         ];
     }
 
-    public function readingModesWithSaveMethods(): array
+    public static function readingModesWithSaveMethods(): array
     {
         return [
             // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since

@@ -3,10 +3,10 @@
 namespace Terraformers\KeysForCache\Extensions;
 
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Versioned\Versioned;
@@ -20,7 +20,7 @@ use Terraformers\KeysForCache\State\StagingState;
  * @property DataObject|Versioned|$this $owner
  * @method HasManyList|CacheKey CacheKeys()
  */
-class CacheKeyExtension extends DataExtension
+class CacheKeyExtension extends Extension
 {
     private static array $has_many = [
         // Programmatically we know that we will only ever create one of these CacheKey records per unique DataObject,

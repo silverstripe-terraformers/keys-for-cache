@@ -472,7 +472,7 @@ class CacheKeyExtensionTest extends SapphireTest
         );
     }
 
-    public function readingModes(): array
+    public static function readingModes(): array
     {
         return [
             [Versioned::DRAFT],
