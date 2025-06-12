@@ -2,6 +2,7 @@
 
 namespace Terraformers\KeysForCache\Tests\Scenarios;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
@@ -51,9 +52,7 @@ class ExtendedTouchesTest extends SapphireTest
         TouchesBelongsTo::class,
     ];
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testTouchesHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
@@ -70,9 +69,7 @@ class ExtendedTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testTouchesTrueHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
@@ -89,9 +86,7 @@ class ExtendedTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testPolymorphicTouchesHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
@@ -108,9 +103,7 @@ class ExtendedTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testExtendedPolymorphicTouchesHasOne(
         string $readingMode,
         string $saveMethod,
@@ -130,9 +123,7 @@ class ExtendedTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testTouchesHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
@@ -145,9 +136,7 @@ class ExtendedTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testPolymorphicTouchesHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         $page = $this->objFromFixture(ExtendedTouchesPage::class, 'page1');
@@ -160,9 +149,7 @@ class ExtendedTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testExtendedPolymorphicTouchesHasMany(
         string $readingMode,
         string $saveMethod,
@@ -178,9 +165,7 @@ class ExtendedTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testTouchesBelongsTo(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         $page = $this->objFromFixture(ExtendedTouchedPage::class, 'page1');

@@ -3,6 +3,7 @@
 namespace Terraformers\KeysForCache\Tests\Extensions;
 
 use Page;
+use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataList;
 use SilverStripe\Versioned\Versioned;
@@ -24,9 +25,7 @@ class CacheKeyExtensionTest extends SapphireTest
         CachePage::class,
     ];
 
-    /**
-     * @dataProvider readingModes
-     */
+    #[DataProvider('readingModes')]
     public function testWriteGeneratesCacheKey(string $readingMode): void
     {
         $page = Versioned::withVersionedMode(static function () use ($readingMode): CachePage {
@@ -64,9 +63,7 @@ class CacheKeyExtensionTest extends SapphireTest
         });
     }
 
-    /**
-     * @dataProvider readingModes
-     */
+    #[DataProvider('readingModes')]
     public function testWriteDoesNotGenerateCacheKey(string $readingMode): void
     {
         Versioned::withVersionedMode(function () use ($readingMode): void {

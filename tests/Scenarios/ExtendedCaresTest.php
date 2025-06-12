@@ -2,6 +2,7 @@
 
 namespace Terraformers\KeysForCache\Tests\Scenarios;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
@@ -53,9 +54,7 @@ class ExtendedCaresTest extends SapphireTest
         PolymorphicCaredHasOne::class,
     ];
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testCaresPureHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -75,9 +74,7 @@ class ExtendedCaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testCaresBelongsTo(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -97,9 +94,7 @@ class ExtendedCaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testCaresHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -119,9 +114,7 @@ class ExtendedCaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testPolymorphicCaresHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -141,9 +134,7 @@ class ExtendedCaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testExtendedPolymorphicCaresHasOne(
         string $readingMode,
         string $saveMethod,
@@ -166,9 +157,7 @@ class ExtendedCaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testCaresHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -184,9 +173,7 @@ class ExtendedCaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testPolymorphicCaresHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -202,9 +189,7 @@ class ExtendedCaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $model, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testExtendedPolymorphicCaresHasMany(
         string $readingMode,
         string $saveMethod,
@@ -225,9 +210,8 @@ class ExtendedCaresTest extends SapphireTest
 
     /**
      * Testing that Base relationships work when the explicit class is used in the relationship
-     *
-     * @dataProvider readingModesWithSaveMethods
      */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testBaseCaredHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -245,9 +229,8 @@ class ExtendedCaresTest extends SapphireTest
 
     /**
      * Testing that Base relationships work when the explicit class is used in the relationship
-     *
-     * @dataProvider readingModesWithSaveMethods
      */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testBaseCaredHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -265,9 +248,8 @@ class ExtendedCaresTest extends SapphireTest
 
     /**
      * Now testing that a relationship to a Base class still works when the related object is an extended class
-     *
-     * @dataProvider readingModesWithSaveMethods
      */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testExtendedCaredHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -287,9 +269,8 @@ class ExtendedCaresTest extends SapphireTest
 
     /**
      * Now testing that a relationship to a Base class still works when the related object is an extended class
-     *
-     * @dataProvider readingModesWithSaveMethods
      */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testExtendedCaredHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
