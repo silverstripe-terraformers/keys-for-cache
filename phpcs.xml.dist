@@ -3,7 +3,6 @@
     <description>CodeSniffer ruleset for SilverStripe coding conventions.</description>
 
 	<file>src</file>
-	<file>tests</file>
 
     <!-- Show progress and output sniff names on violation, and add colours -->
     <arg value="p" />
