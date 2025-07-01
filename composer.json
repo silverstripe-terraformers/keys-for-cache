@@ -23,9 +23,10 @@
         "silverstripe/framework": "^6"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11",
+        "phpunit/phpunit": "^11.5",
         "tractorcow/silverstripe-fluent": "^8",
-        "slevomat/coding-standard": "~8.8.0"
+        "slevomat/coding-standard": "~8.8.0",
+        "silverstripe/cms": "^6"
     },
     "autoload": {
         "psr-4": {
