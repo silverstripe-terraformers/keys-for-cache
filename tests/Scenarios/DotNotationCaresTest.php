@@ -2,6 +2,7 @@
 
 namespace Terraformers\KeysForCache\Tests\Scenarios;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
@@ -29,9 +30,7 @@ class DotNotationCaresTest extends SapphireTest
         DotNotationCaredHasOne::class,
     ];
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testCaresPureHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -55,9 +54,7 @@ class DotNotationCaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testCaresBelongsTo(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -122,9 +119,7 @@ class DotNotationCaresTest extends SapphireTest
         );
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testCaresHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -148,9 +143,7 @@ class DotNotationCaresTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testCaresHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -242,7 +235,7 @@ class DotNotationCaresTest extends SapphireTest
         );
     }
 
-    public function readingModesWithSaveMethods(): array
+    public static function readingModesWithSaveMethods(): array
     {
         return [
             // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since

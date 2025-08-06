@@ -2,8 +2,8 @@
 
 namespace Terraformers\KeysForCache\Models;
 
+use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\ValidationException;
 use SilverStripe\Versioned\Versioned;
 use Terraformers\KeysForCache\Extensions\CacheKeyExtension;
 

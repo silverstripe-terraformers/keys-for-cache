@@ -3,13 +3,13 @@
 namespace Terraformers\KeysForCache\Extensions;
 
 use SilverStripe\CMS\Controllers\ContentController;
-use SilverStripe\CMS\Model\SiteTreeExtension;
+use SilverStripe\Core\Extension;
 use Terraformers\KeysForCache\State\StagingState;
 
 /**
  * @property ContentController $owner
  */
-class StagingExtension extends SiteTreeExtension
+class StagingExtension extends Extension
 {
     public function contentcontrollerInit(ContentController $controller): void
     {

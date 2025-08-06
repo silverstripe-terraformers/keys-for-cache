@@ -2,6 +2,7 @@
 
 namespace Terraformers\KeysForCache\Tests\Scenarios;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\SiteConfig\SiteConfig;
@@ -23,9 +24,7 @@ class GlobalCaresTest extends SapphireTest
         GlobalCaresPage::class,
     ];
 
-    /**
-     * @dataProvider readingModes
-     */
+    #[DataProvider('readingModes')]
     public function testGlobalCares(string $readingMode): void
     {
         $siteConfig = SiteConfig::current_site_config();
@@ -67,7 +66,7 @@ class GlobalCaresTest extends SapphireTest
         });
     }
 
-    public function readingModes(): array
+    public static function readingModes(): array
     {
         return [
             [Versioned::DRAFT],

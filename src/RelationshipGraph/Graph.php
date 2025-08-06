@@ -10,8 +10,8 @@ use SilverStripe\Core\Config\Config_ForClass;
 use SilverStripe\Core\Flushable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Model\ModelData;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\View\ViewableData;
 use Terraformers\KeysForCache\Models\CacheKey;
 
 class Graph implements Flushable
@@ -49,7 +49,7 @@ class Graph implements Flushable
         // Base classes that show up in every ancestry array
         $disallowList = [
             DataObject::class,
-            ViewableData::class,
+            ModelData::class,
         ];
 
         return array_filter(

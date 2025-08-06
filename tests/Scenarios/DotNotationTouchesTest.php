@@ -2,6 +2,7 @@
 
 namespace Terraformers\KeysForCache\Tests\Scenarios;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
@@ -33,9 +34,7 @@ class DotNotationTouchesTest extends SapphireTest
         DotNotationTouchesBelongsTo::class,
     ];
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testTouchesHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -59,9 +58,7 @@ class DotNotationTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testTouchesPureHasOne(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -85,9 +82,7 @@ class DotNotationTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testTouchesHasMany(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -111,9 +106,7 @@ class DotNotationTouchesTest extends SapphireTest
         $this->assertCacheKeyChanges($page, $modelOne, $modelTwo, $readingMode, $saveMethod, $expectKeyChange);
     }
 
-    /**
-     * @dataProvider readingModesWithSaveMethods
-     */
+    #[DataProvider('readingModesWithSaveMethods')]
     public function testTouchesBelongsTo(string $readingMode, string $saveMethod, bool $expectKeyChange): void
     {
         // Updates are processed as part of scaffold, so we need to flush before we kick off
@@ -247,7 +240,7 @@ class DotNotationTouchesTest extends SapphireTest
         );
     }
 
-    public function readingModesWithSaveMethods(): array
+    public static function readingModesWithSaveMethods(): array
     {
         return [
             // If write() is performed on a model then we would expect the CacheKey to be updated in DRAFT only. Since
