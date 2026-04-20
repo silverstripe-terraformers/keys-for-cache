@@ -334,12 +334,6 @@ See: [Unit testing](docs/en/unit-testing.md)
 
 See [License](license.md)
 
-## Maintainers
-
-* Adrian Humphreys <adrhumphreys@gmail.com>
-* Chris Penny <chris.penny@gmail.com>
-* Adrian Jimson <adrian.jimson@silverstripe.com>
-
 ## Development and contribution
 
 If you would like to make contributions to the module please ensure you raise a pull request and discuss with the module
